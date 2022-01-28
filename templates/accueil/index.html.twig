@@ -6,15 +6,53 @@
 <style>
     .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+    .box {
+        width: 100%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(6);
+        grid-gap: 10px;
+        grid-auto-rows: minmax(100px, auto);
+        /* Other grid code goes here */
+    }
+    .cell_1 {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    .cell_2 {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .cell_3 {
+        grid-column: 3;
+        grid-row: 1;
+    }
+    .cell_4 {
+        grid-column: 4;
+        grid-row: 1;
+    }
+    .cell_5 {
+        grid-column: 5;
+        grid-row: 1;
+    }
+    .cell_6 {
+        grid-column: 6;
+        grid-row: 1;
+    }
+    .cell {
+        height: 100px;
+        background: antiquewhite;
+    }
 </style>
 
 <div class="example-wrapper">
     <h1>Hello {{ controller_name }}! ✅</h1>
+    <div class="container-fluid bg-primary ">
+        <div class="box"></div>
+    </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'C:/xampp/htdocs/Otsum/src/Controller/AccueilController.php'|file_link(0) }}">src/Controller/AccueilController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'C:/xampp/htdocs/Otsum/templates/accueil/index.html.twig'|file_link(0) }}">templates/accueil/index.html.twig</a></code></li>
-    </ul>
 </div>
+
+
 {% endblock %}
+
