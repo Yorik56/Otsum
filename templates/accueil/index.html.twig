@@ -1,58 +1,37 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello AccueilController!{% endblock %}
+{% block title %}Otsum{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-    .box {
-        width: 100%;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: repeat(6);
-        grid-gap: 10px;
-        grid-auto-rows: minmax(100px, auto);
-        /* Other grid code goes here */
-    }
-    .cell_1 {
-        grid-column: 1;
-        grid-row: 1;
-    }
-    .cell_2 {
-        grid-column: 2;
-        grid-row: 1;
-    }
-    .cell_3 {
-        grid-column: 3;
-        grid-row: 1;
-    }
-    .cell_4 {
-        grid-column: 4;
-        grid-row: 1;
-    }
-    .cell_5 {
-        grid-column: 5;
-        grid-row: 1;
-    }
-    .cell_6 {
-        grid-column: 6;
-        grid-row: 1;
-    }
-    .cell {
-        height: 100px;
-        background: antiquewhite;
-    }
-</style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-    <div class="container-fluid bg-primary ">
+    <h1 class="mot"></h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="choix">
+                    <button type="button" class="btn btn-primary" value="5">5</button>
+                    <button type="button" class="btn btn-primary" value="6">6</button>
+                    <button type="button" class="btn btn-primary" value="7">7</button>
+                    <button type="button" class="btn btn-primary" value="8">8</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h1>Otsum</h1>
+    <p class="mot_a_trouver"></p>
+    <div class="content container-fluid bg-light ">
         <div class="box"></div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <input type="text" id="search_field">
+                <div id="keyboard"></div>
+            </div>
+        </div>
     </div>
 
 </div>
 
-
 {% endblock %}
-

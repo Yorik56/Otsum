@@ -6,6 +6,7 @@ use App\Repository\LigneRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JetBrains\PhpStorm\Pure;
 
 #[ORM\Entity(repositoryClass: LigneRepository::class)]
 class Ligne
@@ -25,16 +26,18 @@ class Ligne
     #[ORM\OneToMany(mappedBy: 'ligne', targetEntity: Cellule::class)]
     private $id_cellules;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private $secondes_restantes;
 
     #[ORM\ManyToOne(targetEntity: Partie::class, inversedBy: 'id_lignes')]
     #[ORM\JoinColumn(nullable: false)]
-    private $partie;
+    private ?Partie $partie;
 
-    public function __construct()
+    #[Pure] public function __construct(Utilisateur $id_joueur,Partie $partie)
     {
         $this->id_cellules = new ArrayCollection();
+        $this->id_joueur = $id_joueur;
+        $this->partie = $partie;
     }
 
     public function getId(): ?int

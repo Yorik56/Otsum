@@ -49,8 +49,10 @@ class Partie
     private $longueur_lignes;
 
 
-    public function __construct()
+    public function __construct($longueur_lignes, $mot_a_trouver)
     {
+        $this->mot_a_trouver = $mot_a_trouver;
+        $this->longueur_lignes = $longueur_lignes;
         $this->id_joueurs = new ArrayCollection();
         $this->id_lignes = new ArrayCollection();
     }

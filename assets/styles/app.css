@@ -1,3 +1,41 @@
 body {
     background-color: lightgray;
 }
+/* Grille de jeu */
+.example-wrapper {
+    margin: 1em auto;
+    max-width: 800px;
+    width: 95%;
+    font: 18px/1.5 sans-serif;
+}
+.example-wrapper code {
+    background: #F5F5F5;
+    padding: 2px 6px;
+}
+.content {
+    margin: 50px 0;
+}
+.box {
+    width: 70%;
+    margin: 0 auto;
+    display: grid;
+    grid-gap: 1px;
+    grid-auto-rows: minmax(70px, auto);
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    color: #DDDDDD;
+    text-transform: uppercase;
+}
+
+#search_field {
+    display: none;
+}
+
+.valide_cell {
+    background-color: rgb(179, 15, 15);
+}
