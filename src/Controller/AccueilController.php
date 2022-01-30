@@ -73,6 +73,18 @@ class AccueilController extends AbstractController
         return new JsonResponse([$mot_a_trouver[0], $partie->getId()]);
     }
 
+    #[Route('/maj_ligne', name: 'maj_ligne')]
+    function maj_ligne(ManagerRegistry $doctrine, Request $request): JsonResponse
+    {
+        // Paramètres utiles à la construction du mot
+        $ligne_actuelle = $request->request->get('ligne_actuelle');
+        $mot = $request->request->get('mot');
+        $id_partie = $request->request->get('id_partie');
+
+        // On envoi la première lettre
+        return new JsonResponse($parametre_longueur_mot);
+    }
+
     function genereListeValide(){
         $projectDir = $this->getParameter('kernel.project_dir');
         $file = $projectDir . '/public/liste_francais.txt';

@@ -1,0 +1,7 @@
+{
+  "app.css": "build/app.css",
+  "app.js": "build/app.js",
+  "runtime.js": "build/runtime.js",
+  "vendors-node_modules_symfony_stimulus-bridge_dist_index_js-node_modules_core-js_modules_es_ar-de2273.js": "build/vendors-node_modules_symfony_stimulus-bridge_dist_index_js-node_modules_core-js_modules_es_ar-de2273.js",
+  "fonts/Poppins-Medium.ttf": "build/fonts/Poppins-Medium.673ed423.ttf"
+}
