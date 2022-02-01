@@ -3,35 +3,27 @@
 {% block title %}Otsum{% endblock %}
 
 {% block body %}
-
-<div class="example-wrapper">
-    <h1 class="mot"></h1>
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="choix">
-                    <button type="button" class="btn btn-primary" value="5">5</button>
-                    <button type="button" class="btn btn-primary" value="6">6</button>
-                    <button type="button" class="btn btn-primary" value="7">7</button>
-                    <button type="button" class="btn btn-primary" value="8">8</button>
+        <div class="container">
+            <div class="row area d-flex justify-content-center align-items-center ">
+                <div class="col area col-6 d-flex justify-content-around align-items-center flex-column">
+                    <h2 class="text-center">Bonjour ! </h2>
+                    <h3 class="text-center">Bienvenue sur OTSUM</h3>
+                    <div class="block_bouton w-50">
+                        <div class="row">
+                            <div class="col">
+                                <a class="btn button d-block w-100" href="{{ path('hub') }}">Nouvelle Partie</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-12 col-md-6 col">
+                                <a class="btn button d-block w-100" href="{{ path('login') }}">Log in</a>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col">
+                                <a class="btn button d-block w-100" href="{{ path('app_register') }}">Sign in</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <h1>Otsum</h1>
-    <p class="mot_a_trouver"></p>
-    <div class="content container-fluid bg-light ">
-        <div class="box"></div>
-    </div>
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <input type="text" id="search_field">
-                <div id="keyboard"></div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
 {% endblock %}

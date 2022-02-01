@@ -20,9 +20,25 @@ class AccueilController extends AbstractController
     #[Route('/', name: 'accueil')]
     public function index(): Response
     {
-
         return $this->render('accueil/index.html.twig', [
             'controller_name' => 'AccueilController',
+        ]);
+    }
+
+    #[Route('/hub', name: 'hub')]
+    public function hub(): Response
+    {
+        return $this->render('hub/index.html.twig', [
+            'controller_name' => 'AccueilController',
+        ]);
+    }
+    
+    #[Route('/otsum/{id}', name: 'otsum')]
+    public function otsum($id): Response
+    {
+        return $this->render('otsum/index.html.twig', [
+            'controller_name' => 'AccueilController',
+            'id' => $id,
         ]);
     }
 
@@ -53,6 +69,7 @@ class AccueilController extends AbstractController
         $partie->setDureeSessionLigne(50);
         $partie->addIdJoueur($joueur);
         $partie->setNombreTours(5);
+        $partie->setNombreToursJoues(1);
         $entityManager->persist($partie);
         $entityManager->flush();
         //--- Création d'une ligne
@@ -78,11 +95,24 @@ class AccueilController extends AbstractController
     {
         // Paramètres utiles à la construction du mot
         $ligne_actuelle = $request->request->get('ligne_actuelle');
+        $ligne_actuelle ++;
         $mot = $request->request->get('mot');
         $id_partie = $request->request->get('id_partie');
+        $partie = $doctrine->getRepository(Partie::class)->find($id_partie);
+        $partie->setNombreToursJoues($ligne_actuelle);
 
+
+        if($partie->getNombreTours() ==  $partie->getNombreToursJoues()){
+            $response = "over";
+        } else {
+
+            $doctrine->getManager()->persist($partie);
+            $doctrine->getManager()->flush();
+            $response = $ligne_actuelle;
+        }
+        // $parametre_longueur_mot;
         // On envoi la première lettre
-        return new JsonResponse($parametre_longueur_mot);
+        return new JsonResponse($response);
     }
 
     function genereListeValide(){

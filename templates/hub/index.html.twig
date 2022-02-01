@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Otsum{% endblock %}
+
+{% block body %}
+        <div class="container">
+            <div class="row area d-flex justify-content-center align-items-center ">
+                <div class="col area col-6 d-flex justify-content-around align-items-center flex-column">
+                    <h2 class="text-center">Choisissez une difficulté</h2>
+                    <div class="choix">
+                        <a class="btn button d-block w-100" href="{{ path('otsum', {'id':5}) }}">Débutant</a>
+                        <a class="btn button d-block w-100" href="{{ path('otsum', {'id':6}) }}">Facile</a>
+                        <a class="btn button d-block w-100" href="{{ path('otsum', {'id':7}) }}">Moyen</a>
+                        <a class="btn button d-block w-100" href="{{ path('otsum', {'id':8}) }}">Difficile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
