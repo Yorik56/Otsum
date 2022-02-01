@@ -21,99 +21,99 @@
     </div>
 
 </div>
-    <script>
-        $(document).ready(function(){
+{#    <script>#}
+{#        $(document).ready(function(){#}
 
-            // alphabet en tableau
-            alphabet = ['','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-            let difficulte;
-            let essais = 5;
-            let n_case = 1;
-            let ligne_actuelle = 0;
-            let id_partie;
-            /*$('.btn').click(function() {
+{#            // alphabet en tableau#}
+{#            alphabet = ['','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];#}
+{#            let difficulte;#}
+{#            let essais = 6;#}
+{#            let n_case = 1;#}
+{#            let ligne_actuelle = 0;#}
+{#            let id_partie;#}
+{#            /*$('.btn').click(function() {#}
 
-            });*/
-            difficulte = {{id}};
-            init_partie({{id}});
+{#            });*/#}
+{#            difficulte = {{id}};#}
+{#            init_partie({{id}});#}
 
-            $('.return').click(function() {
-                // alert($('.current_cell').text());
-                let parcours_de_la_ligne = true;
-                let motvalide = true;
-                let mot = "";
-                $(".line_" + ligne_actuelle).each(function(){
-                    mot += $(this).text();
-                    if($(this).text() === "." || $(this).text() === "_"){
-                        motvalide = false;
-                        return false;
-                    }
-                });
-                if(!motvalide){
-                    alert('mot trop court !');
-                } else {
-                    $.ajax({
-                        method: "POST",
-                        url: "{{ path('maj_ligne') }}",
-                        data: {
-                            ligne_actuelle: ligne_actuelle,
-                            mot: mot,
-                            id_partie: id_partie
-                        },
-                        success: function(mot){
-                            alert(mot)
-                        }
-                    });
-                }
-            });
+{#            $('.return').click(function() {#}
+{#                // alert($('.current_cell').text());#}
+{#                let parcours_de_la_ligne = true;#}
+{#                let motvalide = true;#}
+{#                let mot = "";#}
+{#                $(".line_" + ligne_actuelle).each(function(){#}
+{#                    mot += $(this).text();#}
+{#                    if($(this).text() === "." || $(this).text() === "_"){#}
+{#                        motvalide = false;#}
+{#                        return false;#}
+{#                    }#}
+{#                });#}
+{#                if(!motvalide){#}
+{#                    alert('mot trop court !');#}
+{#                } else {#}
+{#                    $.ajax({#}
+{#                        method: "POST",#}
+{#                        url: "{{ path('maj_ligne') }}",#}
+{#                        data: {#}
+{#                            ligne_actuelle: ligne_actuelle,#}
+{#                            mot: mot,#}
+{#                            id_partie: id_partie#}
+{#                        },#}
+{#                        success: function(mot){#}
+{#                            alert(mot)#}
+{#                        }#}
+{#                    });#}
+{#                }#}
+{#            });#}
 
-            function init_partie(longueur){
-                let mot = "";
-                $.ajax({
-                    method: "POST",
-                    url: "{{ path('genere_mot') }}",
-                    data: {id: longueur},
-                    success: function(reponse){
-                        id_partie = reponse[1];
-                        difficulte = longueur;
-                        creationDeLaGrille(reponse[0], difficulte);
-                    }
-                });
-            }
-            function creationDeLaGrille(mot, difficulte) {
-                $('.box').css({
-                    "grid-template-columns":" repeat(" + difficulte + ",1fr)"
-                })
-                $('.mot_a_trouver').append(mot);
-                for(let i = 0; i < essais; i++) {
-                    for(let j = 0; j < difficulte; j++) {
-                        // nombre aléatoire entre 1 et 25
-                        let random = Math.ceil(Math.random() * 25);
-                        // on recupere une entrée aléatoire du tableau
-                        let lettre_aleatoire = alphabet[random];
-                        if(i < 1 && j < 1){
-                            $('.box').append('<div class="line_' + i + ' valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</div>')
-                            $('.cell_'+ n_case).css({
-                                "background-color" : "rgb(179, 15, 15)"
-                            })
-                        } else {
-                            if(i < 1 && j === 1){
-                                $('.box').append('<div class="line_' + i + ' current_cell cell cell_'+ n_case +'">_</div>')
-                            } else if(i < 1 && j  === (difficulte -1)){
-                                $('.box').append('<div class="line_' + i + ' cell cell_'+ n_case +' last_cell" >.</div>')
-                            } else if(i < 1 && j <= difficulte){
-                                $('.box').append('<div class="line_' + i + ' cell cell_'+ n_case +'">.</div>')
-                            } else {
-                                $('.box').append('<div class="line_' + i + ' cell cell_'+ n_case +'"></div>')
-                            }
-                            $('.cell_'+ n_case).css({
-                                "background-color" : "#185a82"
-                            })
-                        }
-                        n_case++;
-                    }
-                }
-            }
-        });
-    </script>
+{#            function init_partie(longueur){#}
+{#                let mot = "";#}
+{#                $.ajax({#}
+{#                    method: "POST",#}
+{#                    url: "{{ path('genere_mot') }}",#}
+{#                    data: {id: longueur},#}
+{#                    success: function(reponse){#}
+{#                        id_partie = reponse[1];#}
+{#                        difficulte = longueur;#}
+{#                        creationDeLaGrille(reponse[0], difficulte);#}
+{#                    }#}
+{#                });#}
+{#            }#}
+{#            function creationDeLaGrille(mot, difficulte) {#}
+{#                $('.box').css({#}
+{#                    "grid-template-columns":" repeat(" + difficulte + ",1fr)"#}
+{#                })#}
+{#                $('.mot_a_trouver').append(mot);#}
+{#                for(let i = 0; i < essais; i++) {#}
+{#                    for(let j = 0; j < difficulte; j++) {#}
+{#                        // nombre aléatoire entre 1 et 25#}
+{#                        let random = Math.ceil(Math.random() * 25);#}
+{#                        // on recupere une entrée aléatoire du tableau#}
+{#                        let lettre_aleatoire = alphabet[random];#}
+{#                        if(i < 1 && j < 1){#}
+{#                            $('.box').append('<div class="line_' + i + ' valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</div>')#}
+{#                            $('.cell_'+ n_case).css({#}
+{#                                "background-color" : "rgb(179, 15, 15)"#}
+{#                            })#}
+{#                        } else {#}
+{#                            if(i < 1 && j === 1){#}
+{#                                $('.box').append('<div class="line_' + i + ' current_cell cell cell_'+ n_case +'">_</div>')#}
+{#                            } else if(i < 1 && j  === (difficulte -1)){#}
+{#                                $('.box').append('<div class="line_' + i + ' cell cell_'+ n_case +' last_cell" >.</div>')#}
+{#                            } else if(i < 1 && j <= difficulte){#}
+{#                                $('.box').append('<div class="line_' + i + ' cell cell_'+ n_case +'">.</div>')#}
+{#                            } else {#}
+{#                                $('.box').append('<div class="line_' + i + ' cell cell_'+ n_case +'"></div>')#}
+{#                            }#}
+{#                            $('.cell_'+ n_case).css({#}
+{#                                "background-color" : "#185a82"#}
+{#                            })#}
+{#                        }#}
+{#                        n_case++;#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    </script>#}
 {% endblock %}

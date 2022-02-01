@@ -49,10 +49,10 @@ class AccueilController extends AbstractController
         // Paramètres utiles à la construction du mot
         $parametre_longueur_mot = $request->request->get('id');
         $nomsFichiers = [
-            5 => 'cinq_lettres.txt',
-            6 => 'six_lettres.txt',
-            7 => 'sept_lettres.txt',
-            8 => 'huit_lettres.txt',
+            7  => 'sept_lettres.txt',
+            8  => 'huit_lettres.txt',
+            9  => 'neuf_lettres.txt',
+            10 => 'dix_lettres.txt',
         ];
         //--- Recherche d'un mot aléatoire
         $projectDir = $this->getParameter('kernel.project_dir');
@@ -65,10 +65,10 @@ class AccueilController extends AbstractController
         //--- Création d'un joueur
         $joueur = $doctrine->getRepository(Utilisateur::class)->find($this->getUser()->getId());
         //--- Création de la partie
-        $partie = new Partie($parametre_longueur_mot, $mot_a_trouver);
+        $partie = new Partie($parametre_longueur_mot, trim($mot_a_trouver));
         $partie->setDureeSessionLigne(50);
         $partie->addIdJoueur($joueur);
-        $partie->setNombreTours(5);
+        $partie->setNombreTours(6);
         $partie->setNombreToursJoues(1);
         $entityManager->persist($partie);
         $entityManager->flush();
@@ -93,22 +93,68 @@ class AccueilController extends AbstractController
     #[Route('/maj_ligne', name: 'maj_ligne')]
     function maj_ligne(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
-        // Paramètres utiles à la construction du mot
-        $ligne_actuelle = $request->request->get('ligne_actuelle');
-        $ligne_actuelle ++;
-        $mot = $request->request->get('mot');
+        //Nombre d'essais
+        $essai = $request->request->get('ligne_actuelle');
+        $essai ++;
+        //ID de la partie
         $id_partie = $request->request->get('id_partie');
+        //Dernier essai de mot
+        $dernier_essai =  $request->request->get('mot');
+        //Partie en cours
         $partie = $doctrine->getRepository(Partie::class)->find($id_partie);
-        $partie->setNombreToursJoues($ligne_actuelle);
-
+        $mot_a_trouver = $partie->getMotATrouver();
+        $partie->setNombreToursJoues($essai);
+        $doctrine->getManager()->persist($partie);
+        $doctrine->getManager()->flush();
 
         if($partie->getNombreTours() ==  $partie->getNombreToursJoues()){
-            $response = "over";
+            $response = $mot_a_trouver;
         } else {
-
-            $doctrine->getManager()->persist($partie);
-            $doctrine->getManager()->flush();
-            $response = $ligne_actuelle;
+            // Comparaison de la tentative et du mot à trouver
+            $tableau_mot_a_trouver = str_split($mot_a_trouver);
+            $tableau_dernier_essai = str_split($dernier_essai);
+            //-- Mise à jour de la ligne actuelle
+            $ligne_actuelle = [];
+            $lettres_valides = 0;
+            // Pour chaque lettre du mot à trouver
+            foreach ($tableau_mot_a_trouver as $index_mot_a_trouver => $lettre){
+                $ligne_actuelle[$index_mot_a_trouver]['valeur'] = $tableau_dernier_essai[$index_mot_a_trouver];
+                $ligne_actuelle[$index_mot_a_trouver]['test']   = true;
+                $ligne_actuelle[$index_mot_a_trouver]['comparaison']   = $tableau_dernier_essai[$index_mot_a_trouver] . " -> " . $lettre;
+                // Si la lettre est dans le mot
+                if(preg_match('/'.$tableau_dernier_essai[$index_mot_a_trouver].'/', $mot_a_trouver)){
+                    $ligne_actuelle[$index_mot_a_trouver]['presence'] = true;
+                    // Si la lettre est bien placée
+                    if($tableau_dernier_essai[$index_mot_a_trouver] === $lettre) {
+                        $ligne_actuelle[$index_mot_a_trouver]['placement'] = true;
+                        $lettres_valides++;
+                    } else {
+                        $ligne_actuelle[$index_mot_a_trouver]['placement'] = false;
+                    }
+                } else {
+                    $ligne_actuelle[$index_mot_a_trouver]['presence']  = false;
+                    $ligne_actuelle[$index_mot_a_trouver]['placement'] = false;
+                }
+            }
+            // Si le mot est trouvé
+            if($lettres_valides == count($tableau_mot_a_trouver)){
+                $victoire = true;
+            } else {
+                $victoire = false;
+            }
+            // On retourne :
+            // - L'état de la partie
+            // - L'état de la dernière ligne jouée,
+            // - L'état de la ligne actuelle
+            // - Le nombre d'essais actuel
+            // - Victoire ?
+            $response = [
+                "mot_a_trouver"  => $tableau_mot_a_trouver,
+                "dernier_essai"  => $tableau_dernier_essai,
+                "ligne_actuelle" => $ligne_actuelle,
+                "essais"         => $essai,
+                "victoire"       => $victoire
+            ];
         }
         // $parametre_longueur_mot;
         // On envoi la première lettre
@@ -116,23 +162,38 @@ class AccueilController extends AbstractController
     }
 
     function genereListeValide(){
+        $nomsFichiers = [
+            7  => 'sept_lettres.txt',
+            8  => 'huit_lettres.txt',
+            9  => 'neuf_lettres.txt',
+            10 => 'dix_lettres.txt',
+        ];
         $projectDir = $this->getParameter('kernel.project_dir');
-        $file = $projectDir . '/public/liste_francais.txt';
+        $file = $projectDir . '/public/liste_francais2.txt';
         $file_arr = file($file);
         $num_lines = count($file_arr);
         $last_arr_index = $num_lines - 1;
         $rand_index = rand(0, $last_arr_index);
         $random_word = $file_arr[$rand_index];
+        $nombre_de_mots = 0;
         setlocale(LC_CTYPE, 'fr_FR','fra'); //Fournit les informations de localisation
         foreach ($file_arr as $index => $word){
             $word_length = mb_strlen(trim( $word, " \n\r\t\v\x00"));
-            if (($word_length > 4) && ($word_length < 9)  ){
+            if (($word_length > 6) && ($word_length < 11)  ){
                 if (preg_match('#^[a-z]*$#',trim( $word, " \n\r\t\v\x00"))){
+                    $nombre_de_mots++;
+                    /*écriture du mot dans le fichier approprié*/
                     $random_word = fopen($projectDir.'/public/'.$nomsFichiers[$word_length], "a") or die("Unable to open file!");
                     fwrite($random_word, $word);
                     fclose($random_word);
                 }
             }
         }
+        /*écriture du nombre de mots dans un fichier séparé*/
+
+        $compteur = fopen($projectDir.'/public/compteur.txt', "a") or die("Unable to open file!");
+        fwrite($compteur, $nombre_de_mots);
+        fclose($compteur);
+
     }
 }
