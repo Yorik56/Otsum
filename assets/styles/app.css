@@ -31,6 +31,28 @@ body {
     font-family: 'Poppins', sans-serif;
     color: #DDDDDD;
     text-transform: uppercase;
+    background-color: #185a82;
+}
+
+.is_in_cell {
+    position: relative;
+}
+
+.is_in_cell p{
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.is_in_cell::before {
+    content: "";
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    background-color: #d2cf00;
+    border-radius: 50%;
 }
 
 #search_field {

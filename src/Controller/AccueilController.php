@@ -142,18 +142,12 @@ class AccueilController extends AbstractController
             } else {
                 $victoire = false;
             }
-            // On retourne :
-            // - L'état de la partie
-            // - L'état de la dernière ligne jouée,
-            // - L'état de la ligne actuelle
-            // - Le nombre d'essais actuel
-            // - Victoire ?
             $response = [
-                "mot_a_trouver"  => $tableau_mot_a_trouver,
-                "dernier_essai"  => $tableau_dernier_essai,
-                "ligne_actuelle" => $ligne_actuelle,
-                "essais"         => $essai,
-                "victoire"       => $victoire
+                "mot_a_trouver"    => $tableau_mot_a_trouver,
+                "dernier_essai"    => $tableau_dernier_essai,
+                "ligne_precedente" => $ligne_actuelle,
+                "essais"           => $essai,
+                "victoire"         => $victoire
             ];
         }
         // $parametre_longueur_mot;

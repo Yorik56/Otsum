@@ -59,6 +59,31 @@
                                 success: function(data){
                                     console.log(data)
                                     ligne_actuelle = data.essais;
+                                    let numero_cellule = 1;
+                                    // MAJ de la ligne précédente
+                                    data.ligne_precedente.forEach(function (lettre, index) {
+                                        let cellule;
+                                        if(ligne_actuelle -1 === 0){
+                                            cellule = $('.line_' + (ligne_actuelle - 1) +".cell_" + (index+1));
+                                        }else{
+                                            cellule = $('.line_' + (ligne_actuelle - 1) +".cell_" + (((ligne_actuelle - 1) * difficultee) + numero_cellule));
+                                        }
+                                        setTimeout(function(){
+                                            if(lettre.placement === true && lettre.presence === true){
+
+                                                if(!cellule.hasClass("valide_cell")){
+                                                    cellule.addClass("valide_cell")
+                                                }
+                                            } else if (lettre.presence === true) {
+                                                if(!cellule.hasClass("is_in_cell")){
+                                                    cellule.html("<p>"+ cellule.text() +"</p>")
+                                                    cellule.addClass("is_in_cell")
+                                                }
+                                            }
+                                        }, 300);
+                                        numero_cellule++;
+                                    })
+                                    // Préparation de la nouvelle ligne
                                     $('.line_' + ligne_actuelle+".cell_" + ((difficultee * ligne_actuelle)+1))
                                     .addClass('current_cell')
                                     .text("_");
@@ -92,9 +117,6 @@
                             for(let j = 0; j < difficultee; j++) {
                                 if(i < 1 && j < 1){
                                     $('.box').append('<div class="line_' + i + ' valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</div>')
-                                    $('.cell_'+ n_case).css({
-                                        "background-color" : "rgb(179, 15, 15)"
-                                    })
                                 } else {
                                     if(i < 1 && j === 1){
                                         $('.box').append('<div class="line_' + i + ' current_cell cell cell_'+ n_case +'">_</div>')
@@ -105,9 +127,6 @@
                                     } else {
                                         $('.box').append('<div class="line_' + i + ' cell cell_'+ n_case +'"></div>')
                                     }
-                                    $('.cell_'+ n_case).css({
-                                        "background-color" : "#185a82"
-                                    })
                                 }
                                 n_case++;
                             }
