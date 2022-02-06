@@ -12,6 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -23,6 +25,17 @@ class AccueilController extends AbstractController
         return $this->render('accueil/index.html.twig', [
             'controller_name' => 'AccueilController',
         ]);
+    }
+
+    #[Route('/push', name: 'push')]
+    public function push(HubInterface $hub): Response
+    {
+        $update = new Update(
+            '/accueil',
+            json_encode(['data' => "je veux savoir qui est co "])
+        );
+        $hub->publish($update);
+        return new Response($this->generateUrl("accueil"));
     }
 
     #[Route('/hub', name: 'hub')]

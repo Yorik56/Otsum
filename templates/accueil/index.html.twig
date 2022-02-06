@@ -26,4 +26,37 @@
                 </div>
             </div>
         </div>
+        <script>
+            $(document).ready(function(){
+                {% if app.user is null %}
+                    alert("No user logged for now!");
+                {% else %}
+                    /*/ Envoi d'une requête à mercure /*/
+                    $.ajax({
+                        method: "GET",
+                        url: "{{ path('push') }}",
+                        success: function(response){
+                            console.log(response)
+                        }
+                    });
+                    /*/ Inscription à mercure /*/
+
+                    // Initialisation de l'url mercure
+                    const url = new URL('http://localhost:3000/.well-known/mercure')
+                    // On ajoute le "topic" correspondant aux notifications de chat
+                    url.searchParams.append('topic','/accueil')
+                    // On écoute les évènements provenant de mercure
+                    const eventSource = new EventSource(url)
+                    eventSource.onmessage = (e) => {
+                        console.log(e)
+                    }
+                    // Désinscription à mercure
+                    window.addEventListener('beforeunload', function () {
+                        if(eventSource != null){
+                            eventSource.close()
+                        }
+                    })
+                {% endif %}
+            });
+        </script>
 {% endblock %}
