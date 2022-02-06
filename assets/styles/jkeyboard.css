@@ -43,3 +43,11 @@
     width: 120px;
 }
 
+/*.jkeyboard .jline .backspace {*/
+/*    width: 120px;*/
+/*}*/
+
+.jkeyboard .jline .backspace {
+    width: 69px;
+    background: url("../images/backspace.png") no-repeat center center;
+}

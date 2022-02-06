@@ -72,7 +72,7 @@
     azerty: [
       ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',],
       ['q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l','m'],
-      [ 'w', 'x', 'c', 'v', 'b', 'n', ['return']]
+      ['backspace', 'w', 'x', 'c', 'v', 'b', 'n', ['return']]
     ]
   }
 
@@ -219,6 +219,26 @@
 
       var current_id = layout_id % plain_layouts.length;
       return plain_layouts[current_id];
+    },
+
+    backspace: function () {
+      var input = this.settings.input,
+        input_node = input.get(0),
+        start = input_node.selectionStart,
+        val = input.val();
+        let current_cell = $('.current_cell');
+        current_cell.prev().addClass('current_cell').text("_");
+        current_cell.removeClass('current_cell').text(".");
+
+      // if (start > 0) {
+      //   input.val(val.substring(0, start - 1) + val.substring(start));
+      //   input.trigger('focus');
+      //   input_node.setSelectionRange(start - 1, start - 1);
+      // }
+      // else {
+      //   input.trigger('focus');
+      //   input_node.setSelectionRange(0, 0);
+      // }
     },
 
     insertToString: function (start, end, string, insert_string) {
