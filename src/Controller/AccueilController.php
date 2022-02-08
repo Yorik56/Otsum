@@ -7,8 +7,10 @@ use App\Entity\Ligne;
 use App\Entity\Partie;
 
 use App\Entity\Utilisateur;
+use App\Form\ContactRequestType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,14 +19,60 @@ use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Finder\SplFileInfo;
 
-class AccueilController extends AbstractController
-{
+class AccueilController extends AbstractController {
+
     #[Route('/', name: 'accueil')]
-    public function index(): Response
+    public function index(HubInterface $hub, ManagerRegistry $doctrine, Request $request): Response
     {
+        $form = $this->createForm(ContactRequestType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $pseudo = $form->getData();
+            $utilisateur = $doctrine
+                ->getRepository(Utilisateur::class)
+                ->findOneBy(['pseudo'=> $pseudo['Pseudo']]);
+            if ($utilisateur->getId() == $this->getUser()->getId()) {
+                $error = new FormError("Vous ne pouvez pas vous ajouter en tant que contact");
+                $form->addError($error);
+            } else {
+                $update = new Update(
+                    '/accueil/notifications/demande_ajout/'.$utilisateur->getId(),
+                    json_encode([
+                        'topic' => '/accueil/notifications/demande_ajout/'.$utilisateur->getId(),
+                        'notification' => "Vous avez une demande d'amis de ".$this->getUser()->getPseudo(),
+                        'id_source' => $this->getUser()->getId()
+                    ])
+                );
+                $hub->publish($update);
+            }
+        }
+
         return $this->render('accueil/index.html.twig', [
             'controller_name' => 'AccueilController',
+            'contact_request_form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/contact_request', name: 'contact_request')]
+    public function contact_request(HubInterface $hub): Response
+    {
+        $update = new Update(
+            '/accueil',
+            json_encode(['data' => "je veux savoir qui est co "])
+        );
+        $hub->publish($update);
+        return new Response($this->generateUrl("accueil"));
+    }
+
+    #[Route('/respond_contact_request', name: 'respond_contact_request')]
+    public function respond_contact_request(HubInterface $hub): Response
+    {
+        $update = new Update(
+            '/accueil',
+            json_encode(['data' => "je veux savoir qui est co "])
+        );
+        $hub->publish($update);
+        return new Response($this->generateUrl("accueil"));
     }
 
     #[Route('/push', name: 'push')]
