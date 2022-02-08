@@ -7,15 +7,13 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 
+import './jkeyboard';
+import './partie';
 import './bootstrap';
+import './bootstrap/css/bootstrap.css';
 import './styles/polices.css';
 import './styles/jkeyboard.css';
 import './styles/accueil.css';
-
 import './styles/app.css';
-// start the Stimulus application
-import './jkeyboard';
-import './partie';
-
 
 
