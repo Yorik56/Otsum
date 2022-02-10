@@ -46,15 +46,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $isVerified = false;
 
-    #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'contacts')]
-    private $contacts;
-
+    #[ORM\OneToOne(mappedBy: 'source', targetEntity: DemandeContact::class, cascade: ['persist', 'remove'])]
+    private $demandesContact;
 
     #[Pure] public function __construct()
     {
         $this->parties = new ArrayCollection();
         $this->scoresJoueur = new ArrayCollection();
-        $this->contacts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -229,27 +227,21 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection|self[]
-     */
-    public function getContacts(): Collection
+    public function getDemandesContact(): ?DemandeContact
     {
-        return $this->contacts;
+        return $this->demandesContact;
     }
 
-    public function addContact(self $contact): self
+    public function setDemandesContact(DemandeContact $demandesContact): self
     {
-        if (!$this->contacts->contains($contact)) {
-            $this->contacts[] = $contact;
+        // set the owning side of the relation if necessary
+        if ($demandesContact->getSource() !== $this) {
+            $demandesContact->setSource($this);
         }
 
-        return $this;
-    }
-
-    public function removeContact(self $contact): self
-    {
-        $this->contacts->removeElement($contact);
+        $this->demandesContact = $demandesContact;
 
         return $this;
     }
+
 }
