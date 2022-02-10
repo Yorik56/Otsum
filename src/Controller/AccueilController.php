@@ -3,11 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Cellule;
+use App\Entity\DemandeContact;
 use App\Entity\Ligne;
 use App\Entity\Partie;
 
 use App\Entity\Utilisateur;
 use App\Form\ContactRequestType;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -21,29 +26,48 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class AccueilController extends AbstractController {
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     #[Route('/', name: 'accueil')]
-    public function index(HubInterface $hub, ManagerRegistry $doctrine, Request $request): Response
+    public function index(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
     {
+        // Formulaire demande de contact
         $form = $this->createForm(ContactRequestType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $pseudo = $form->getData();
-            $utilisateur = $doctrine
+            // Recherche de l'utilisateur ciblé
+            $utilisateur_cible = $entityManager
                 ->getRepository(Utilisateur::class)
                 ->findOneBy(['pseudo'=> $pseudo['Pseudo']]);
-            if ($utilisateur->getId() == $this->getUser()->getId()) {
-                $error = new FormError("Vous ne pouvez pas vous ajouter en tant que contact");
-                $form->addError($error);
+            // Si l'utilisateur existe
+            if($utilisateur_cible){
+                // Au cas où l'utilisateur s'envoie une demande à lui-même
+                if ($utilisateur_cible->getId() == $this->getUser()->getId()) {
+                    $error = new FormError("Vous ne pouvez pas vous ajouter en tant que contact.");
+                    $form->addError($error);
+                } else {
+                    //Enregistrement de la demande de contact
+                    $demande_de_contact = new DemandeContact($this->getUser(),$utilisateur_cible);
+                    $entityManager->persist($demande_de_contact);
+                    $entityManager->flush();
+                    //Envois de la notification
+                    $update = new Update(
+                        '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
+                        json_encode([
+                            'topic' => '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
+                            'notification' => "Vous avez une demande d'amis de ".$this->getUser()->getPseudo(),
+                            'id_source' => $this->getUser()->getId()
+                        ])
+                    );
+                    $hub->publish($update);
+                }
             } else {
-                $update = new Update(
-                    '/accueil/notifications/demande_ajout/'.$utilisateur->getId(),
-                    json_encode([
-                        'topic' => '/accueil/notifications/demande_ajout/'.$utilisateur->getId(),
-                        'notification' => "Vous avez une demande d'amis de ".$this->getUser()->getPseudo(),
-                        'id_source' => $this->getUser()->getId()
-                    ])
-                );
-                $hub->publish($update);
+                // On prévient le demandeur que le contact recherché n'existe pas
+                $error = new FormError("L'utilisateur avec ce pseudo n'existe pas.");
+                $form->addError($error);
             }
         }
 

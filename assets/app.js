@@ -9,11 +9,9 @@
 
 import './jkeyboard';
 import './partie';
-import './bootstrap';
-import './bootstrap/css/bootstrap.css';
-import './styles/polices.css';
-import './styles/jkeyboard.css';
-import './styles/accueil.css';
-import './styles/app.css';
+import './styles/polices.scss';
+import './styles/jkeyboard.scss';
+import './styles/accueil.scss';
+import './styles/app.scss';
 
 

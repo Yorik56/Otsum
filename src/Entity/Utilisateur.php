@@ -46,13 +46,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $isVerified = false;
 
-    #[ORM\OneToOne(mappedBy: 'source', targetEntity: DemandeContact::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'source', targetEntity: DemandeContact::class)]
     private $demandesContact;
+
 
     #[Pure] public function __construct()
     {
         $this->parties = new ArrayCollection();
         $this->scoresJoueur = new ArrayCollection();
+        $this->demandesContact = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -227,19 +229,32 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getDemandesContact(): ?DemandeContact
+    /**
+     * @return Collection|DemandeContact[]
+     */
+    public function getDemandesContact(): Collection
     {
         return $this->demandesContact;
     }
 
-    public function setDemandesContact(DemandeContact $demandesContact): self
+    public function addDemandesContact(DemandeContact $demandesContact): self
     {
-        // set the owning side of the relation if necessary
-        if ($demandesContact->getSource() !== $this) {
+        if (!$this->demandesContact->contains($demandesContact)) {
+            $this->demandesContact[] = $demandesContact;
             $demandesContact->setSource($this);
         }
 
-        $this->demandesContact = $demandesContact;
+        return $this;
+    }
+
+    public function removeDemandesContact(DemandeContact $demandesContact): self
+    {
+        if ($this->demandesContact->removeElement($demandesContact)) {
+            // set the owning side to null (unless already changed)
+            if ($demandesContact->getSource() === $this) {
+                $demandesContact->setSource(null);
+            }
+        }
 
         return $this;
     }

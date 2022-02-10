@@ -16,14 +16,23 @@ class DemandeContact
     #[ORM\Column(type: 'smallint', nullable: true)]
     private $flag_etat;
 
-    #[ORM\OneToOne(inversedBy: 'demandesContact', targetEntity: Utilisateur::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'demandesContact')]
     #[ORM\JoinColumn(nullable: false)]
-    private $source;
+    private ?Utilisateur $source;
 
-    #[ORM\OneToOne(targetEntity: Utilisateur::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private $cible;
+    private ?Utilisateur $cible;
 
+    /**
+     * @param $source
+     * @param $cible
+     */
+    public function __construct($source, $cible)
+    {
+        $this->source = $source;
+        $this->cible = $cible;
+    }
 
     public function getId(): ?int
     {
@@ -47,7 +56,7 @@ class DemandeContact
         return $this->source;
     }
 
-    public function setSource(Utilisateur $source): self
+    public function setSource(?Utilisateur $source): self
     {
         $this->source = $source;
 
@@ -59,7 +68,7 @@ class DemandeContact
         return $this->cible;
     }
 
-    public function setCible(Utilisateur $cible): self
+    public function setCible(?Utilisateur $cible): self
     {
         $this->cible = $cible;
 
