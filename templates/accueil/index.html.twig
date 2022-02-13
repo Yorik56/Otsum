@@ -3,29 +3,48 @@
 {% block title %}Otsum{% endblock %}
 
 {% block body %}
-        <div class="container-fluid">
-            <div class="row area d-flex justify-content-center align-items-center ">
-                <div class="col col-3"></div>
-                <div class="col area col-6 d-flex justify-content-around align-items-center flex-column">
-                    <h2 class="text-center">Bonjour ! </h2>
-                    <h3 class="text-center">Bienvenue sur OTSUM</h3>
-                    <div class="block_bouton w-50">
-                        <div class="row">
-                            <div class="col">
-                                <a class="btn button d-block w-100" href="{{ path('hub') }}">Nouvelle Partie</a>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-12 col-md-6 col">
-                                <a class="btn button d-block w-100" href="{{ path('login') }}">Log in</a>
-                            </div>
-                            <div class="form-group col-12 col-md-6 col">
-                                <a class="btn button d-block w-100" href="{{ path('app_register') }}">Sign in</a>
-                            </div>
-                        </div>
-                    </div>
+    <section class="area">
+        <h2 class="text-center">Bonjour ! </h2>
+        <h3 class="text-center">Bienvenue sur OTSUM</h3>
+        <div class="block_bouton">
+            <div class="row">
+                <div class="col">
+                    <a class="btn button d-block w-100" href="{{ path('hub') }}">Nouvelle Partie</a>
                 </div>
-                <div class="col col-3">
+            </div>
+            <div class="row">
+                <div class="form-group col-12 col-md-6 col">
+                    <a class="btn button d-block w-100" href="{{ path('login') }}">Log in</a>
+                </div>
+                <div class="form-group col-12 col-md-6 col">
+                    <a class="btn button d-block w-100" href="{{ path('app_register') }}">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </section>
+{#        <div class="container-fluid">#}
+{#            <div class="row area d-flex justify-content-center align-items-center ">#}
+{#                <div class="col col-3"></div>#}
+{#                <div class="col area col-6 d-flex justify-content-around align-items-center flex-column">#}
+{#                    <h2 class="text-center">Bonjour ! </h2>#}
+{#                    <h3 class="text-center">Bienvenue sur OTSUM</h3>#}
+{#                    <div class="block_bouton w-50">#}
+{#                        <div class="row">#}
+{#                            <div class="col">#}
+{#                                <a class="btn button d-block w-100" href="{{ path('hub') }}">Nouvelle Partie</a>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="row">#}
+{#                            <div class="form-group col-12 col-md-6 col">#}
+{#                                <a class="btn button d-block w-100" href="{{ path('login') }}">Log in</a>#}
+{#                            </div>#}
+{#                            <div class="form-group col-12 col-md-6 col">#}
+{#                                <a class="btn button d-block w-100" href="{{ path('app_register') }}">Sign in</a>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="col col-3">#}
                     <div class="demande_contact_formulaire">
                         <div>
                             <img src="{{ asset('images/add_contact_png.png') }}" alt="add_contact_png">
@@ -41,9 +60,9 @@
                             {{ form_end(contact_request_form) }}
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
         <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute;top: 0;right: 0">
             <div class="toast-header">
                 <strong class="mr-auto">Bootstrap</strong>

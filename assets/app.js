@@ -6,15 +6,15 @@
  */
 
 // any CSS you import will output into a single css file (app.css in this case)
-let $ = require('jquery')
 
-import  './bootstrap/js/bootstrap'
-import  './bootstrap/css/bootstrap.css'
-import './jkeyboard';
-import './partie';
+// CSS
 import './styles/polices.scss';
 import './styles/jkeyboard.scss';
 import './styles/accueil.scss';
 import './styles/app.scss';
+// JS
+let $ = require('jquery')
+import './jkeyboard';
+import './partie';
 
 
