@@ -6,7 +6,10 @@
  */
 
 // any CSS you import will output into a single css file (app.css in this case)
+let $ = require('jquery')
 
+import  './bootstrap/js/bootstrap'
+import  './bootstrap/css/bootstrap.css'
 import './jkeyboard';
 import './partie';
 import './styles/polices.scss';
