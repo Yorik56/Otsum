@@ -171,7 +171,7 @@ class Partie
     }
 
     /**
-     * @return Collection|Ligne[]
+     * @return Collection
      */
     public function getIdLignes(): Collection
     {

@@ -151,7 +151,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection|Partie[]
+     * @return Collection
      */
     public function getParties(): Collection
     {
@@ -230,7 +230,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection|DemandeContact[]
+     * @return Collection
      */
     public function getDemandesContact(): Collection
     {

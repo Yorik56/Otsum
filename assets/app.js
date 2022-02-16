@@ -12,6 +12,7 @@ import './styles/polices.scss';
 import './styles/jkeyboard.scss';
 import './styles/accueil.scss';
 import './styles/app.scss';
+import './styles/sidenav.scss';
 // JS
 let $ = require('jquery')
 import './jkeyboard';

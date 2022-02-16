@@ -1,0 +1,153 @@
+//SIDEBAR
+.sidenav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  background: #3C3F41;
+  width: 250px;
+  border: solid 1px #000;
+  display: flex;
+  justify-content: flex-start;
+  align-items: self-start;
+  z-index: 4;
+  .sidenav_content {
+    position: relative;
+    width: 100%;
+    margin: 80px 0 0 0;
+    ul li {
+      list-style: none;
+    }
+  }
+}
+
+//CHECKBOX
+.hamburger_checkbox {
+  cursor: pointer;
+  position: absolute;
+  top: 18px;
+  left: 180px;
+  height: 39px;
+  width: 42px;
+  background: #000;
+  z-index: 10;
+  opacity: 0;
+
+}
+
+/* CLEARFIX */
+
+.cf:before,
+.cf:after {
+  content: " ";
+  display: table;
+}
+
+.cf:after {
+  clear: both;
+}
+
+.cf {
+  *zoom: 1;
+}
+
+// HAMBURGER
+.hamburger .line{
+  width: 50px;
+  height: 5px;
+  background-color: #fff;
+  display: block;
+  margin: 8px auto;
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+.hamburger:hover{
+  cursor: pointer;
+}
+
+.hamburger {
+  position: absolute;
+  top: 14px;
+  left: 180px;
+  height: 20px;
+  width: 20px;
+  z-index: 5;
+}
+#hamburger{
+  //-webkit-transition: all 0.3s ease-in-out;
+  //-o-transition: all 0.3s ease-in-out;
+  //transition: all 0.3s ease-in-out;
+}
+
+@keyframes smallbig{
+  0%, 100%{
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
+  }
+
+  50%{
+    -webkit-transform: scale(0);
+    -ms-transform: scale(0);
+    -o-transform: scale(0);
+    transform: scale(0);
+  }
+}
+
+//CHECKBOX INTERACTIONS
+
+.hamburger_checkbox:checked ~ #hamburger .line:nth-child(1),
+.hamburger_checkbox:checked ~ #hamburger .line:nth-child(2),
+.hamburger_checkbox:checked ~ #hamburger .line:nth-child(3){
+  -webkit-transition-delay: 0.2s;
+  -o-transition-delay: 0.2s;
+  transition-delay: 0.2s;
+}
+
+.hamburger_checkbox:checked ~ #hamburger .line:nth-child(2)
+{
+  opacity: 0;
+}
+
+.hamburger_checkbox:checked ~ #hamburger .line:nth-child(1){
+  -webkit-transform: translateY(13px) rotate(45deg);
+  -ms-transform: translateY(13px) rotate(45deg);
+  -o-transform: translateY(13px) rotate(45deg);
+  transform: translateY(13px) rotate(45deg);
+}
+
+.hamburger_checkbox:checked ~ #hamburger .line:nth-child(3){
+  -webkit-transform: translateY(-13px) rotate(-45deg);
+  -ms-transform: translateY(-13px) rotate(-45deg);
+  -o-transform: translateY(-13px) rotate(-45deg);
+  transform: translateY(-13px) rotate(-45deg);
+}
+
+.hamburger_checkbox:checked ~ #hamburger{
+  animation: smallbig 0.6s forwards;
+}
+
+.hamburger_checkbox:not(:checked) ~ .sidenav {
+  transform: translateX(-100%);
+}
+
+.hamburger_checkbox:not(:checked) ~ #hamburger{
+  left: 30px;
+  transition: all .5s;
+}
+
+.hamburger_checkbox:not(:checked) {
+  left: 30px;
+  transition: all .5s;
+}
+
+.hamburger_checkbox:checked ~ #hamburger{
+  animation: smallbig 0.6s forwards;
+}
+
+
+.sidenav {
+  transition: all .5s;
+}

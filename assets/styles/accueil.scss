@@ -1,28 +1,32 @@
-.col.area {
-    padding: 20px;
-    height: 50vh;
+.area {
     border-radius: 5px;
     box-shadow: -2px 3px 8px 0 #000;
-    background-image: url("/assets/bg.jpg");
+    //background-image: url("/assets/bg.jpg");
+    background-color: #313335;
     background-repeat: no-repeat;
     background-size: 100%;
     background-position: center;
-    position: relative;
-
+    padding: 5%;
 }
 .row.area {
     height: 100vh;
 }
-.block_bouton {
-    /*height: 400px;*/
-}
 .button {
     margin: 30px 0;
-    background-color: #0d6efdc4;
+    box-shadow: -2px 3px 8px 0 #000;
 }
-h1, h2, h3, .button {
-    color: #fff;
+*  {
+    color: #C8B651;
     font-family: 'Poppins', sans-serif;
+}
+
+.btn  {
+    color: #C8B651;
+    background-color: #2B2B2B;
+}
+
+.btn:hover  {
+    color: #fff;
 }
 
 .demande_contact_formulaire {
@@ -50,4 +54,13 @@ h1, h2, h3, .button {
 
 .demande_contact_formulaire form {
     display: none;
+}
+
+section {
+    background: black;
+    color: white;
+    border-radius: 1em;
+    padding: 1em;
+    width: 70%;
+    margin: auto;
 }
