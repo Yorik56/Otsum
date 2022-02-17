@@ -4,25 +4,27 @@
 
 {% block body %}
     <h1 class="text-center">OTSUM</h1>
-    <section class="area">
-        <div class="block_bouton">
-            <div class="row">
-                <div class="col">
-                    <a class="btn button d-block w-100" href="{{ path('hub') }}">Partie en ligne</a>
+    <div class="container d-flex justify-content-center">
+        <section class="row area d-flex justify-content-center">
+            <div class="block_bouton col-6">
+                <div class="row">
+                    <div class="col">
+                        <a class="btn button d-block w-100" href="{{ path('hub') }}">Partie en ligne</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <a class="btn button d-block w-100" href="{{ path('hub') }}">Partie locale</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <a class="btn button d-block w-100" href="{{ path('classement') }}">Classement</a>
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col">
-                    <a class="btn button d-block w-100" href="{{ path('hub') }}">Partie locale</a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <a class="btn button d-block w-100" href="{{ path('classement') }}">Classement</a>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
+    </div>
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute;top: 0;right: 0">
         <div class="toast-header">
             <strong class="mr-auto">Bootstrap</strong>

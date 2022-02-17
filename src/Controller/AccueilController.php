@@ -128,7 +128,7 @@ class AccueilController extends AbstractController {
         $entityManager->persist($lettre);
         $entityManager->flush();
 
-        // On envoi la première lettre
+        // On envoie la première lettre
         return new JsonResponse([$mot_a_trouver[0], $partie->getId()]);
     }
 

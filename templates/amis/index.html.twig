@@ -4,39 +4,50 @@
 
 {% block body %}
     <h1 class="text-center">Amis</h1>
-    <section class="area">
-        <div class="block_bouton">
-            <div class="row">
-                <div class="col">
-                    <h2>Amis en ligne</h2>
+    <div class="container d-flex justify-content-center flex-column">
+        <section class="row area amis d-flex justify-content-center">
+            <div class="block_amis">
+                <div class="row">
+                    <div class="col">
+                        <h2>Amis en ligne</h2>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-    <section class="area">
-        <div class="block_amis">
-            <div class="row">
-                <div class="col">
-                    <h2>Inviter un joueur</h2>
-                    <div class="demande_contact_formulaire">
-                        <div>
-                            <img src="{{ asset('images/add_contact_png.png') }}" alt="add_contact_png">
-                        </div>
-                        <div>
-                            {{ form_start(contact_request_form, {'attr': {'class': 'form-inline'}}) }}
-                            <div class="my-custom-class-for-errors">
-                                {{ form_errors(contact_request_form) }}
+        </section>
+        <section class="row area amis d-flex justify-content-center">
+            <div class="block_amis">
+                <div class="row">
+                    <div class="col">
+                        <h2>Inviter un joueur</h2>
+                        <div class="demande_contact_formulaire">
+                            <div>
+                                <img src="{{ asset('images/add_contact_png.png') }}" alt="add_contact_png">
                             </div>
-                            {{ form_label(contact_request_form.Pseudo) }}
-                            {{ form_widget(contact_request_form.Pseudo) }}
-                            {{ form_widget(contact_request_form.Demander, {'attr': {'class': 'btn btn-primary'}}) }}
-                            {{ form_end(contact_request_form) }}
+                            <div>
+                                {{ form_start(contact_request_form, {'attr': {'class': 'form-inline'}}) }}
+                                <div class="my-custom-class-for-errors">
+                                    {{ form_errors(contact_request_form) }}
+                                </div>
+                                {{ form_label(contact_request_form.Pseudo) }}
+                                {{ form_widget(contact_request_form.Pseudo) }}
+                                {{ form_widget(contact_request_form.Demander, {'attr': {'class': 'btn btn-primary'}}) }}
+                                {{ form_end(contact_request_form) }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+        <section class="row area amis d-flex justify-content-center">
+            <div class="block_amis">
+                <div class="row">
+                    <div class="col">
+                        <h2>Demandes d'amis</h2>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>    
     <script>
         $(document).ready(function(){
             // Si l'utilisateur est connecté
