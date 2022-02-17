@@ -17,6 +17,7 @@
     margin: 80px 0 0 0;
     ul li {
       list-style: none;
+      margin: 0 0 10px 0;
       a {
         color: #C8B651;
       }
@@ -36,6 +37,31 @@
   z-index: 10;
   opacity: 0;
 
+}
+
+.hamburger_checkbox:not(:checked) ~ .hamburger .notification {
+  display: none;
+  //display: flex;
+  top: 0;
+  right: -37px;
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background: #C8B651;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 6px 2px #00000069;
+  i {
+    color: #000000e6;
+    text-shadow: 0 4px 12px #685b5b;
+    font-size: 15px;
+    transform: rotate(-11deg);
+  }
+}
+
+.hamburger_checkbox:checked ~ .hamburger .notification {
+  display: none;
 }
 
 /* CLEARFIX */

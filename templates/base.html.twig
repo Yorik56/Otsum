@@ -6,6 +6,7 @@
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -17,20 +18,31 @@
             <span class="line"></span>
             <span class="line"></span>
             <span class="line"></span>
+            <div class="notification " style="color: #0b2e13">
+                <i class="fa-solid fa-bell"></i>
+            </div>
         </div>
         <div class="sidenav">
             <div class="sidenav_content">
                 <ul>
                     <li>
-                        <a href="{{ path('login') }}">Connexion</a> / <a href="{{ path('app_register') }}">Inscription</a>
-                    </li>
-                    <li>
+                        <i class="fa-solid fa-house"></i>
                         <a href="{{ path('accueil') }}">Accueil</a>
                     </li>
                     <li>
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <a href="{{ path('login') }}">Connexion</a>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-user-pen"></i>
+                        <a href="{{ path('app_register') }}">Inscription</a>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-user-group"></i>
                         <a href="{{ path('amis') }}">Amis</a>
                     </li>
                     <li>
+                        <i class="fa-solid fa-star"></i>
                         <a href="{{ path('classement') }}">Classement</a>
                     </li>
                 </ul>
