@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello MonProfilController!{% endblock %}
+
+{% block body %}
+    <h1>Mon profil</h1>
+    <div class="container d-flex justify-content-center">
+        <section class="row area d-flex justify-content-center">
+            <div class="block_profil">
+                <div class="row">
+                    <div class="col">
+                        <div class="avatar_container">
+                            <a href="{{ path('majAvatar') }}">
+                                {% if avatar %}
+                                    <img src="{{ ('images/avatars/'~avatar.avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                {% else %}
+                                    <div class="avatar_par_defaut">
+                                        {{ utilisateur.pseudo|first|upper }}
+                                    </div>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <p>pseudo: {{ utilisateur.pseudo }}</p>
+                        <p>email: {{ utilisateur.email }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

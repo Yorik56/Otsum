@@ -1,0 +1,19 @@
+liip_imagine:
+    driver: "gd"
+    resolvers:
+        default:
+            web_path: ~
+    filter_sets:
+
+        # name our filter set "my_thumb_filter"
+        my_thumb_filter:
+            filters:
+
+                # use and setup the "thumbnail" filter
+                thumbnail:
+
+                    # set the thumbnail size to "32x32" pixels
+                    size: [ 150, 150 ]
+
+                    # crop the input image, if required
+                    mode: outbound

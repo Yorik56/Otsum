@@ -9,6 +9,19 @@ h1 {
     text-align: center;
 }
 
+//AVATAR
+.avatar_par_defaut {
+    background: #C8B651;
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+}
+
 /* Grille de jeu */
 .example-wrapper {
     margin: 1em auto;

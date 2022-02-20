@@ -21,6 +21,22 @@
       a {
         color: #C8B651;
       }
+      .notification-amis {
+        display: inline-block;
+        background-color: #C8B651;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        .notification-amis-cloche {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          font-size: 13px;
+          transform: rotate(-9deg);
+        }
+      }
     }
   }
 }
@@ -40,8 +56,8 @@
 }
 
 .hamburger_checkbox:not(:checked) ~ .hamburger .notification {
-  display: none;
-  //display: flex;
+  //display: none;
+  display: flex;
   top: 0;
   right: -37px;
   position: absolute;
