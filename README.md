@@ -12,3 +12,6 @@
 
 # Get dependencies: 
 `composer install`
+
+# install Yarn
+[https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
