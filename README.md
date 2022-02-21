@@ -53,6 +53,7 @@
 
 > Mercure : Websocket
 - [config/packages/mercure.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/mercure.yaml)
+- [Makefile](https://github.com/Yorik56/Otsum/blob/main/Makefile)
 
 ![img.png](assets/img.png)
 
