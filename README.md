@@ -22,3 +22,11 @@
 
 > launch watcher
 `yarn watch`
+
+# Install Make
+
+## Install chocolatey
+[https://chocolatey.org/install#individual](https://chocolatey.org/install#individual)
+
+## Run as Administrator
+`choco install make`
