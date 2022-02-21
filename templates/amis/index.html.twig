@@ -17,8 +17,28 @@
         <section class="row area amis d-flex justify-content-center">
             <div class="block_amis">
                 <div class="row">
-                    <div class="col">
+                    <div class="col col-12">
                         <h2>Demandes d'amis</h2>
+                        <div class="demandes_contact_reçues">
+                            {% for demande in demandes_contact %}
+                                <div data-row_utilisateur="{{ demande.source.id }}" class="row">
+                                    <div class="utilisateur col-12 col-md-6">
+                                        {% if demande.source.getAvatar() %}
+                                            <img class="avatar" src="{{ ('images/avatars/'~demande.source.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                        {% else %}
+                                            <div class="avatar_par_defaut">
+                                                {{ demande.source.pseudo|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        {{ demande.source.pseudo }}
+                                    </div>
+                                    <div class="action col-12 col-md-6">
+                                        <button class="btn accept btn-success" data-action="accepte" data-id="{{ demande.source.id }}">Accepter</button>
+                                        <button class="btn decline btn-danger" data-action="refuse" data-id="{{ demande.source.id }}">Refuser</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -51,36 +71,31 @@
     </div>    
     <script>
         $(document).ready(function(){
-            // Si l'utilisateur est connecté
-            {% if app.user %}
-                //-- Inscription a un topic mercure.
-                // Initialisation de l'Url mercure
-                const url = new URL('http://localhost:3000/.well-known/mercure')
-                // On ajoute le "topic" correspondant aux notifications de chat
-                url.searchParams.append('topic','/accueil')
-                // On ajoute le "topic" correspondant aux notifications de l'utilisateur courant
-                url.searchParams.append('topic','/accueil/notifications/demande_ajout/' + {{ app.user.id }})
-                // On écoute les évènements provenant de mercure
-                const eventSource = new EventSource(url)
-                eventSource.onmessage = (e) => {
-                    if(JSON.parse(e.data).topic === '/accueil/notifications/demande_ajout/' + {{ app.user.id }}){
-                        let toast = $('.toast');
-                        $('.toast-body').html(JSON.parse(e.data).notification)
-                        toast.toast({ autohide: false })
-                        toast.toast('show')
+            $('.btn').on('click',function () {
+                let utilisateur = $(this).data('id');
+                let action      = $(this).data('action');
+                //-- Répondre à une demande d'amis
+                $.ajax({
+                    // Adresse à laquelle la requête est envoyée
+                    method: "GET",
+                    url: "{{ path("reponseDemandeAmis") }}",
+                    data: {
+                        idUtilisateur : utilisateur,
+                        reponse: action
+                    },
+                    // Le délai maximum en millisecondes de traitement de la demande
+                    timeout: 4000,
+                    // La fonction à appeler si la requête aboutie
+                    success: function (data) {
+                        $("[data-row_utilisateur=" + data + "]").remove()
+                    },
+                    // La fonction à appeler si la requête n'a pas abouti
+                    error: function() {
+
                     }
-                }
-                //-- Désinscription aux topics mercure
-                window.addEventListener('beforeunload', function () {
-                    if(eventSource != null){
-                        eventSource.close()
-                    }
-                })
-                //-- Formulaire demande de contact
-                $('.demande_contact_formulaire img').on('click', function () {
-                    $('.demande_contact_formulaire form').toggleClass('show')
-                })
-            {% endif %}
+                });
+            })
+
         });
     </script>
 {% endblock %}

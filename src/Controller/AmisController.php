@@ -17,9 +17,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class AmisController extends AbstractController
 {
     #[Route('/amis', name: 'amis')]
-    public function index(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
+    public function amis(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
     {
-        // Formulaire demande de contact
+        //-- Demandes d'amis reçues
+        $demandes_de_contact = $entityManager->getRepository(DemandeContact::class)
+            ->findBy([
+                'cible' => $this->getUser()->getId(),
+                'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
+            ]);
+        //-- Formulaire demande de contact
         $form = $this->createForm(ContactRequestType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -35,20 +41,33 @@ class AmisController extends AbstractController
                     $error = new FormError("Vous ne pouvez pas vous ajouter en tant que contact.");
                     $form->addError($error);
                 } else {
-                    //Enregistrement de la demande de contact
-                    $demande_de_contact = new DemandeContact($this->getUser(),$utilisateur_cible);
-                    $entityManager->persist($demande_de_contact);
-                    $entityManager->flush();
-                    //Envois de la notification
-                    $update = new Update(
-                        '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
-                        json_encode([
-                            'topic' => '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
-                            'notification' => "Vous avez une demande d'amis de ".$this->getUser()->getPseudo(),
-                            'id_source' => $this->getUser()->getId()
-                        ])
-                    );
-                    $hub->publish($update);
+                    $demande_de_contact = $entityManager->getRepository(DemandeContact::class)
+                        ->findOneBy([
+                                'source'=>$this->getUser()->getId(),
+                                'cible' =>$utilisateur_cible,
+                        ]);
+                    // On vérifie que cette demande n'a pas déjà été envoyée
+                    if(!$demande_de_contact){
+                        //Enregistrement de la demande de contact
+                        $demande_de_contact = new DemandeContact($this->getUser(),$utilisateur_cible);
+                        $demande_de_contact->setFlagEtat(DemandeContact::DEMANDE_CONTACT_EN_ATTENTE);
+                        $entityManager->persist($demande_de_contact);
+                        $entityManager->flush();
+                        //Envois de la notification
+                        $update = new Update(
+                            '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
+                            json_encode([
+                                'topic' => '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
+                                'notification' => "Vous avez une demande d'amis de ".$this->getUser()->getPseudo(),
+                                'id_source' => $this->getUser()->getId()
+                            ])
+                        );
+                        $hub->publish($update);
+                    } else {
+                        // On prévient le demandeur que la demande a déjà été envoyée
+                        $error = new FormError("La demande à déjà été envoyée à ce contact.");
+                        $form->addError($error);
+                    }
                 }
             } else {
                 // On prévient le demandeur que le contact recherché n'existe pas
@@ -59,7 +78,37 @@ class AmisController extends AbstractController
 
         return $this->render('amis/index.html.twig', [
             'controller_name' => 'AmisController',
-            'contact_request_form' => $form->createView()
+            'contact_request_form' => $form->createView(),
+            'demandes_contact' => $demandes_de_contact
         ]);
     }
+
+    #[Route('/reponseDemandeAmis', name: 'reponseDemandeAmis')]
+    public function reponseDemandeAmis(EntityManagerInterface $entityManager, Request $request): Response
+    {
+        $reponse     = $request->query->get('reponse');
+        $utilisateur = $request->query->get('idUtilisateur');
+        //Maj de la demande de contact
+        $demande_de_contact = $entityManager->getRepository(DemandeContact::class)
+        ->findOneBy([
+            'source'=>$utilisateur,
+            'cible' =>$this->getUser()->getId(),
+        ]);
+        if($demande_de_contact && ($reponse=="accepte" || $reponse == "refuse") ){
+
+            if($reponse == "accepte"){
+                $flag_etat = DemandeContact::DEMANDE_CONTACT_ACCEPTEE;
+            }
+            else{
+                $flag_etat = DemandeContact::DEMANDE_CONTACT_REFUSEE;
+            }
+            $demande_de_contact->setFlagEtat($flag_etat);
+            $entityManager->persist($demande_de_contact);
+            $entityManager->flush();
+        }
+
+
+        return new Response($utilisateur);
+    }
+
 }

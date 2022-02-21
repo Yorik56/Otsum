@@ -22,7 +22,7 @@
         color: #C8B651;
       }
       .notification-amis {
-        display: inline-block;
+        display: none;
         background-color: #C8B651;
         border-radius: 50%;
         width: 20px;
@@ -55,9 +55,12 @@
 
 }
 
+.hamburger_checkbox:checked ~ .hamburger .notification {
+  display: none!important;
+}
+
 .hamburger_checkbox:not(:checked) ~ .hamburger .notification {
-  //display: none;
-  display: flex;
+  display: none;
   top: 0;
   right: -37px;
   position: absolute;

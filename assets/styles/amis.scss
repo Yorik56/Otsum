@@ -12,3 +12,28 @@ section.area.amis {
 .block_profil {
     width: 100%;
 }
+
+.block_amis{
+    width: 100%;
+    .demandes_contact_reçues {
+        tr {
+            display: flex;
+        }
+        .utilisateur {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            .avatar, .avatar_par_defaut{
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+            }
+        }
+        .action {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+    }
+}

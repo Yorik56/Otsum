@@ -41,7 +41,9 @@ class MonProfilController extends AbstractController
             // encode the plain password
             $avatar->setAvatarFile( $form->get('avatarFile')->getData());
             $avatar->setUtilisateur($utilisateur);
+            $utilisateur->setAvatar($avatar);
             $entityManager->persist($avatar);
+            $entityManager->persist($utilisateur);
             $entityManager->flush();
             return $this->redirectToRoute('mon_profil');
         }

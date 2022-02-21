@@ -8,21 +8,15 @@ use App\Entity\Ligne;
 use App\Entity\Partie;
 
 use App\Entity\Utilisateur;
-use App\Form\ContactRequestType;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Finder\SplFileInfo;
 
 class AccueilController extends AbstractController {
 
@@ -32,6 +26,18 @@ class AccueilController extends AbstractController {
         return $this->render('accueil/index.html.twig', [
             'controller_name' => 'AccueilController'
         ]);
+    }
+
+    #[Route('/mes-notifications', name: 'mes_notifications')]
+    public function mes_notifications(EntityManagerInterface $entityManager, Request $request): Response
+    {
+        $demande_de_contact = $entityManager->getRepository(DemandeContact::class)
+            ->findOneBy([
+                'cible' =>$this->getUser()->getId(),
+                'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
+            ]);
+        ($demande_de_contact)?$demandes=true:$demandes=false;
+        return new Response($demandes);
     }
 
     #[Route('/contact_request', name: 'contact_request')]

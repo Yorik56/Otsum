@@ -50,6 +50,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'source', targetEntity: DemandeContact::class)]
     private $demandesContact;
 
+    #[ORM\OneToOne(targetEntity: Avatar::class, cascade: ['persist', 'remove'])]
+    private $avatar;
+
 
     #[Pure] public function __construct()
     {
@@ -259,5 +262,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getAvatar(): ?Avatar
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?Avatar $avatar): self
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
 
 }

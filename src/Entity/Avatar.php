@@ -12,7 +12,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  * @Vich\Uploadable
  */
 #[ORM\Entity(repositoryClass: AvatarRepository::class)]
-class Avatar
+class Avatar implements \Serializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -109,5 +109,16 @@ class Avatar
         $this->utilisateur = $utilisateur;
 
         return $this;
+    }
+
+    public function serialize()
+    {
+        $this->avatar = base64_encode($this->avatar);
+    }
+
+    public function unserialize($serialized)
+    {
+        $this->avatar = base64_decode($this->avatar);
+
     }
 }

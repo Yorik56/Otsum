@@ -8,6 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: DemandeContactRepository::class)]
 class DemandeContact
 {
+    const DEMANDE_CONTACT_EN_ATTENTE = 1;
+    const DEMANDE_CONTACT_ACCEPTEE   = 2;
+    const DEMANDE_CONTACT_REFUSEE    = 3;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
