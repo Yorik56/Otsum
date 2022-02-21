@@ -30,3 +30,6 @@
 
 ## Run as Administrator
 `choco install make`
+
+# Create Database
+`php bin/console doctrine:migrations:migrate`
