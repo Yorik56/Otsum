@@ -21,6 +21,7 @@
 `yarn install`
 
 > launch watcher
+
 `yarn watch`
 
 # Install Make
@@ -33,4 +34,5 @@
 
 # Create Database
 >Create a database named "Otsum"
+
 `php bin/console doctrine:migrations:migrate`
