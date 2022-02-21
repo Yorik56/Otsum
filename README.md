@@ -1,10 +1,10 @@
 # Otsum
 
-> PHP 8
-> Yarn
-> Make
-> Webpack
-> Mercure
+> - PHP 8
+> - Yarn
+> - Make
+> - Webpack
+> - Mercure
 
 # Get project: 
 
