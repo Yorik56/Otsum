@@ -17,3 +17,8 @@
 [https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
 
 `npm install --global yarn` 
+
+`yarn install`
+
+> launch watcher
+`yarn watch`
