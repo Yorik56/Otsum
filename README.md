@@ -32,4 +32,5 @@
 `choco install make`
 
 # Create Database
+>Create a database named "Otsum"
 `php bin/console doctrine:migrations:migrate`
