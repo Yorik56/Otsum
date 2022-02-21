@@ -6,33 +6,43 @@
 > - Webpack
 > - Mercure
 
-# Get project: 
+# Install project
+
+## Get project: 
 
 `git clone https://github.com/Yorik56/Otsum`
 
-# Get dependencies: 
+## Get dependencies: 
 `composer install`
 
-# install Yarn
+## install Yarn
 [https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
 
 `npm install --global yarn` 
 
 `yarn install`
 
-> launch watcher
+## Install Make
 
-`yarn watch`
-
-# Install Make
-
-## Install chocolatey
+### Install chocolatey
 [https://chocolatey.org/install#individual](https://chocolatey.org/install#individual)
 
-## Run as Administrator
+### Run as Administrator
 `choco install make`
 
-# Create Database
+## Create Database
 >Create a database named "Otsum"
 
 `php bin/console doctrine:migrations:migrate`
+
+# Launch project
+
+> run make 
+
+`make`
+
+> run yarn watch 
+
+`yarn watch`
+
+*GOOD TO GO*
