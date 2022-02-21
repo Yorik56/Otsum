@@ -15,7 +15,7 @@
 ## Get dependencies: 
 `composer install`
 
-## install Yarn
+## Install Yarn
 [https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
 
 `npm install --global yarn` 
@@ -63,7 +63,7 @@
 
 `make`
 
-> run yarn watch (Compile css/js)
+> Run yarn watch (Compile css/js)
 
 `yarn watch`
 
