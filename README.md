@@ -22,7 +22,7 @@
 
 `yarn install`
 
-## Install Make
+## Install Make 
 
 ### Install chocolatey
 [https://chocolatey.org/install#individual](https://chocolatey.org/install#individual)
@@ -31,17 +31,27 @@
 `choco install make`
 
 ## Create Database
->Create a database named "Otsum"
+> Create a database named "Otsum"
+
+> Lauch migration script
 
 `php bin/console doctrine:migrations:migrate`
 
+# Configs
+
+- [.env.exemple](https://github.com/Yorik56/Otsum/blob/main/.env.exemple)
+- [config/packages/webpack_encore.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/webpack_encore.yaml)
+- [config/packages/liip_imagine.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/liip_imagine.yaml)
+- [config/packages/vich_uploader.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/vich_uploader.yaml)
+- [config/packages/mercure.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/mercure.yaml)
+
 # Launch project
 
-> run make 
+> run make (Launch Mercure Serveur)
 
 `make`
 
-> run yarn watch 
+> run yarn watch (Compile css/js)
 
 `yarn watch`
 
