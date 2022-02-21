@@ -51,8 +51,9 @@
 > Upload Files
 - [config/packages/vich_uploader.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/vich_uploader.yaml)
 
-> Websocket
+> Mercure : Websocket
 - [config/packages/mercure.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/mercure.yaml)
+![img.png](assets/img.png)
 
 # Launch project
 
