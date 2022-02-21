@@ -39,10 +39,19 @@
 
 # Configs
 
+> Variables environment
 - [.env.exemple](https://github.com/Yorik56/Otsum/blob/main/.env.exemple)
+
+> Compile JS/CSS
 - [config/packages/webpack_encore.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/webpack_encore.yaml)
+
+> Resize/Crop/Watermarks..
 - [config/packages/liip_imagine.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/liip_imagine.yaml)
+
+> Upload Files
 - [config/packages/vich_uploader.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/vich_uploader.yaml)
+
+> Websocket
 - [config/packages/mercure.yaml](https://github.com/Yorik56/Otsum/blob/main/config/packages/mercure.yaml)
 
 # Launch project
