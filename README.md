@@ -1,5 +1,5 @@
 # Otsum
-
+> - Symfony 6
 > - PHP 8
 > - Yarn
 > - Make
