@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
+use Datetime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -52,6 +53,10 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToOne(targetEntity: Avatar::class, cascade: ['persist', 'remove'])]
     private $avatar;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private Datetime $lastActivityAt;
+
 
 
     #[Pure] public function __construct()
@@ -273,6 +278,34 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->avatar = $avatar;
 
         return $this;
+    }
+
+    /**
+     * @return Datetime
+     */
+    public function getLastActivityAt(): Datetime
+    {
+        return $this->lastActivityAt;
+    }
+
+    /**
+     * @param Datetime $lastActivityAt
+     */
+    public function setLastActivityAt(Datetime $lastActivityAt): void
+    {
+        $this->lastActivityAt = $lastActivityAt;
+    }
+
+
+    /**
+     * @return Bool Whether the user is active or not
+     */
+    public function isActiveNow(): bool
+    {
+        // Delay during wich the user will be considered as still active
+        $delay = new \DateTime('2 minutes ago');
+
+        return ( $this->getLastActivityAt() > $delay );
     }
 
 

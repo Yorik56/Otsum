@@ -160,6 +160,16 @@ class AccueilController extends AbstractController {
         } else {
             // Comparaison de la tentative et du mot à trouver
             $tableau_mot_a_trouver = str_split($mot_a_trouver);
+            //-- Comptage du nombre d'occurrences de chaque lettre
+            $compteur_occurrence_placees = [];
+            // Pour chaque lettre du mot à trouver
+            foreach ($tableau_mot_a_trouver as $value){
+                // Si cette lettre n'as pas été comptée
+                if(!isset($compteur_occurrence[$value])){
+                    $compteur_occurrence_placees[$value] = substr_count($mot_a_trouver, $value);
+                }
+            }
+            $compteur_occurrence_testees = $compteur_occurrence_placees;
             $tableau_dernier_essai = str_split($dernier_essai);
             //-- Mise à jour de la ligne actuelle
             $ligne_actuelle = [];
@@ -174,14 +184,29 @@ class AccueilController extends AbstractController {
                     $ligne_actuelle[$index_mot_a_trouver]['presence'] = true;
                     // Si la lettre est bien placée
                     if($tableau_dernier_essai[$index_mot_a_trouver] === $lettre) {
+                        $compteur_occurrence_placees[$tableau_dernier_essai[$index_mot_a_trouver]]--;
                         $ligne_actuelle[$index_mot_a_trouver]['placement'] = true;
                         $lettres_valides++;
                     } else {
                         $ligne_actuelle[$index_mot_a_trouver]['placement'] = false;
+                        if($compteur_occurrence_testees[$tableau_dernier_essai[$index_mot_a_trouver]] < 1){
+                            $ligne_actuelle[$index_mot_a_trouver]['presence']  = false;
+                        }
+                        $compteur_occurrence_testees[$tableau_dernier_essai[$index_mot_a_trouver]]--;
                     }
                 } else {
                     $ligne_actuelle[$index_mot_a_trouver]['presence']  = false;
                     $ligne_actuelle[$index_mot_a_trouver]['placement'] = false;
+                }
+            }
+            // On retire le flag présence des lettres mal placées dont le compteur de placement est à zero
+            foreach($ligne_actuelle as $index => $lettre){
+                if(
+                    ($lettre['placement'] == false && $lettre['presence'] == true) &&
+                    $compteur_occurrence_placees[$lettre['valeur']] < 1
+                )
+                {
+                    $ligne_actuelle[$index]['presence']  = false;
                 }
             }
             // Si le mot est trouvé
@@ -198,8 +223,6 @@ class AccueilController extends AbstractController {
                 "victoire"         => $victoire
             ];
         }
-        // $parametre_longueur_mot;
-        // On envoi la première lettre
         return new JsonResponse($response);
     }
 
@@ -232,7 +255,6 @@ class AccueilController extends AbstractController {
             }
         }
         /*écriture du nombre de mots dans un fichier séparé*/
-
         $compteur = fopen($projectDir.'/public/compteur.txt', "a") or die("Unable to open file!");
         fwrite($compteur, $nombre_de_mots);
         fclose($compteur);

@@ -227,8 +227,17 @@
         start = input_node.selectionStart,
         val = input.val();
         let current_cell = $('.current_cell');
-        current_cell.prev().addClass('current_cell').text("_");
-        current_cell.removeClass('current_cell').text(".");
+        let last_cell = $('.last_cell');
+        if(current_cell.length > 0){
+          if(!current_cell.prev().hasClass('first_cell')){
+            current_cell.prev().addClass('current_cell').text("_");
+            current_cell.removeClass('current_cell').text(".");
+          }
+        } else {
+          last_cell.prev().addClass('current_cell').text("_");
+          last_cell.text(".");
+        }
+
 
       // if (start > 0) {
       //   input.val(val.substring(0, start - 1) + val.substring(start));

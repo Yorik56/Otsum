@@ -110,6 +110,7 @@
                         if(!mot_valide){
                             alert('mot trop court !');
                         } else {
+                            $('.last_cell').toggleClass('last_cell');
                             $.ajax({
                                 method: "POST",
                                 url: "{{ path('maj_ligne') }}",
@@ -132,7 +133,6 @@
                                         }
                                         setTimeout(function(){
                                             if(lettre.placement === true && lettre.presence === true){
-
                                                 if(!cellule.hasClass("valide_cell")){
                                                     cellule.addClass("valide_cell")
                                                 }
@@ -145,10 +145,24 @@
                                         }, 300);
                                         numero_cellule++;
                                     })
-                                    // Préparation de la nouvelle ligne
-                                    $('.line_' + ligne_actuelle+".cell_" + ((difficultee * ligne_actuelle)+1))
-                                    .addClass('current_cell')
-                                    .text("_");
+                                    //-- Préparation de la nouvelle ligne
+                                    $('.line_' + ligne_actuelle).each(function (index) {
+                                        let numero = (index + 1)  +  (difficultee * ligne_actuelle);
+                                        if(index === 0){
+                                            // Affichage de la première lettre
+                                            $('.line_' + ligne_actuelle +".cell_" + numero)
+                                            .addClass('valide_cell first_cell')
+                                            .text(data.ligne_precedente[0].valeur);
+                                        } else if (index === 1){
+                                            // Placement du curseur
+                                            $('.line_' + ligne_actuelle +".cell_" + numero)
+                                            .addClass('current_cell')
+                                            .text("_");
+                                        } else  {
+                                            $('.line_' + ligne_actuelle +".cell_" + numero).text(".");
+                                        }
+                                    })
+                                    //-- Repérage de la dernière lettre
                                     $('.line_' + ligne_actuelle+".cell_" + ((difficultee * ligne_actuelle)+difficultee))
                                     .addClass('last_cell')
                                 }
@@ -178,7 +192,7 @@
                         for(let i = 0; i < essais; i++) {
                             for(let j = 0; j < difficultee; j++) {
                                 if(i < 1 && j < 1){
-                                    box.append('<div class="line_' + i + ' valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</div>')
+                                    box.append('<div class="line_' + i + ' first_cell valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</div>')
                                 } else {
                                     if(i < 1 && j === 1){
                                         box.append('<div class="line_' + i + ' current_cell cell cell_'+ n_case +'">_</div>')
