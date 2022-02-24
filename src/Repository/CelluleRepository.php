@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Cellule;
+use App\Entity\Partie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -47,4 +48,33 @@ class CelluleRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    /*
+    SELECT cellule.* FROM cellule
+    JOIN ligne ON ligne.id = cellule.ligne_id
+    JOIN partie ON partie.id = ligne.partie_id
+    WHERE partie.id = '10'
+    GROUP BY
+    cellule.valeur,
+    cellule.flag_presente,
+    cellule.flag_placee
+    ORDER BY ligne.id, cellule.position;
+    */
+
+    public function getMajKeyBoard($idPartie): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('p.id = :val')
+            ->join('c.ligne', 'l')
+            ->join('l.partie', 'p')
+            ->addGroupBy('c.valeur')
+            ->addGroupBy('c.flag_presente')
+            ->addGroupBy('c.flag_placee')
+            ->addOrderBy('l.id')
+            ->addOrderBy('c.position')
+            ->setParameter('val', $idPartie)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }

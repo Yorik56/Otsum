@@ -143,12 +143,14 @@ class AccueilController extends AbstractController {
         $doctrine->getManager()->persist($partie);
         $doctrine->getManager()->flush();
 
+        // Si on est arrivé au dernier tour
         if($partie->getNombreTours() ==  $partie->getNombreToursJoues()){
             $response = $mot_a_trouver;
         } else {
             // Comparaison de la tentative et du mot à trouver
             $tableau_mot_a_trouver = str_split($mot_a_trouver);
-            //-- Comptage du nombre d'occurrences de chaque lettre
+            //-- Comptage dans le mot à trouver,
+            //-- du nombre d'occurrences existantes de chaque lettre
             $compteur_occurrence_placees = [];
             // Pour chaque lettre du mot à trouver
             foreach ($tableau_mot_a_trouver as $value){
@@ -157,6 +159,7 @@ class AccueilController extends AbstractController {
                     $compteur_occurrence_placees[$value] = substr_count($mot_a_trouver, $value);
                 }
             }
+            //-- Il faut également compter les occurrences de toutes les lettres testées
             $compteur_occurrence_testees = $compteur_occurrence_placees;
             $tableau_dernier_essai = str_split($dernier_essai);
             //-- Mise à jour de la ligne actuelle
@@ -177,6 +180,8 @@ class AccueilController extends AbstractController {
                         $lettres_valides++;
                     } else {
                         $ligne_actuelle[$index_mot_a_trouver]['placement'] = false;
+                        // Si le nombre total de cette occurrence ont été jouées dans la dernière tentative
+                        // alors cette occurrence n'est pas considérée comme présente dans la ligne
                         if($compteur_occurrence_testees[$tableau_dernier_essai[$index_mot_a_trouver]] < 1){
                             $ligne_actuelle[$index_mot_a_trouver]['presence']  = false;
                         }
@@ -224,6 +229,14 @@ class AccueilController extends AbstractController {
                 $entityManager->persist($cellule);
             }
             $entityManager->flush();
+            //-- Maj des touches du clavier
+            $majKeyboard = $doctrine->getRepository(Cellule::class)->getMajKeyBoard($id_partie);
+            $arrayMajKeyboard = [];
+            foreach ($majKeyboard as $cellule){
+                $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
+                $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
+                $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
+            }
             // Si le mot est trouvé
             if($lettres_valides == count($tableau_mot_a_trouver)){
                 $victoire = true;
@@ -234,6 +247,7 @@ class AccueilController extends AbstractController {
                 "mot_a_trouver"    => $tableau_mot_a_trouver,
                 "dernier_essai"    => $tableau_dernier_essai,
                 "ligne_precedente" => $ligne_actuelle,
+                "arrayMajKeyboard" => $arrayMajKeyboard,
                 "essais"           => $essai,
                 "victoire"         => $victoire
             ];
