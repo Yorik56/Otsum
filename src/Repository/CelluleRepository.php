@@ -49,18 +49,6 @@ class CelluleRepository extends ServiceEntityRepository
     }
     */
 
-    /*
-    SELECT cellule.* FROM cellule
-    JOIN ligne ON ligne.id = cellule.ligne_id
-    JOIN partie ON partie.id = ligne.partie_id
-    WHERE partie.id = '10'
-    GROUP BY
-    cellule.valeur,
-    cellule.flag_presente,
-    cellule.flag_placee
-    ORDER BY ligne.id, cellule.position;
-    */
-
     public function getMajKeyBoard($idPartie): array
     {
         return $this->createQueryBuilder('c')
