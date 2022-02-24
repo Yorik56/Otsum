@@ -120,19 +120,6 @@ class AccueilController extends AbstractController {
         $partie->setNombreToursJoues(1);
         $entityManager->persist($partie);
         $entityManager->flush();
-        //--- Création d'une ligne
-        $ligne = new Ligne($joueur, $partie);
-        $entityManager->persist($ligne);
-        $entityManager->flush();
-        //-- Mise à jour des lettres
-        $lettre = new Cellule();
-        $lettre->setLigne($ligne);
-        $lettre->setValeur($mot_a_trouver[0]);
-        $lettre->setPosition(0);
-        $lettre->setFlagPlacee(1);
-        $lettre->setFlagPresente(1);
-        $entityManager->persist($lettre);
-        $entityManager->flush();
 
         // On envoie la première lettre
         return new JsonResponse([$mot_a_trouver[0], $partie->getId()]);
@@ -141,6 +128,7 @@ class AccueilController extends AbstractController {
     #[Route('/maj_ligne', name: 'maj_ligne')]
     function maj_ligne(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
+        $entityManager = $doctrine->getManager();
         //Nombre d'essais
         $essai = $request->request->get('ligne_actuelle');
         $essai ++;
@@ -209,6 +197,33 @@ class AccueilController extends AbstractController {
                     $ligne_actuelle[$index]['presence']  = false;
                 }
             }
+            // Enregistrement de la nouvelle ligne
+            $ligne = new Ligne($this->getUser(), $partie);
+            $entityManager->persist($ligne);
+            //-- Mise à jour des lettres
+            foreach ($ligne_actuelle as $index => $lettre){
+                $cellule = new Cellule();
+                $cellule->setLigne($ligne);
+                $cellule->setValeur($lettre['valeur']);
+                $cellule->setPosition($index);
+                if($lettre['placement']){
+                    $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_TRUE);
+                } else {
+                    $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_FALSE);
+                }
+                if($lettre['presence']){
+                    $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_TRUE);
+                } else {
+                    $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_FALSE);
+                }
+                if($lettre['test']){
+                    $cellule->setFlagTestee(Cellule::FLAG_TEST_TRUE);
+                } else {
+                    $cellule->setFlagTestee(Cellule::FLAG_TEST_FALSE);
+                }
+                $entityManager->persist($cellule);
+            }
+            $entityManager->flush();
             // Si le mot est trouvé
             if($lettres_valides == count($tableau_mot_a_trouver)){
                 $victoire = true;

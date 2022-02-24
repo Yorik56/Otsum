@@ -8,6 +8,14 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: CelluleRepository::class)]
 class Cellule
 {
+    const FLAG_TEST_TRUE       = 1;
+    const FLAG_TEST_FALSE      = 0;
+    const FLAG_PRESENCE_TRUE   = 1;
+    const FLAG_PRESENCE_FALSE  = 0;
+    const FLAG_PLACEMENT_TRUE  = 1;
+    const FLAG_PLACEMENT_FALSE = 0;
+
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
