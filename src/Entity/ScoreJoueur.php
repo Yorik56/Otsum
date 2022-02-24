@@ -14,7 +14,7 @@ class ScoreJoueur
     private $id;
 
     #[ORM\OneToOne(targetEntity: Partie::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private $id_partie;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'scoresJoueur')]

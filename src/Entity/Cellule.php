@@ -28,8 +28,8 @@ class Cellule
     #[ORM\Column(type: 'integer')]
     private $position;
 
-    #[ORM\ManyToOne(targetEntity: Ligne::class, inversedBy: 'id_cellules')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Ligne::class, cascade: ["remove"], inversedBy: 'id_cellules')]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private $ligne;
 
     public function getId(): ?int

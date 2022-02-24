@@ -39,7 +39,7 @@ class Partie
     #[ORM\Column(type: 'string', length: 255)]
     private $mot_a_trouver;
 
-    #[ORM\OneToMany(mappedBy: 'partie', targetEntity: Ligne::class)]
+    #[ORM\OneToMany(mappedBy: 'partie', targetEntity: Ligne::class, orphanRemoval: true)]
     private $id_lignes;
 
     #[ORM\Column(type: 'integer')]

@@ -23,14 +23,14 @@ class Ligne
     #[ORM\JoinColumn(nullable: false)]
     private $id_joueur;
 
-    #[ORM\OneToMany(mappedBy: 'ligne', targetEntity: Cellule::class)]
+    #[ORM\OneToMany(mappedBy: 'ligne', targetEntity: Cellule::class, orphanRemoval: true)]
     private $id_cellules;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     private $secondes_restantes;
 
-    #[ORM\ManyToOne(targetEntity: Partie::class, inversedBy: 'id_lignes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Partie::class, cascade: ["remove"], inversedBy: 'id_lignes')]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Partie $partie;
 
     #[Pure] public function __construct(Utilisateur $id_joueur,Partie $partie)
