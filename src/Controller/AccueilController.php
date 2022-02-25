@@ -230,12 +230,23 @@ class AccueilController extends AbstractController {
             }
             $entityManager->flush();
             //-- Maj des touches du clavier
-            $majKeyboard = $doctrine->getRepository(Cellule::class)->getMajKeyBoard($id_partie);
+            $celluleRepository = $doctrine->getRepository(Cellule::class);
+            // Maj des lettres absentes ou placées
+            $majKeyboardFoundOrPlaced = $celluleRepository->getFoundOrPlaced($id_partie);
             $arrayMajKeyboard = [];
-            foreach ($majKeyboard as $cellule){
+            foreach ($majKeyboardFoundOrPlaced as $cellule){
                 $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
                 $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
                 $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
+            }
+            // Maj des lettres présentes et non placées
+            $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($id_partie);
+            foreach ($majKeyboardPresentAndNotPlaced as $cellule){
+                if(!$celluleRepository->getPlacedOrFalse($id_partie, $cellule->getValeur())){
+                    $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
+                    $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
+                    $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
+                }
             }
             // Si le mot est trouvé
             if($lettres_valides == count($tableau_mot_a_trouver)){

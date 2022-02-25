@@ -165,6 +165,33 @@
                                     //-- Repérage de la dernière lettre
                                     $('.line_' + ligne_actuelle+".cell_" + ((difficultee * ligne_actuelle)+difficultee))
                                     .addClass('last_cell')
+                                    //-- Mise à jour du clavier
+                                    // parcours des lettres du clavier
+                                    $('.jkey.letter').each(function (index,element) {
+                                        let letter = element.childNodes[0].data;
+                                        let array_maj_keyboard = Object.entries(data.arrayMajKeyboard);
+                                        // parcours des lettres mises à jour
+                                        array_maj_keyboard.forEach(([key, value]) => {
+                                            if (letter === key){
+                                                //Raz des classes
+                                                element.classList.remove('placee')
+                                                element.classList.remove('presente')
+                                                element.classList.remove('absente')
+                                                if(value.presence){
+                                                    if(value.placement){
+                                                        // position trouvée
+                                                        element.classList.add('placee')
+                                                    } else {
+                                                        // position non trouvée
+                                                        element.classList.add('presente')
+                                                    }
+                                                } else {
+                                                    // lettre absente
+                                                    element.classList.add('absente')
+                                                }
+                                            }
+                                        })
+                                    })
                                 }
                             });
                         }
