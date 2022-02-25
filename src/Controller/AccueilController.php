@@ -243,10 +243,20 @@ class AccueilController extends AbstractController {
             }
             // Maj des lettres absentes
             $majKeyboardNotPresent = $celluleRepository->getNotPresent($id_partie);
-            $arrayMajKeyboard = $this->arrayMajKeyboard($celluleRepository, $id_partie, $arrayMajKeyboard, $majKeyboardNotPresent);
+            $arrayMajKeyboard = $this->arrayMajKeyboard(
+                $celluleRepository,
+                $id_partie,
+                $arrayMajKeyboard,
+                $majKeyboardNotPresent
+            );
             // Maj des lettres présentes et non placées
             $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($id_partie);
-            $arrayMajKeyboard = $this->arrayMajKeyboard($celluleRepository, $id_partie, $arrayMajKeyboard, $majKeyboardPresentAndNotPlaced);
+            $arrayMajKeyboard = $this->arrayMajKeyboard(
+                $celluleRepository,
+                $id_partie,
+                $arrayMajKeyboard,
+                $majKeyboardPresentAndNotPlaced
+            );
             // Si le mot est trouvé
             if($lettres_valides == count($tableau_mot_a_trouver)){
                 $victoire = true;
@@ -304,7 +314,7 @@ class AccueilController extends AbstractController {
      * @param CelluleRepository $celluleRepository
      * @param int $id_partie
      * @param array $arrayMajKeyboard
-     * @param $majKeyboard
+     * @param Cellule[] $majKeyboardArrayCell
      * @return array
      */
     public function arrayMajKeyboard(ObjectRepository $celluleRepository, int $id_partie, array $arrayMajKeyboard, $majKeyboardArrayCell): array
