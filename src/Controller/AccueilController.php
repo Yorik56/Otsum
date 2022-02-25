@@ -8,8 +8,10 @@ use App\Entity\Ligne;
 use App\Entity\Partie;
 
 use App\Entity\Utilisateur;
+use App\Repository\CelluleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -231,23 +233,20 @@ class AccueilController extends AbstractController {
             $entityManager->flush();
             //-- Maj des touches du clavier
             $celluleRepository = $doctrine->getRepository(Cellule::class);
-            // Maj des lettres absentes ou placées
-            $majKeyboardFoundOrPlaced = $celluleRepository->getFoundOrPlaced($id_partie);
+            // Maj des lettres placées
+            $majKeyboardPlaced = $celluleRepository->getPlaced($id_partie);
             $arrayMajKeyboard = [];
-            foreach ($majKeyboardFoundOrPlaced as $cellule){
+            foreach ($majKeyboardPlaced as $cellule){
                 $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
                 $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
                 $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
             }
+            // Maj des lettres absentes
+            $majKeyboardNotPresent = $celluleRepository->getNotPresent($id_partie);
+            $arrayMajKeyboard = $this->arrayMajKeyboard($celluleRepository, $id_partie, $arrayMajKeyboard, $majKeyboardNotPresent);
             // Maj des lettres présentes et non placées
             $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($id_partie);
-            foreach ($majKeyboardPresentAndNotPlaced as $cellule){
-                if(!$celluleRepository->getPlacedOrFalse($id_partie, $cellule->getValeur())){
-                    $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
-                    $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
-                    $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
-                }
-            }
+            $arrayMajKeyboard = $this->arrayMajKeyboard($celluleRepository, $id_partie, $arrayMajKeyboard, $majKeyboardPresentAndNotPlaced);
             // Si le mot est trouvé
             if($lettres_valides == count($tableau_mot_a_trouver)){
                 $victoire = true;
@@ -299,5 +298,24 @@ class AccueilController extends AbstractController {
         fwrite($compteur, $nombre_de_mots);
         fclose($compteur);
 
+    }
+
+    /**
+     * @param CelluleRepository $celluleRepository
+     * @param int $id_partie
+     * @param array $arrayMajKeyboard
+     * @param $majKeyboard
+     * @return array
+     */
+    public function arrayMajKeyboard(ObjectRepository $celluleRepository, int $id_partie, array $arrayMajKeyboard, $majKeyboardArrayCell): array
+    {
+        foreach ($majKeyboardArrayCell as $cellule) {
+            if (!$celluleRepository->getPlacedOrFalse($id_partie, $cellule->getValeur())) {
+                $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
+                $arrayMajKeyboard[$cellule->getValeur()]['presence'] = $cellule->getFlagPresente();
+                $arrayMajKeyboard[$cellule->getValeur()]['test'] = $cellule->getFlagTestee();
+            }
+        }
+        return $arrayMajKeyboard;
     }
 }

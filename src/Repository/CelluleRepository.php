@@ -49,19 +49,35 @@ class CelluleRepository extends ServiceEntityRepository
     }
     */
 
-    public function getFoundOrPlaced($idPartie): array
+    public function getPlaced($idPartie): array
     {
         return $this->createQueryBuilder('c')
             ->join('c.ligne', 'l')
             ->join('l.partie', 'p')
             ->Where('p.id = :val')
-            ->andWhere('c.flag_presente = :flag_presente OR c.flag_placee = :flag_placee')
+            ->andWhere('c.flag_placee = :flag_placee')
+            ->addGroupBy('c.valeur')
+            ->addOrderBy('l.id')
+            ->addOrderBy('c.position')
+            ->setParameter('val', $idPartie)
+            ->setParameter('flag_placee'  , Cellule::FLAG_PLACEMENT_TRUE)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
+    public function getNotPresent($idPartie): array
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.ligne', 'l')
+            ->join('l.partie', 'p')
+            ->Where('p.id = :val')
+            ->andWhere('c.flag_presente = :flag_presente')
             ->addGroupBy('c.valeur')
             ->addOrderBy('l.id')
             ->addOrderBy('c.position')
             ->setParameter('val', $idPartie)
             ->setParameter('flag_presente', Cellule::FLAG_PRESENCE_FALSE)
-            ->setParameter('flag_placee'  , Cellule::FLAG_PLACEMENT_TRUE)
             ->getQuery()
             ->getResult()
             ;
