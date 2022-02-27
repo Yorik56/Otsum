@@ -163,10 +163,10 @@ class AccueilController extends AbstractController {
             }
             //-- Il faut également compter les occurrences de toutes les lettres testées
             $compteur_occurrence_testees = $compteur_occurrence_placees;
-            $tableau_dernier_essai = str_split($dernier_essai);
             //-- Mise à jour de la ligne actuelle
             $ligne_actuelle = [];
             $lettres_valides = 0;
+            $tableau_dernier_essai = str_split($dernier_essai);
             // Pour chaque lettre du mot à trouver
             foreach ($tableau_mot_a_trouver as $index_mot_a_trouver => $lettre){
                 $ligne_actuelle[$index_mot_a_trouver]['valeur'] = $tableau_dernier_essai[$index_mot_a_trouver];

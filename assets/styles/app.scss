@@ -91,7 +91,7 @@ h1 {
 {
     -webkit-box-shadow: inset 0 0 3px #b30f0f;
     background-color: #b30f0f;
-    border: 1px solid #b30f0f;
+    border: 1px solid #ffffff;
 }
 
 // lettre présente
@@ -100,15 +100,14 @@ h1 {
 {
     -webkit-box-shadow: inset 0 0 3px #d2cf00;
     background-color: #d2cf00;
-    border: 1px solid #d2cf00;
+    border: 1px solid #ffffff;
 }
 
 // lettre présente
 .jkeyboard .jline ul li.absente,
 .jkeyboard .jline ul li.absente:hover, .jkeyboard .jline ul li.absente:active,
 {
-    -webkit-box-shadow: inset 0 0 3px gray;
-    background-color: gray;
-    border: 1px solid gray;
+    border: 1px solid #2d2d2d;
+    color: #2d2d2d;
 }
 
