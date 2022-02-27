@@ -211,24 +211,27 @@
                     }
                     // Affichage de la partie
                     function creationDeLaGrille(mot, difficultee) {
-                        let box = $('.box');
-                        box.css({
-                            "grid-template-columns":" repeat(" + difficultee + ",1fr)"
-                        })
+                        let box = $('.table');
+                        let box_line;
+                        // box.css({
+                        //     "grid-template-columns":" repeat(" + difficultee + ",1fr)"
+                        // })
                         $('.mot_a_trouver').append(mot);
                         for(let i = 0; i < essais; i++) {
+                            box.append('<tr></tr>')
+                            box_line = $('div tr:last-child');
                             for(let j = 0; j < difficultee; j++) {
                                 if(i < 1 && j < 1){
-                                    box.append('<div class="line_' + i + ' first_cell valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</div>')
+                                      box_line.append('<td class="td line_' + i + ' first_cell valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</td>')
                                 } else {
                                     if(i < 1 && j === 1){
-                                        box.append('<div class="line_' + i + ' current_cell cell cell_'+ n_case +'">_</div>')
+                                         box_line.append('<td class="td line_' + i + ' current_cell cell cell_'+ n_case +'">_</td>')
                                     } else if(i < 1 && j  === (difficultee -1)){
-                                        box.append('<div class="line_' + i + ' cell cell_'+ n_case +' last_cell" >.</div>')
+                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +' last_cell" >.</td>')
                                     } else if(i < 1 && j <= difficultee){
-                                        box.append('<div class="line_' + i + ' cell cell_'+ n_case +'">.</div>')
+                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +'">.</td>')
                                     } else {
-                                        box.append('<div class="line_' + i + ' cell cell_'+ n_case +'"></div>')
+                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +'"></td>')
                                     }
                                 }
                                 n_case++;
