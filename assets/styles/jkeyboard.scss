@@ -42,11 +42,55 @@
     width: 120px;
 }
 
-/*.jkeyboard .jline .backspace {*/
-/*    width: 120px;*/
-/*}*/
-
 .jkeyboard .jline .backspace {
     width: 69px;
     background: url("../images/backspace.png") no-repeat center center;
+}
+
+@media screen and (max-width: 500px){
+    .jkeyboard .jline {
+        margin: 0;
+    }
+
+    .jkeyboard .jline ul li {
+        font-size: 12px;
+        margin: 1px 0 0 4px;
+        width: 26px;
+        line-height: 28px;
+        height: 28px;
+    }
+
+    .jkeyboard .jline .return {
+        width: 64px;
+    }
+    .jkeyboard .jline .backspace {
+        width: 48px;
+    }
+
+    .col-12 {
+        padding: 0;
+    }
+
+}
+
+@media screen and (min-width: 501px) and (max-width: 900px){
+    .jkeyboard .jline {
+        margin: 0;
+    }
+    .jkeyboard .jline ul li {
+        width: 43px;
+        height: 52px;
+        margin: 1px 0 1px 4px;
+    }
+    .jkeyboard .jline .return {
+        width: 88px;
+    }
+    .jkeyboard .jline .backspace {
+        width: 66px;
+    }
+
+    .col-12 {
+        padding: 0;
+    }
+
 }

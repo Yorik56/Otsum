@@ -138,7 +138,8 @@
                                                 }
                                             } else if (lettre.presence === true) {
                                                 if(!cellule.hasClass("is_in_cell")){
-                                                    cellule.html("<p>"+ cellule.text() +"</p>")
+                                                    alert(cellule.text());
+                                                    cellule.html("<div><p>"+ lettre.valeur +"</p></div>")
                                                     cellule.addClass("is_in_cell")
                                                 }
                                             }
