@@ -1,44 +1,36 @@
 <?php
-namespace App\Listener;
-use App\Controller\LoginController;
-use App\Entity\Utilisateur;
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\HttpKernel\HttpKernel;
 
-/**
- * Listener that updates the last activity of the authenticated user
- */
+namespace App\Listener;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+
 class ActivityListener
 {
-    protected LoginController $LoginController;
-    protected EntityManager $entityManager;
+    private TokenStorageInterface $tokenStorage;
+    private $entityManager;
 
-    public function __construct(LoginController $LoginController, EntityManager $entityManager)
+    public function __construct(TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager)
     {
-        $this->LoginController = $LoginController;
+        $this->tokenStorage = $tokenStorage;
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * Update the user "lastActivity" on each request
-     * @param FilterControllerEvent $event
-     */
-    public function onCoreController(FilterControllerEvent $event)
+    public function onKernelRequest(RequestEvent $event)
     {
-        // Check that the current request is a "MASTER_REQUEST"
-        // Ignore any sub-request
-        if ($event->getRequestType() !== HttpKernel::MASTER_REQUEST) {
-        return;
-        }
-
-        // Check token authentication availability
-        if ($this->LoginController->getToken()) {
-            $user = $this->LoginController->getToken()->getUser();
-
-            if ( ($user instanceof Utilisateur) && !($user->isActiveNow()) ) {
-                $user->setLastActivityAt(new \DateTime());
-                $this->entityManager->flush($user);
-            }
-        }
+        // Get the user object from the tokenStorageInterface
+        $token = $this->getTokenStorageInterface();
+        $user = $token?->getUser();
+        $user?->setLastActivityAt(new \DateTime());
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
+
+    public function getTokenStorageInterface(): ?TokenInterface
+    {
+        return $this->tokenStorage->getToken();
+    }
+
 }
