@@ -18,9 +18,6 @@ class MonProfilController extends AbstractController
         $utilisateur = $this->getUser();
         $avatar = $entityManager->getRepository(Avatar::class)->findOneBy(['utilisateur'=>$utilisateur]);
 
-//        var_dump(realpath("C:\\xampp\\htdocs\\Otsum\\public"));
-//        die();
-
         return $this->render('mon_profil/index.html.twig', [
             'utilisateur' => $utilisateur,
             'avatar' => $avatar

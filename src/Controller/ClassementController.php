@@ -8,6 +8,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ClassementController extends AbstractController
 {
+    /**
+     * Display of rankings
+     *
+     * @return Response
+     */
     #[Route('/classement', name: 'classement')]
     public function index(): Response
     {

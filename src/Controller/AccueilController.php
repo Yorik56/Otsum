@@ -22,6 +22,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AccueilController extends AbstractController {
 
+    /**
+     * Display the home page
+     */
     #[Route('/', name: 'accueil')]
     public function index(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
     {
@@ -30,6 +33,12 @@ class AccueilController extends AbstractController {
         ]);
     }
 
+    /**
+     * Get friend requests for the current user
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/mes-notifications', name: 'mes_notifications')]
     public function mes_notifications(EntityManagerInterface $entityManager, Request $request): Response
     {
@@ -42,39 +51,10 @@ class AccueilController extends AbstractController {
         return new Response($demandes);
     }
 
-    #[Route('/contact_request', name: 'contact_request')]
-    public function contact_request(HubInterface $hub): Response
-    {
-        $update = new Update(
-            '/accueil',
-            json_encode(['data' => "je veux savoir qui est co "])
-        );
-        $hub->publish($update);
-        return new Response($this->generateUrl("accueil"));
-    }
-
-    #[Route('/respond_contact_request', name: 'respond_contact_request')]
-    public function respond_contact_request(HubInterface $hub): Response
-    {
-        $update = new Update(
-            '/accueil',
-            json_encode(['data' => "je veux savoir qui est co "])
-        );
-        $hub->publish($update);
-        return new Response($this->generateUrl("accueil"));
-    }
-
-    #[Route('/push', name: 'push')]
-    public function push(HubInterface $hub): Response
-    {
-        $update = new Update(
-            '/accueil',
-            json_encode(['data' => "je veux savoir qui est co "])
-        );
-        $hub->publish($update);
-        return new Response($this->generateUrl("accueil"));
-    }
-
+    /**
+     * Display a hub
+     * @return Response
+     */
     #[Route('/hub', name: 'hub')]
     public function hub(): Response
     {
@@ -82,7 +62,12 @@ class AccueilController extends AbstractController {
             'controller_name' => 'AccueilController',
         ]);
     }
-    
+
+    /**
+     * Start a game
+     * @param $id
+     * @return Response
+     */
     #[Route('/otsum/{id}', name: 'otsum')]
     public function otsum($id): Response
     {
@@ -92,6 +77,15 @@ class AccueilController extends AbstractController {
         ]);
     }
 
+    /**
+     * - Generate a word
+     * - Create a player
+     * - Creation of the game
+     *
+     * @param ManagerRegistry $doctrine
+     * @param Request $request
+     * @return JsonResponse
+     */
     #[Route('/generemot', name: 'genere_mot')]
     function genereUnMot(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
@@ -127,6 +121,13 @@ class AccueilController extends AbstractController {
         return new JsonResponse([$mot_a_trouver[0], $partie->getId()]);
     }
 
+    /**
+     * Update a line
+     *
+     * @param ManagerRegistry $doctrine
+     * @param Request $request
+     * @return JsonResponse
+     */
     #[Route('/maj_ligne', name: 'maj_ligne')]
     function maj_ligne(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
@@ -275,6 +276,11 @@ class AccueilController extends AbstractController {
         return new JsonResponse($response);
     }
 
+    /**
+     * Generates a list of words
+     *
+     * @return void
+     */
     function genereListeValide(){
         $nomsFichiers = [
             7  => 'sept_lettres.txt',
@@ -311,6 +317,8 @@ class AccueilController extends AbstractController {
     }
 
     /**
+     * Updating the keyboard keys
+     *
      * @param CelluleRepository $celluleRepository
      * @param int $id_partie
      * @param array $arrayMajKeyboard
@@ -320,7 +328,9 @@ class AccueilController extends AbstractController {
     public function arrayMajKeyboard(ObjectRepository $celluleRepository, int $id_partie, array $arrayMajKeyboard, $majKeyboardArrayCell): array
     {
         foreach ($majKeyboardArrayCell as $cellule) {
+            // Check if the letter has already been placed
             if (!$celluleRepository->getPlacedOrFalse($id_partie, $cellule->getValeur())) {
+                // Update the status of the letter
                 $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
                 $arrayMajKeyboard[$cellule->getValeur()]['presence'] = $cellule->getFlagPresente();
                 $arrayMajKeyboard[$cellule->getValeur()]['test'] = $cellule->getFlagTestee();

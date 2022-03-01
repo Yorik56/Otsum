@@ -18,6 +18,11 @@ class ActivityListener
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * Trigger an action on KernelRequest
+     * @param RequestEvent $event
+     * @return void
+     */
     public function onKernelRequest(RequestEvent $event)
     {
         // Get the user object from the tokenStorageInterface
@@ -30,6 +35,10 @@ class ActivityListener
         }
     }
 
+    /**
+     * Get a token storage from the security session
+     * @return TokenInterface|null
+     */
     public function getTokenStorageInterface(): ?TokenInterface
     {
         return $this->tokenStorage->getToken();

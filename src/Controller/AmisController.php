@@ -16,6 +16,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AmisController extends AbstractController
 {
+    /**
+     * - Manage the display of the "/amis" page
+     * - Friend request form
+     * - Sending a friend request topic (Mercure)
+     * @param HubInterface $hub
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/amis', name: 'amis')]
     public function amis(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
     {
@@ -75,7 +84,6 @@ class AmisController extends AbstractController
                 $form->addError($error);
             }
         }
-
         return $this->render('amis/index.html.twig', [
             'controller_name' => 'AmisController',
             'contact_request_form' => $form->createView(),
@@ -83,6 +91,12 @@ class AmisController extends AbstractController
         ]);
     }
 
+    /**
+     * Save the answer to a friend request
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/reponseDemandeAmis', name: 'reponseDemandeAmis')]
     public function reponseDemandeAmis(EntityManagerInterface $entityManager, Request $request): Response
     {
@@ -95,7 +109,6 @@ class AmisController extends AbstractController
             'cible' =>$this->getUser()->getId(),
         ]);
         if($demande_de_contact && ($reponse=="accepte" || $reponse == "refuse") ){
-
             if($reponse == "accepte"){
                 $flag_etat = DemandeContact::DEMANDE_CONTACT_ACCEPTEE;
             }
@@ -106,8 +119,6 @@ class AmisController extends AbstractController
             $entityManager->persist($demande_de_contact);
             $entityManager->flush();
         }
-
-
         return new Response($utilisateur);
     }
 
