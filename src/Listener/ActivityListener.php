@@ -23,9 +23,11 @@ class ActivityListener
         // Get the user object from the tokenStorageInterface
         $token = $this->getTokenStorageInterface();
         $user = $token?->getUser();
-        $user?->setLastActivityAt(new \DateTime());
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        if($user){
+            $user->setLastActivityAt(new \DateTime());
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+        }
     }
 
     public function getTokenStorageInterface(): ?TokenInterface

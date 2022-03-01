@@ -27,3 +27,4 @@ services:
     App\Listener\ActivityListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request }
+
