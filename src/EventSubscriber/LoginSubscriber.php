@@ -2,6 +2,7 @@
 
 namespace App\EventSubscriber;
 
+use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -16,15 +17,17 @@ class LoginSubscriber implements EventSubscriberInterface
 {
     private TokenStorageInterface $tokenStorage;
     private EntityManagerInterface $entityManager;
+    private HubInterface $hub;
 
     const ACTION_LOGIN  = 1;
     const ACTION_LOGOUT = 2;
 
 
-    public function __construct(TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager)
+    public function __construct(TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager, HubInterface $hub)
     {
         $this->tokenStorage = $tokenStorage;
         $this->entityManager = $entityManager;
+        $this->hub = $hub;
     }
 
     /**
@@ -44,34 +47,31 @@ class LoginSubscriber implements EventSubscriberInterface
     /**
      * Trigger an action on LoginSuccessEvent
      * @param LoginSuccessEvent $event
-     * @param HubInterface $hub
      * @return void
      */
-    #[NoReturn] public function onLoginSuccess(LoginSuccessEvent $event, HubInterface $hub)
+    #[NoReturn] public function onLoginSuccess(LoginSuccessEvent $event)
     {
         // Publish a topic "imLogged/{id}" from the current User
-        $this->publishTopicFromCurrentUser($hub, self::ACTION_LOGIN);
+        $this->publishTopicFromCurrentUser(self::ACTION_LOGIN);
     }
 
     /**
      * Trigger an action on LogoutEvent
      * @param LogoutEvent $event
-     * @param HubInterface $hub
      * @return void
      */
-    #[NoReturn] public function onLogout(LogoutEvent $event, HubInterface $hub)
+    #[NoReturn] public function onLogout(LogoutEvent $event)
     {
         // Publish a topic "iLeave/{id}" from the current User
-        $this->publishTopicFromCurrentUser($hub, self::ACTION_LOGOUT);
+        $this->publishTopicFromCurrentUser(self::ACTION_LOGOUT);
     }
 
     /**
      *  Publish a Topic (login/logout) from the current user
-     * @param $hub
      * @param $event
      * @return void
      */
-    public function publishTopicFromCurrentUser($hub, $event): void
+    public function publishTopicFromCurrentUser($event): void
     {
         $token = $this->getTokenStorageInterface();
         $user = $token?->getUser();
@@ -79,9 +79,11 @@ class LoginSubscriber implements EventSubscriberInterface
         if ($user) {
             if($event == self::ACTION_LOGIN){
                 $topic = "imLogged/".$user->getId();
+                $user->setConnected(Utilisateur::USER_CONNECTED_TRUE);
             }
-            if($event == self::ACTION_LOGIN){
+            if($event == self::ACTION_LOGOUT){
                 $topic = "iLeave/".$user->getId();
+                $user->setConnected(Utilisateur::USER_CONNECTED_FALSE);
             }
             // Maj de la date de la dernière activité
             $user->setLastActivityAt(new \DateTime());
@@ -95,7 +97,7 @@ class LoginSubscriber implements EventSubscriberInterface
                         'loggedUser' => $user->getId()
                     ])
                 );
-                $hub->publish($update);
+                $this->hub->publish($update);
             }
         }
     }

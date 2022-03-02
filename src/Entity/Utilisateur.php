@@ -20,6 +20,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    const USER_CONNECTED_TRUE  = 1;
+    const USER_CONNECTED_FALSE = 0;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -56,6 +59,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     private Datetime $lastActivityAt;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private $connected;
 
 
 
@@ -306,6 +312,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $delay = new \DateTime('2 minutes ago');
 
         return ( $this->getLastActivityAt() > $delay );
+    }
+
+    public function getConnected(): ?bool
+    {
+        return $this->connected;
+    }
+
+    public function setConnected(?bool $connected): self
+    {
+        $this->connected = $connected;
+
+        return $this;
     }
 
 
