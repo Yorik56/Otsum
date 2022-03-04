@@ -74,6 +74,26 @@
                         </li>
                     {% endif %}
                 </ul>
+                {% if listeAmis is defined %}
+                    <ul class="listeAmis">
+                        <li>Contacts</li>
+                        {% for amis in listeAmis %}
+                            <li>
+                                <div class="item" data-id="{{ amis.getId() }}">
+                                    <input class="amisId" type="hidden" value="{{ amis.getId() }}">
+                                    {% if amis.getAvatar() %}
+                                        <img class="avatar {% if amis.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~amis.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                    {% else %}
+                                        <div class="avatar_par_defaut {% if amis.getConnected()  == true  %}connecte{% endif %}">
+                                            {{ amis.pseudo|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <span>{{ amis.pseudo }}</span>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
             </div>
         </div>
         {% block body %}{% endblock %}
@@ -81,6 +101,7 @@
             {{ encore_entry_script_tags('app') }}
             <script>
                 $(document).ready(function(){
+                    // --- GESTION DU JEU ---//
                     // Création du clavier
                     $('#keyboard').jkeyboard({
                         input: $('#search_field'),
@@ -239,17 +260,22 @@
                             }
                         }
                     }
+                    //--- EVENTS MERCURE ---//
                     //-- Notifications demandes d'amis
                     // Si l'utilisateur est connecté
                     {% if app.user %}
-                        //-- Inscription a un topic mercure.
+                        //-- Inscription aux topics mercure.
                         // Initialisation de l'Url mercure
                         const url = new URL('http://localhost:3000/.well-known/mercure')
                         // On ajoute le "topic" correspondant aux notifications de l'utilisateur courant
                         url.searchParams.append('topic','/accueil/notifications/demande_ajout/' + {{ app.user.id }})
+                        // On ajoute des "topics" correspondants aux connexions/déconnexion des contacts
+                        url.searchParams.append('topic','/imLogged/' + {{ app.user.id }})
+                        url.searchParams.append('topic','/iLeave/' + {{ app.user.id }})
                         // On écoute les évènements provenant de mercure
                         const eventSource = new EventSource(url)
                         eventSource.onmessage = (e) => {
+                            // notification demande d'ajout
                             if(JSON.parse(e.data).topic === '/accueil/notifications/demande_ajout/' + {{ app.user.id }}){
                                 let toast = $('.toast');
                                 $('.toast-body').html(JSON.parse(e.data).notification)
@@ -258,6 +284,24 @@
                                 $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display','flex')
                                 $('.sidenav .sidenav_content ul li .notification-amis').css('display','inline-block')
                             }
+                            // connexion
+                            if(JSON.parse(e.data).topic === '/imLogged/' + {{ app.user.id }}) {
+                                let idUser  = JSON.parse(e.data).idUser;
+                                let user = $(`[data-id='${idUser}']`).find('img');
+                                console.log(user);
+                                if(!user.hasClass('connecte')){
+                                    user.addClass('connecte');
+                                }
+                            }
+                            // déconnexion
+                            if(JSON.parse(e.data).topic === '/iLeave/' + {{ app.user.id }}) {
+                                let idUser  = JSON.parse(e.data).idUser;
+                                let user = $(`[data-id='${idUser}']`).find('img');
+                                console.log(user);
+                                if(user.hasClass('connecte')){
+                                    user.removeClass('connecte');
+                                }
+                            }
                         }
                         //-- Affichage des notifications de l'utilisateur courant
                         $.ajax({
@@ -265,17 +309,13 @@
                             url: '{{ path('mes_notifications') }}',
                             // Le délai maximun en millisecondes de traitement de la demande
                             timeout: 4000,
-                            // La fonction à apeller si la requête aboutie
+                            // Affichage de l'icône de notification dans la side barre
                             success: function (data) {
                                 if(data){
                                     $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display','flex')
                                     $('.sidenav .sidenav_content ul li .notification-amis').css('display','inline-block')
                                 }
                             },
-                            // La fonction à appeler si la requête n'a pas abouti
-                            error: function() {
-
-                            }
                         });
 
                         //-- Désinscription aux topics mercure

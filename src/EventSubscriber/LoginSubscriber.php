@@ -2,32 +2,40 @@
 
 namespace App\EventSubscriber;
 
+use App\Controller\LoginController;
+use App\Controller\RegistrationController;
+use App\Entity\DemandeContact;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Twig\Environment;
 
 class LoginSubscriber implements EventSubscriberInterface
 {
     private TokenStorageInterface $tokenStorage;
     private EntityManagerInterface $entityManager;
     private HubInterface $hub;
+    private Environment $twig;
 
     const ACTION_LOGIN  = 1;
     const ACTION_LOGOUT = 2;
 
 
-    public function __construct(TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager, HubInterface $hub)
+    public function __construct(Environment $twig, TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager, HubInterface $hub)
     {
         $this->tokenStorage = $tokenStorage;
         $this->entityManager = $entityManager;
         $this->hub = $hub;
+        $this->twig = $twig;
     }
 
     /**
@@ -41,7 +49,40 @@ class LoginSubscriber implements EventSubscriberInterface
         return [
             LoginSuccessEvent::class => 'onLoginSuccess',
             LogoutEvent::class => 'onLogout',
+            ControllerEvent ::class => 'onKernelController',
         ];
+    }
+
+    /**
+     * Display the contact list of current User
+     * @param ControllerEvent $event
+     * @return void
+     */
+    public function onKernelController(ControllerEvent $event)
+    {
+        // Get controller from ControllerEvent
+        $controller = $event->getController();
+        // We want to filter the registration/connexion controllers
+        if (!$controller instanceof LoginController and !$controller instanceof RegistrationController) {
+            // Get the current User
+            $token = $this->getTokenStorageInterface();
+            $user = $token?->getUser();
+             if ($user) {
+                 // Get contact requests id's then User Entities
+                 $contacts = $this->getContacts($user->getId());
+                 if($contacts){
+                     $listeAmis = [];
+                     foreach ($contacts as $contact) {
+                         $amis = $this->entityManager->getRepository(entityName: Utilisateur::class)
+                             ->findOneBy([
+                                 'id' => $contact['contact']
+                             ]);
+                         $listeAmis[] = $amis;
+                     }
+                     $this->twig->addGlobal('listeAmis', $listeAmis);
+                 }
+            }
+        }
     }
 
     /**
@@ -77,27 +118,34 @@ class LoginSubscriber implements EventSubscriberInterface
         $user = $token?->getUser();
         $topic = null;
         if ($user) {
-            if($event == self::ACTION_LOGIN){
-                $topic = "imLogged/".$user->getId();
-                $user->setConnected(Utilisateur::USER_CONNECTED_TRUE);
-            }
-            if($event == self::ACTION_LOGOUT){
-                $topic = "iLeave/".$user->getId();
-                $user->setConnected(Utilisateur::USER_CONNECTED_FALSE);
-            }
-            // Maj de la date de la dernière activité
-            $user->setLastActivityAt(new \DateTime());
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-            // Publication d'un topic
-            if($topic){
-                $update = new Update(
-                    $topic,
-                    json_encode([
-                        'loggedUser' => $user->getId()
-                    ])
-                );
-                $this->hub->publish($update);
+            $contacts = $this->getContacts($user->getId());
+            if($contacts){
+                foreach ($contacts as $contact) {
+                    if($event == self::ACTION_LOGIN){
+                        $topic = "/imLogged/".$contact['contact'];
+                        dump($topic);
+                        $user->setConnected(Utilisateur::USER_CONNECTED_TRUE);
+                    }
+                    if($event == self::ACTION_LOGOUT){
+                        $topic = "/iLeave/".$contact['contact'];
+                        $user->setConnected(Utilisateur::USER_CONNECTED_FALSE);
+                    }
+                    // Maj de la date de la dernière activité
+                    $user->setLastActivityAt(new \DateTime());
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+                    // Publication d'un topic
+                    if($topic){
+                        $update = new Update(
+                            $topic,
+                            json_encode([
+                                'topic' => $topic,
+                                'idUser' => $user->getId()
+                            ])
+                        );
+                        $this->hub->publish($update);
+                    }
+                }
             }
         }
     }
@@ -109,6 +157,16 @@ class LoginSubscriber implements EventSubscriberInterface
     public function getTokenStorageInterface(): ?TokenInterface
     {
         return $this->tokenStorage->getToken();
+    }
+
+    /**
+     * Get array of contact id's
+     * @return array
+     */
+    public function getContacts($userId): array
+    {
+        return $this->entityManager->getRepository(entityName: DemandeContact::class)
+            ->mesContacts(userId: $userId);
     }
 }
 

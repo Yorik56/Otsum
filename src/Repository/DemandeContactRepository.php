@@ -19,22 +19,29 @@ class DemandeContactRepository extends ServiceEntityRepository
         parent::__construct($registry, DemandeContact::class);
     }
 
-    // /**
-    //  * @return DemandeContact[] Returns an array of DemandeContact objects
-    //  */
-    /*
-    public function findByExampleField($value)
+
+    /**
+     * @param $userId
+     * @return int|mixed|string
+     */
+    public function mesContacts($userId)
     {
         return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('d.id', 'ASC')
-            ->setMaxResults(10)
+            ->addSelect(
+            "CASE
+                        WHEN IDENTITY(d.source) = :userId THEN IDENTITY(d.cible) 
+                        WHEN IDENTITY(d.cible)  = :userId THEN IDENTITY(d.source) 
+                        ELSE 0 
+                  END AS contact")
+            ->where('IDENTITY(d.source) = :userId OR IDENTITY(d.cible) = :userId')
+            ->andWhere("d.flag_etat = :acceptee")
+            ->setParameter('userId', $userId)
+            ->setParameter('acceptee', DemandeContact::DEMANDE_CONTACT_ACCEPTEE)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?DemandeContact

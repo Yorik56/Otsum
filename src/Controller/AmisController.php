@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class AmisController extends AbstractController
 {
@@ -28,8 +31,18 @@ class AmisController extends AbstractController
     #[Route('/amis', name: 'amis')]
     public function amis(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
     {
+        //-- Contacts
+        $contacts = $entityManager->getRepository(entityName: DemandeContact::class)
+            ->mesContacts(userId: $this->getUser()->getId());
+        $usersContact = [];
+        foreach ($contacts as $index => $contact) {
+            $usersContact[] = $entityManager->getRepository(entityName: Utilisateur::class)
+                ->findOneBy([
+                    'id' => $contact['contact']
+            ]);
+        }
         //-- Demandes d'amis reçues
-        $demandes_de_contact = $entityManager->getRepository(DemandeContact::class)
+        $demandes_de_contact = $entityManager->getRepository(entityName: DemandeContact::class)
             ->findBy([
                 'cible' => $this->getUser()->getId(),
                 'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
@@ -87,8 +100,33 @@ class AmisController extends AbstractController
         return $this->render('amis/index.html.twig', [
             'controller_name' => 'AmisController',
             'contact_request_form' => $form->createView(),
-            'demandes_contact' => $demandes_de_contact
+            'demandes_contact' => $demandes_de_contact,
+            'users_ontact' => $usersContact
         ]);
+    }
+
+    /**
+     * Retourne la liste des contacts de l'utilisateur courant
+     * @return Response
+     */
+    #[Route('/listeAmis', name: 'listeAmis')]
+    public function listeAmis(EntityManagerInterface $entityManager){
+        $listeAmis = [];
+        //-- Contacts
+        if ($this->getUser()){
+            $contacts = $entityManager->getRepository(entityName: DemandeContact::class)
+                ->mesContacts(userId: $this->getUser()->getId());
+            foreach ($contacts as $index => $contact) {
+                $amis = $entityManager->getRepository(entityName: Utilisateur::class)
+                    ->findOneBy([
+                        'id' => $contact['contact']
+                    ]);
+                $listeAmis[$index]['pseudo'] = $amis->getPseudo();
+                $listeAmis[$index]['avatar'] = $amis->getAvatar()?->getAvatar();
+            }
+        }
+
+         return new Response(json_encode($listeAmis));
     }
 
     /**
