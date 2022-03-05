@@ -106,30 +106,6 @@ class AmisController extends AbstractController
     }
 
     /**
-     * Retourne la liste des contacts de l'utilisateur courant
-     * @return Response
-     */
-    #[Route('/listeAmis', name: 'listeAmis')]
-    public function listeAmis(EntityManagerInterface $entityManager){
-        $listeAmis = [];
-        //-- Contacts
-        if ($this->getUser()){
-            $contacts = $entityManager->getRepository(entityName: DemandeContact::class)
-                ->mesContacts(userId: $this->getUser()->getId());
-            foreach ($contacts as $index => $contact) {
-                $amis = $entityManager->getRepository(entityName: Utilisateur::class)
-                    ->findOneBy([
-                        'id' => $contact['contact']
-                    ]);
-                $listeAmis[$index]['pseudo'] = $amis->getPseudo();
-                $listeAmis[$index]['avatar'] = $amis->getAvatar()?->getAvatar();
-            }
-        }
-
-         return new Response(json_encode($listeAmis));
-    }
-
-    /**
      * Save the answer to a friend request
      * @param EntityManagerInterface $entityManager
      * @param Request $request
