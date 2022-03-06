@@ -11,7 +11,9 @@ use App\Entity\Utilisateur;
 use App\Repository\CelluleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
+use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +23,14 @@ use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AccueilController extends AbstractController {
+
+
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
 
     /**
      * Display the home page
@@ -35,14 +45,13 @@ class AccueilController extends AbstractController {
 
     /**
      * Get friend requests for the current user
-     * @param EntityManagerInterface $entityManager
      * @param Request $request
      * @return Response
      */
     #[Route('/mes-notifications', name: 'mes_notifications')]
-    public function mes_notifications(EntityManagerInterface $entityManager, Request $request): Response
+    public function mes_notifications(Request $request): Response
     {
-        $demande_de_contact = $entityManager->getRepository(DemandeContact::class)
+        $demande_de_contact = $this->entityManager->getRepository(DemandeContact::class)
             ->findOneBy([
                 'cible' =>$this->getUser()->getId(),
                 'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
@@ -82,15 +91,13 @@ class AccueilController extends AbstractController {
      * - Create a player
      * - Creation of the game
      *
-     * @param ManagerRegistry $doctrine
      * @param Request $request
      * @return JsonResponse
      */
-    #[Route('/generemot', name: 'genere_mot')]
-    function genereUnMot(ManagerRegistry $doctrine, Request $request): JsonResponse
+    #[Route('/createGame', name: 'createGame')]
+    function createGame(Request $request): JsonResponse
     {
-        $entityManager = $doctrine->getManager();
-        // Paramètres utiles à la construction du mot
+        // Parameters to get a word
         $parametre_longueur_mot = $request->request->get('id');
         $nomsFichiers = [
             7  => 'sept_lettres.txt',
@@ -98,182 +105,191 @@ class AccueilController extends AbstractController {
             9  => 'neuf_lettres.txt',
             10 => 'dix_lettres.txt',
         ];
-        //--- Recherche d'un mot aléatoire
+        //--- Get a random word
         $projectDir = $this->getParameter('kernel.project_dir');
         $file = $projectDir . '/public/'.$nomsFichiers[$parametre_longueur_mot];
         $file_arr = file($file);
         $num_lines = count($file_arr);
         $last_arr_index = $num_lines - 1;
         $rand_index = rand(0, $last_arr_index);
-        $mot_a_trouver = $file_arr[$rand_index];
-        //--- Création d'un joueur
-        $joueur = $doctrine->getRepository(Utilisateur::class)->find($this->getUser()->getId());
-        //--- Création de la partie
-        $partie = new Partie($parametre_longueur_mot, trim($mot_a_trouver));
-        $partie->setDureeSessionLigne(50);
-        $partie->addIdJoueur($joueur);
-        $partie->setNombreTours(6);
-        $partie->setNombreToursJoues(1);
-        $entityManager->persist($partie);
-        $entityManager->flush();
+        $word_to_find = $file_arr[$rand_index];
+        //--- Create a player
+        $joueur = $this->entityManager->getRepository(Utilisateur::class)->find($this->getUser()->getId());
+        //--- Create a game
+        $game = new Partie($parametre_longueur_mot, trim($word_to_find));
+        $game->setDureeSessionLigne(50);
+        $game->addIdJoueur($joueur);
+        $game->setNombreTours(6);
+        $game->setNombreToursJoues(1);
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
 
-        // On envoie la première lettre
-        return new JsonResponse([$mot_a_trouver[0], $partie->getId()]);
+        // Send the first letter
+        return new JsonResponse([$word_to_find[0], $game->getId()]);
     }
 
     /**
-     * Update a line
+     * Get the state of last played line ine game,
+     * then we update it and return it with other information about the game
      *
-     * @param ManagerRegistry $doctrine
      * @param Request $request
      * @return JsonResponse
      */
-    #[Route('/maj_ligne', name: 'maj_ligne')]
-    function maj_ligne(ManagerRegistry $doctrine, Request $request): JsonResponse
+    #[Route('/updateLine', name: 'updateLine')]
+    function updateLine(Request $request): JsonResponse
     {
-        $entityManager = $doctrine->getManager();
-        //Nombre d'essais
-        $essai = $request->request->get('ligne_actuelle');
-        $essai ++;
-        //ID de la partie
-        $id_partie = $request->request->get('id_partie');
-        //Dernier essai de mot
-        $dernier_essai =  $request->request->get('mot');
-        //Partie en cours
-        $partie = $doctrine->getRepository(Partie::class)->find($id_partie);
-        $mot_a_trouver = $partie->getMotATrouver();
-        $partie->setNombreToursJoues($essai);
-        $doctrine->getManager()->persist($partie);
-        $doctrine->getManager()->flush();
-
-        // Si on est arrivé au dernier tour
-        if($partie->getNombreTours() ==  $partie->getNombreToursJoues()){
-            $response = $mot_a_trouver;
+        $id_game = $request->request->get('id_partie');
+        //Game in progress
+        $game = $this->entityManager->getRepository(Partie::class)->find($id_game);
+        $number_of_try = $request->request->get('ligne_actuelle') + 1;
+        $this->persistCurrentLineNumber($game, $number_of_try);
+        $word_to_find = $game->getMotATrouver();
+        // If you made it to the last round
+        if($game->getNombreTours() == $game->getNombreToursJoues()){
+            $response = $word_to_find;
         } else {
-            // Comparaison de la tentative et du mot à trouver
-            $tableau_mot_a_trouver = str_split($mot_a_trouver);
-            //-- Comptage dans le mot à trouver,
-            //-- du nombre d'occurrences existantes de chaque lettre
-            $compteur_occurrence_placees = [];
-            // Pour chaque lettre du mot à trouver
-            foreach ($tableau_mot_a_trouver as $value){
-                // Si cette lettre n'as pas été comptée
-                if(!isset($compteur_occurrence[$value])){
-                    $compteur_occurrence_placees[$value] = substr_count($mot_a_trouver, $value);
-                }
-            }
-            //-- Il faut également compter les occurrences de toutes les lettres testées
-            $compteur_occurrence_testees = $compteur_occurrence_placees;
-            //-- Mise à jour de la ligne actuelle
-            $ligne_actuelle = [];
-            $lettres_valides = 0;
-            $tableau_dernier_essai = str_split($dernier_essai);
-            // Pour chaque lettre du mot à trouver
-            foreach ($tableau_mot_a_trouver as $index_mot_a_trouver => $lettre){
-                $ligne_actuelle[$index_mot_a_trouver]['valeur'] = $tableau_dernier_essai[$index_mot_a_trouver];
-                $ligne_actuelle[$index_mot_a_trouver]['test']   = true;
-                $ligne_actuelle[$index_mot_a_trouver]['comparaison']   = $tableau_dernier_essai[$index_mot_a_trouver] . " -> " . $lettre;
-                // Si la lettre est dans le mot
-                if(preg_match('/'.$tableau_dernier_essai[$index_mot_a_trouver].'/', $mot_a_trouver)){
-                    $ligne_actuelle[$index_mot_a_trouver]['presence'] = true;
-                    // Si la lettre est bien placée
-                    if($tableau_dernier_essai[$index_mot_a_trouver] === $lettre) {
-                        $compteur_occurrence_placees[$tableau_dernier_essai[$index_mot_a_trouver]]--;
-                        $ligne_actuelle[$index_mot_a_trouver]['placement'] = true;
-                        $lettres_valides++;
-                    } else {
-                        $ligne_actuelle[$index_mot_a_trouver]['placement'] = false;
-                        // Si le nombre total de cette occurrence ont été jouées dans la dernière tentative
-                        // alors cette occurrence n'est pas considérée comme présente dans la ligne
-                        if($compteur_occurrence_testees[$tableau_dernier_essai[$index_mot_a_trouver]] < 1){
-                            $ligne_actuelle[$index_mot_a_trouver]['presence']  = false;
-                        }
-                        $compteur_occurrence_testees[$tableau_dernier_essai[$index_mot_a_trouver]]--;
-                    }
-                } else {
-                    $ligne_actuelle[$index_mot_a_trouver]['presence']  = false;
-                    $ligne_actuelle[$index_mot_a_trouver]['placement'] = false;
-                }
-            }
-            // On retire le flag présence des lettres mal placées dont le compteur de placement est à zero
-            foreach($ligne_actuelle as $index => $lettre){
-                if(
-                    ($lettre['placement'] == false && $lettre['presence'] == true) &&
-                    $compteur_occurrence_placees[$lettre['valeur']] < 1
-                )
-                {
-                    $ligne_actuelle[$index]['presence']  = false;
-                }
-            }
-            // Enregistrement de la nouvelle ligne
-            $ligne = new Ligne($this->getUser(), $partie);
-            $entityManager->persist($ligne);
-            //-- Mise à jour des lettres
-            foreach ($ligne_actuelle as $index => $lettre){
-                $cellule = new Cellule();
-                $cellule->setLigne($ligne);
-                $cellule->setValeur($lettre['valeur']);
-                $cellule->setPosition($index);
-                if($lettre['placement']){
-                    $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_TRUE);
-                } else {
-                    $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_FALSE);
-                }
-                if($lettre['presence']){
-                    $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_TRUE);
-                } else {
-                    $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_FALSE);
-                }
-                if($lettre['test']){
-                    $cellule->setFlagTestee(Cellule::FLAG_TEST_TRUE);
-                } else {
-                    $cellule->setFlagTestee(Cellule::FLAG_TEST_FALSE);
-                }
-                $entityManager->persist($cellule);
-            }
-            $entityManager->flush();
-            //-- Maj des touches du clavier
-            $celluleRepository = $doctrine->getRepository(Cellule::class);
-            // Maj des lettres placées
-            $majKeyboardPlaced = $celluleRepository->getPlaced($id_partie);
-            $arrayMajKeyboard = [];
-            foreach ($majKeyboardPlaced as $cellule){
-                $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
-                $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
-                $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
-            }
-            // Maj des lettres absentes
-            $majKeyboardNotPresent = $celluleRepository->getNotPresent($id_partie);
-            $arrayMajKeyboard = $this->arrayMajKeyboard(
-                $celluleRepository,
-                $id_partie,
-                $arrayMajKeyboard,
-                $majKeyboardNotPresent
+            // Comparison of the attempt and the word to find
+            $word_search_array = str_split($word_to_find);
+            // Counting in the word to be found,
+            // the number of existing occurrences of each letter
+            $counts_occurrences_placed = $this->countOccurrencesPlaced($word_search_array, $word_to_find);
+            //-- Update of the current line
+            // Last word tried
+            $last_try = $request->request->get('mot');
+            $table_of_the_last_try = str_split($last_try);
+            $actual_line = $this->updateNewLineState(
+                $word_search_array, $counts_occurrences_placed,
+                $table_of_the_last_try, $word_to_find
             );
-            // Maj des lettres présentes et non placées
-            $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($id_partie);
-            $arrayMajKeyboard = $this->arrayMajKeyboard(
-                $celluleRepository,
-                $id_partie,
-                $arrayMajKeyboard,
-                $majKeyboardPresentAndNotPlaced
-            );
-            // Si le mot est trouvé
-            if($lettres_valides == count($tableau_mot_a_trouver)){
-                $victoire = true;
-            } else {
-                $victoire = false;
-            }
+            $valid_letters = $actual_line['valid_letters'];
+            // Save the new line in database
+            $this->persistNewLineInDatabase($actual_line['actual_line'], $game);
+            // Update keyboard keys
+            $arrayMajKeyboard = $this->updateKeyboardKeys($id_game);
+
+
+            // Set victory variable
+            ($valid_letters == count($word_search_array))?$victory = true:$victory = false;
             $response = [
-                "mot_a_trouver"    => $tableau_mot_a_trouver,
-                "dernier_essai"    => $tableau_dernier_essai,
-                "ligne_precedente" => $ligne_actuelle,
+                "mot_a_trouver"    => $word_search_array,
+                "dernier_essai"    => $table_of_the_last_try,
+                "ligne_precedente" => $actual_line['actual_line'],
                 "arrayMajKeyboard" => $arrayMajKeyboard,
-                "essais"           => $essai,
-                "victoire"         => $victoire
+                "essais"           => $number_of_try,
+                "victoire"         => $victory
             ];
         }
         return new JsonResponse($response);
+    }
+
+    /**
+     * Update states of the last played line
+     *
+     * @param $word_search_array
+     * @param $counts_occurrences_placed
+     * @param $table_of_the_last_try
+     * @param $word_to_find
+     * @return array
+     */
+    public function updateNewLineState(
+        $word_search_array, $counts_occurrences_placed, $table_of_the_last_try, $word_to_find
+    ): array
+    {
+        $valid_letters = 0;
+        $actual_line = [];
+        //-- It is also necessary to count the occurrences of all the letters tested
+        $test_occurrence_counter = $counts_occurrences_placed;
+        // For each letter of the word to find
+        foreach ($word_search_array as $index_word_to_find => $letter){
+            $actual_line[$index_word_to_find]['valeur'] = $table_of_the_last_try[$index_word_to_find];
+            $actual_line[$index_word_to_find]['test']   = true;
+            $actual_line[$index_word_to_find]['comparaison']   = $table_of_the_last_try[$index_word_to_find] . " -> " . $letter;
+            // If the letter is in the word
+            if(preg_match('/'.$table_of_the_last_try[$index_word_to_find].'/', $word_to_find)){
+                $actual_line[$index_word_to_find]['presence'] = true;
+                // If the letter is well-placed
+                if($table_of_the_last_try[$index_word_to_find] === $letter) {
+                    $counts_occurrences_placed[$table_of_the_last_try[$index_word_to_find]]--;
+                    $actual_line[$index_word_to_find]['placement'] = true;
+                    $valid_letters++;
+                } else {
+                    $actual_line[$index_word_to_find]['placement'] = false;
+                    // If the total number of this occurrence have been played in the last attempt
+                    // then this occurrence is not considered to be present in the line
+                    if($test_occurrence_counter[$table_of_the_last_try[$index_word_to_find]] < 1){
+                        $actual_line[$index_word_to_find]['presence']  = false;
+                    }
+                    $test_occurrence_counter[$table_of_the_last_try[$index_word_to_find]]--;
+                }
+            } else {
+                $actual_line[$index_word_to_find]['presence']  = false;
+                $actual_line[$index_word_to_find]['placement'] = false;
+            }
+        }
+        // We remove the presence flag from the misplaced letters whose placement counter is at zero
+        foreach($actual_line as $index => $letter){
+            if(
+                ($letter['placement'] == false && $letter['presence'] == true) &&
+                $counts_occurrences_placed[$letter['valeur']] < 1
+            )
+            {
+                $actual_line[$index]['presence']  = false;
+            }
+        }
+        return [
+            'actual_line' => $actual_line,
+            'valid_letters' => $valid_letters
+        ];
+    }
+
+    /**
+     * Persist the new number of lines played in this game
+     *
+     * @param $game
+     * @param $current_number_line
+     * @return void
+     */
+    public function persistCurrentLineNumber($game, $current_number_line){
+        $game->setNombreToursJoues($current_number_line);
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * Persist the last generated line in database
+     *
+     * @param $actual_line
+     * @param $game
+     * @return void
+     */
+    public function persistNewLineInDatabase($actual_line, $game){
+        // Registration of the new line
+        $ligne = new Ligne($this->getUser(), $game);
+        $this->entityManager->persist($ligne);
+        // Update of letters
+        foreach ($actual_line as $index => $letter){
+            $cellule = new Cellule();
+            $cellule->setLigne($ligne);
+            $cellule->setValeur($letter['valeur']);
+            $cellule->setPosition($index);
+            if($letter['placement']){
+                $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_TRUE);
+            } else {
+                $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_FALSE);
+            }
+            if($letter['presence']){
+                $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_TRUE);
+            } else {
+                $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_FALSE);
+            }
+            if($letter['test']){
+                $cellule->setFlagTestee(Cellule::FLAG_TEST_TRUE);
+            } else {
+                $cellule->setFlagTestee(Cellule::FLAG_TEST_FALSE);
+            }
+            $this->entityManager->persist($cellule);
+        }
+        $this->entityManager->flush();
     }
 
     /**
@@ -317,25 +333,81 @@ class AccueilController extends AbstractController {
     }
 
     /**
+     * Count occurrences for each letters
+     *
+     * @param $word_search_array
+     * @param $word_to_find
+     * @return array
+     */
+    public function countOccurrencesPlaced($word_search_array, $word_to_find): array
+    {
+        $counts_occurrences_placed = [];
+        foreach ($word_search_array as $value){
+            // If this letter has not been counted
+            if(!isset($compteur_occurrence[$value])){
+                $counts_occurrences_placed[$value] = substr_count($word_to_find, $value);
+            }
+        }
+        return $counts_occurrences_placed;
+    }
+
+    /**
+     * Update the keyboard displayed in game
+     *
+     * @param $id_game
+     * @return array
+     */
+    public function updateKeyboardKeys($id_game): array
+    {
+        //-- Update of the keyboard keys
+        $celluleRepository = $this->entityManager->getRepository(Cellule::class);
+        // Update letters placed
+        $majKeyboardPlaced = $celluleRepository->getPlaced($id_game);
+        $arrayMajKeyboard = [];
+        foreach ($majKeyboardPlaced as $cellule){
+            $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
+            $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
+            $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
+        }
+        // Update of missing letters
+        $majKeyboardNotPresent = $celluleRepository->getNotPresent($id_game);
+        $arrayMajKeyboard = $this->arrayMajKeyboard(
+            $celluleRepository,
+            $id_game,
+            $arrayMajKeyboard,
+            $majKeyboardNotPresent
+        );
+        // Update letters present and not placed
+        $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($id_game);
+        return $this->arrayMajKeyboard(
+            $celluleRepository,
+            $id_game,
+            $arrayMajKeyboard,
+            $majKeyboardPresentAndNotPlaced
+        );
+    }
+
+    /**
      * Updating the keyboard keys
      *
      * @param CelluleRepository $celluleRepository
-     * @param int $id_partie
+     * @param int $id_game
      * @param array $arrayMajKeyboard
      * @param Cellule[] $majKeyboardArrayCell
      * @return array
      */
-    public function arrayMajKeyboard(ObjectRepository $celluleRepository, int $id_partie, array $arrayMajKeyboard, $majKeyboardArrayCell): array
+    public function arrayMajKeyboard(ObjectRepository $celluleRepository, int $id_game, array $arrayMajKeyboard, array $majKeyboardArrayCell): array
     {
         foreach ($majKeyboardArrayCell as $cellule) {
             // Check if the letter has already been placed
-            if (!$celluleRepository->getPlacedOrFalse($id_partie, $cellule->getValeur())) {
+            if (!$celluleRepository->getPlacedOrFalse($id_game, $cellule->getValeur())) {
                 // Update the status of the letter
                 $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
                 $arrayMajKeyboard[$cellule->getValeur()]['presence'] = $cellule->getFlagPresente();
                 $arrayMajKeyboard[$cellule->getValeur()]['test'] = $cellule->getFlagTestee();
             }
         }
+
         return $arrayMajKeyboard;
     }
 }

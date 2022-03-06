@@ -121,10 +121,13 @@
                     $('.return').click(function() {
                         let mot_valide = true;
                         let mot = "";
-                        $(".line_" + ligne_actuelle).each(function(){
+                        $(".line_" + ligne_actuelle).each(function(index, element){
                             mot += $(this).text();
                             if($(this).text() === "." || $(this).text() === "_"){
                                 mot_valide = false;
+                                return false;
+                            }
+                            if(index === difficultee -1 ){
                                 return false;
                             }
                         });
@@ -134,7 +137,7 @@
                             $('.last_cell').toggleClass('last_cell');
                             $.ajax({
                                 method: "POST",
-                                url: "{{ path('maj_ligne') }}",
+                                url: "{{ path('updateLine') }}",
                                 data: {
                                     ligne_actuelle: ligne_actuelle,
                                     mot: mot,
@@ -159,7 +162,6 @@
                                                 }
                                             } else if (lettre.presence === true) {
                                                 if(!cellule.hasClass("is_in_cell")){
-                                                    alert(cellule.text());
                                                     cellule.html("<div><p>"+ lettre.valeur +"</p></div>")
                                                     cellule.addClass("is_in_cell")
                                                 }
@@ -218,11 +220,11 @@
                             });
                         }
                     });
-                    // Creation de la partie
+                    // Création de la partie
                     function init_partie(longueur){
                         $.ajax({
                             method: "POST",
-                            url: "{{ path('genere_mot') }}",
+                            url: "{{ path('createGame') }}",
                             data: {id: longueur},
                             success: function(reponse){
                                 id_partie = reponse[1];
@@ -235,9 +237,6 @@
                     function creationDeLaGrille(mot, difficultee) {
                         let box = $('.table');
                         let box_line;
-                        // box.css({
-                        //     "grid-template-columns":" repeat(" + difficultee + ",1fr)"
-                        // })
                         $('.mot_a_trouver').append(mot);
                         for(let i = 0; i < essais; i++) {
                             box.append('<tr></tr>')
@@ -272,7 +271,7 @@
                         // On ajoute des "topics" correspondants aux connexions/déconnexion des contacts
                         url.searchParams.append('topic','/imLogged/' + {{ app.user.id }})
                         url.searchParams.append('topic','/iLeave/' + {{ app.user.id }})
-                        // On écoute les évènements provenant de mercure
+                        //-- On écoute les évènements provenant de mercure
                         const eventSource = new EventSource(url)
                         eventSource.onmessage = (e) => {
                             // notification demande d'ajout
