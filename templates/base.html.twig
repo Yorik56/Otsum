@@ -171,7 +171,9 @@
                                     })
                                     //-- Préparation de la nouvelle ligne
                                     if(data.victoire === true){
-                                        alert('bravo!')
+                                        alert('gagné !!');
+                                        $('.return').remove();
+
                                     } else {
                                         $('.line_' + current_line_number).each(function (index) {
                                             let numero = (index + 1)  +  (difficultee * current_line_number);
@@ -179,20 +181,21 @@
                                                 // Affichage de la première lettre
                                                 $('.line_' + current_line_number +".cell_" + numero)
                                                     .addClass('valide_cell first_cell')
-                                                    .text(data.ligne_precedente[0].valeur);
+                                                    .html("<div>" + data.ligne_precedente[0].valeur + "</div>");
                                             } else if (index === 1){
                                                 // Placement du curseur
                                                 $('.line_' + current_line_number +".cell_" + numero)
                                                     .addClass('current_cell')
-                                                    .text("_");
+                                                    .html("<div>_</div>");
                                             } else  {
-                                                $('.line_' + current_line_number +".cell_" + numero).text(".");
+                                                $('.line_' + current_line_number +".cell_" + numero).html("<div>.</div>");
                                             }
                                         })
+                                        //-- Repérage de la dernière lettre
+                                        $('.line_' + current_line_number+".cell_" + ((difficultee * current_line_number)+difficultee))
+                                            .addClass('last_cell')
                                     }
-                                    //-- Repérage de la dernière lettre
-                                    $('.line_' + current_line_number+".cell_" + ((difficultee * current_line_number)+difficultee))
-                                    .addClass('last_cell')
+
                                     //-- Mise à jour du clavier
                                     // parcours des lettres du clavier
                                     $('.jkey.letter').each(function (index,element) {
@@ -248,16 +251,16 @@
                             box_line = $('div tr:last-child');
                             for(let j = 0; j < difficultee; j++) {
                                 if(i < 1 && j < 1){
-                                      box_line.append('<td class="td line_' + i + ' first_cell valide_cell cell cell_'+ n_case +'">' + mot.split('')[j] + '</td>')
+                                      box_line.append('<td class="td line_' + i + ' first_cell valide_cell cell cell_'+ n_case +'"><div>' + mot.split('')[j] + '</div></td>')
                                 } else {
                                     if(i < 1 && j === 1){
-                                         box_line.append('<td class="td line_' + i + ' current_cell cell cell_'+ n_case +'">_</td>')
+                                         box_line.append('<td class="td line_' + i + ' current_cell cell cell_'+ n_case +'"><div>_</div></td>')
                                     } else if(i < 1 && j  === (difficultee -1)){
-                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +' last_cell" >.</td>')
+                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +' last_cell" ><div>.</div></td>')
                                     } else if(i < 1 && j <= difficultee){
-                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +'">.</td>')
+                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +'"><div>.</div></td>')
                                     } else {
-                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +'"></td>')
+                                          box_line.append('<td class="td line_' + i + ' cell cell_'+ n_case +'"><div></div></td>')
                                     }
                                 }
                                 n_case++;

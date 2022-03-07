@@ -203,9 +203,9 @@
       input.val(key);
       if(key !== "\n"){
         let current_cell = $('.current_cell');
-        current_cell.text(key)
+        current_cell.html("<div>" + key + "</div>")
         if(!current_cell.hasClass('last_cell')){
-          current_cell.next().addClass('current_cell').text("_");
+          current_cell.next().addClass('current_cell').html("<div>_</div>");
         }
         current_cell.toggleClass('current_cell');
       }
@@ -230,26 +230,14 @@
         let last_cell = $('.last_cell');
         if(current_cell.length > 0){
           if(!current_cell.prev().hasClass('first_cell')){
-            current_cell.prev().addClass('current_cell').text("_");
-            current_cell.removeClass('current_cell').text(".");
+            current_cell.prev().addClass('current_cell').html("<div>_</div>");
+            current_cell.removeClass('current_cell').html("<div>.</div>");
           }
         } else {
-          last_cell.prev().addClass('current_cell').text("_");
-          last_cell.text(".");
+          last_cell.prev().addClass('current_cell').html("<div>_</div>");
+          last_cell.html("<div>.</div>");
         }
-
-
-      // if (start > 0) {
-      //   input.val(val.substring(0, start - 1) + val.substring(start));
-      //   input.trigger('focus');
-      //   input_node.setSelectionRange(start - 1, start - 1);
-      // }
-      // else {
-      //   input.trigger('focus');
-      //   input_node.setSelectionRange(0, 0);
-      // }
     },
-
     insertToString: function (start, end, string, insert_string) {
       return string.substring(0, start) + insert_string + string.substring(end, string.length);
     }

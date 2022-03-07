@@ -45,19 +45,40 @@ h1 {
 }
 
 .cell {
-    /*display: flex;
-    justify-content: center;
-    align-items: center;*/
     font-family: 'Poppins', sans-serif;
     color: #DDDDDD;
     text-transform: uppercase;
-    background-color: #185a82;
     height: 65px;
     width: 65px;
-    border: 1px solid #dee2e6;
     text-align: center;
     vertical-align: middle;
     font-size: 30px;
+    perspective: 100px;
+}
+
+.cell div {
+    background-color: #185a82;
+    border: 1px solid #fff;
+    color: #fff;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cell:not(.current_cell) div {
+    transform: rotateY(-90deg);
+    animation: rotateAnimation .3s linear forwards;
+}
+
+@keyframes rotateAnimation {
+    from {
+        transform: rotateY(-90deg);
+    }
+    to {
+        transform: rotateY(0deg);
+        animation: unset;
+    }
 }
 
 .table td {
@@ -97,8 +118,12 @@ h1 {
     display: none;
 }
 
-.valide_cell {
+.valide_cell div{
     background-color: rgb(179, 15, 15);
+}
+
+.table td {
+    border: none;
 }
 
 @media screen and (max-width: 500px){
