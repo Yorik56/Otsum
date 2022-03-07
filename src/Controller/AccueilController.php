@@ -8,6 +8,8 @@ use App\Entity\Ligne;
 use App\Entity\Partie;
 
 use App\Entity\Utilisateur;
+use App\Form\ContactRequestType;
+use App\Form\DropOutFormType;
 use App\Repository\CelluleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -74,16 +76,34 @@ class AccueilController extends AbstractController {
 
     /**
      * Start a game
+     * @param Request $request
      * @param $id
      * @return Response
      */
     #[Route('/otsum/{id}', name: 'otsum')]
     public function otsum($id): Response
     {
+        //--- Formulaire Abandon
+        $dropOutForm = $this->createForm(DropOutFormType::class);
         return $this->render('otsum/index.html.twig', [
             'controller_name' => 'AccueilController',
             'id' => $id,
+            'dropOutForm' => $dropOutForm->createView(),
         ]);
+    }
+
+    #[Route('dropOut', name: 'dropOut')]
+    public function dropOut(Request $request){
+        $dropOutForm = $this->createForm(DropOutFormType::class);
+        $dropOutForm->handleRequest($request);
+        if ($dropOutForm->isSubmitted() && $dropOutForm->isValid()) {
+            $game = $this->entityManager
+                ->getRepository(Partie::class)
+                ->find($dropOutForm->getData()['gameId']);
+            $this->entityManager->remove($game);
+            $this->entityManager->flush();
+            return $this->redirectToRoute('accueil');
+        }
     }
 
     /**
@@ -141,43 +161,39 @@ class AccueilController extends AbstractController {
         $id_game = $request->request->get('id_partie');
         //Game in progress
         $game = $this->entityManager->getRepository(Partie::class)->find($id_game);
-        $number_of_try = $request->request->get('ligne_actuelle') + 1;
+        $number_of_try = $request->request->get('current_line_number') + 1;
         $this->persistCurrentLineNumber($game, $number_of_try);
         $word_to_find = $game->getMotATrouver();
-        // If you made it to the last round
-        if($game->getNombreTours() == $game->getNombreToursJoues()){
-            $response = $word_to_find;
-        } else {
-            // Comparison of the attempt and the word to find
-            $word_search_array = str_split($word_to_find);
-            // Counting in the word to be found,
-            // the number of existing occurrences of each letter
-            $counts_occurrences_placed = $this->countOccurrencesPlaced($word_search_array, $word_to_find);
-            //-- Update of the current line
-            // Last word tried
-            $last_try = $request->request->get('mot');
-            $table_of_the_last_try = str_split($last_try);
-            $actual_line = $this->updateNewLineState(
-                $word_search_array, $counts_occurrences_placed,
-                $table_of_the_last_try, $word_to_find
-            );
-            $valid_letters = $actual_line['valid_letters'];
-            // Save the new line in database
-            $this->persistNewLineInDatabase($actual_line['actual_line'], $game);
-            // Update keyboard keys
-            $arrayMajKeyboard = $this->updateKeyboardKeys($id_game);
-
-
-            // Set victory variable
-            ($valid_letters == count($word_search_array))?$victory = true:$victory = false;
-            $response = [
-                "mot_a_trouver"    => $word_search_array,
-                "dernier_essai"    => $table_of_the_last_try,
-                "ligne_precedente" => $actual_line['actual_line'],
-                "arrayMajKeyboard" => $arrayMajKeyboard,
-                "essais"           => $number_of_try,
-                "victoire"         => $victory
-            ];
+        // Counting in the word to be found,
+        // the number of existing occurrences of each letter
+        $word_search_array = str_split($word_to_find);
+        $counts_occurrences_placed = $this->countOccurrencesPlaced($word_search_array, $word_to_find);
+        //-- Update of the current line
+        // Last word tried
+        $last_try = $request->request->get('mot');
+        $table_of_the_last_try = str_split($last_try);
+        $actual_line = $this->updateNewLineState(
+            $word_search_array, $counts_occurrences_placed,
+            $table_of_the_last_try, $word_to_find
+        );
+        $valid_letters = $actual_line['valid_letters'];
+        // Save the new line in database
+        $this->persistNewLineInDatabase($actual_line['actual_line'], $game);
+        // Update keyboard keys
+        $arrayMajKeyboard = $this->updateKeyboardKeys($id_game);
+        // Set victory variable
+        ($valid_letters == count($word_search_array))?$victory = true:$victory = false;
+        $response = [
+            "mot_a_trouver"    => $word_search_array,
+            "dernier_essai"    => $table_of_the_last_try,
+            "ligne_precedente" => $actual_line['actual_line'],
+            "arrayMajKeyboard" => $arrayMajKeyboard,
+            "essais"           => $number_of_try,
+            "victoire"         => $victory
+        ];
+        // If you made it to the last round and the word was not found
+        if($game->getNombreTours() == $game->getNombreToursJoues() && $victory == false){
+            $response['mot_a_trouver'] = $word_to_find;
         }
         return new JsonResponse($response);
     }
@@ -191,6 +207,7 @@ class AccueilController extends AbstractController {
      * @param $word_to_find
      * @return array
      */
+    #[ArrayShape(['actual_line' => "array", 'valid_letters' => "int"])]
     public function updateNewLineState(
         $word_search_array, $counts_occurrences_placed, $table_of_the_last_try, $word_to_find
     ): array

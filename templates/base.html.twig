@@ -110,7 +110,7 @@
                     // Variables de la grille de jeu
                     let id_partie;
                     let difficultee;
-                    let ligne_actuelle = 0;
+                    let current_line_number = 0;
                     let essais = 6;
                     let n_case = 1;
                     {% if id is defined %}
@@ -121,7 +121,7 @@
                     $('.return').click(function() {
                         let mot_valide = true;
                         let mot = "";
-                        $(".line_" + ligne_actuelle).each(function(index, element){
+                        $(".line_" + current_line_number).each(function(index, element){
                             mot += $(this).text();
                             if($(this).text() === "." || $(this).text() === "_"){
                                 mot_valide = false;
@@ -139,21 +139,21 @@
                                 method: "POST",
                                 url: "{{ path('updateLine') }}",
                                 data: {
-                                    ligne_actuelle: ligne_actuelle,
+                                    current_line_number: current_line_number,
                                     mot: mot,
                                     id_partie: id_partie
                                 },
                                 success: function(data){
                                     console.log(data)
-                                    ligne_actuelle = data.essais;
+                                    current_line_number = data.essais;
                                     let numero_cellule = 1;
                                     // MAJ de la ligne précédente
                                     data.ligne_precedente.forEach(function (lettre, index) {
                                         let cellule;
-                                        if(ligne_actuelle -1 === 0){
-                                            cellule = $('.line_' + (ligne_actuelle - 1) +".cell_" + (index+1));
+                                        if(current_line_number -1 === 0){
+                                            cellule = $('.line_' + (current_line_number - 1) +".cell_" + (index+1));
                                         }else{
-                                            cellule = $('.line_' + (ligne_actuelle - 1) +".cell_" + (((ligne_actuelle - 1) * difficultee) + numero_cellule));
+                                            cellule = $('.line_' + (current_line_number - 1) +".cell_" + (((current_line_number - 1) * difficultee) + numero_cellule));
                                         }
                                         setTimeout(function(){
                                             if(lettre.placement === true && lettre.presence === true){
@@ -170,24 +170,28 @@
                                         numero_cellule++;
                                     })
                                     //-- Préparation de la nouvelle ligne
-                                    $('.line_' + ligne_actuelle).each(function (index) {
-                                        let numero = (index + 1)  +  (difficultee * ligne_actuelle);
-                                        if(index === 0){
-                                            // Affichage de la première lettre
-                                            $('.line_' + ligne_actuelle +".cell_" + numero)
-                                            .addClass('valide_cell first_cell')
-                                            .text(data.ligne_precedente[0].valeur);
-                                        } else if (index === 1){
-                                            // Placement du curseur
-                                            $('.line_' + ligne_actuelle +".cell_" + numero)
-                                            .addClass('current_cell')
-                                            .text("_");
-                                        } else  {
-                                            $('.line_' + ligne_actuelle +".cell_" + numero).text(".");
-                                        }
-                                    })
+                                    if(data.victoire === true){
+                                        alert('bravo!')
+                                    } else {
+                                        $('.line_' + current_line_number).each(function (index) {
+                                            let numero = (index + 1)  +  (difficultee * current_line_number);
+                                            if(index === 0){
+                                                // Affichage de la première lettre
+                                                $('.line_' + current_line_number +".cell_" + numero)
+                                                    .addClass('valide_cell first_cell')
+                                                    .text(data.ligne_precedente[0].valeur);
+                                            } else if (index === 1){
+                                                // Placement du curseur
+                                                $('.line_' + current_line_number +".cell_" + numero)
+                                                    .addClass('current_cell')
+                                                    .text("_");
+                                            } else  {
+                                                $('.line_' + current_line_number +".cell_" + numero).text(".");
+                                            }
+                                        })
+                                    }
                                     //-- Repérage de la dernière lettre
-                                    $('.line_' + ligne_actuelle+".cell_" + ((difficultee * ligne_actuelle)+difficultee))
+                                    $('.line_' + current_line_number+".cell_" + ((difficultee * current_line_number)+difficultee))
                                     .addClass('last_cell')
                                     //-- Mise à jour du clavier
                                     // parcours des lettres du clavier
@@ -230,6 +234,7 @@
                                 id_partie = reponse[1];
                                 difficultee = longueur;
                                 creationDeLaGrille(reponse[0], difficultee);
+                                $('#drop_out_form_gameId').val(id_partie);
                             }
                         });
                     }

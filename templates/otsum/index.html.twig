@@ -20,6 +20,16 @@
                 <div id="keyboard"></div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12">
+                {{ form_start(dropOutForm, {'action': path('dropOut')}) }}
+                {{ form_widget(dropOutForm.gameId) }}
+                <div class="form-group">
+                    {{ form_widget(dropOutForm.abandonner, {'attr': {'class': 'btn'}}) }}
+                </div>
+                {{ form_end(dropOutForm) }}
+            </div>
+        </div>
     </div>
 {#</div>#}
 {% endblock %}
