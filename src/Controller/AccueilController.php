@@ -2,26 +2,22 @@
 
 namespace App\Controller;
 
-use App\Entity\Cellule;
-use App\Entity\DemandeContact;
-use App\Entity\Ligne;
-use App\Entity\Partie;
-
-use App\Entity\Utilisateur;
-use App\Form\ContactRequestType;
+use App\Entity\{
+    Cellule,
+    DemandeContact,
+    Ligne,
+    Partie,
+    Utilisateur
+};
 use App\Form\DropOutFormType;
 use App\Repository\CelluleRepository;
+use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AccueilController extends AbstractController {
@@ -66,17 +62,16 @@ class AccueilController extends AbstractController {
      * Display a hub
      * @return Response
      */
-    #[Route('/hub', name: 'hub')]
+    #[Route('/choixDifficulte', name: 'choixDifficulte')]
     public function hub(): Response
     {
-        return $this->render('hub/index.html.twig', [
+        return $this->render('hub/choix_difficulte.html.twig', [
             'controller_name' => 'AccueilController',
         ]);
     }
 
     /**
      * Start a game
-     * @param Request $request
      * @param $id
      * @return Response
      */
@@ -111,32 +106,22 @@ class AccueilController extends AbstractController {
      * - Create a player
      * - Creation of the game
      *
+     * @param Utils $utils
      * @param Request $request
      * @return JsonResponse
      */
     #[Route('/createGame', name: 'createGame')]
-    function createGame(Request $request): JsonResponse
+    function createGame(Utils $utils, Request $request): JsonResponse
     {
         // Parameters to get a word
         $parametre_longueur_mot = $request->request->get('id');
-        $nomsFichiers = [
-            7  => 'sept_lettres.txt',
-            8  => 'huit_lettres.txt',
-            9  => 'neuf_lettres.txt',
-            10 => 'dix_lettres.txt',
-        ];
-        //--- Get a random word
-        $projectDir = $this->getParameter('kernel.project_dir');
-        $file = $projectDir . '/public/'.$nomsFichiers[$parametre_longueur_mot];
-        $file_arr = file($file);
-        $num_lines = count($file_arr);
-        $last_arr_index = $num_lines - 1;
-        $rand_index = rand(0, $last_arr_index);
-        $word_to_find = $file_arr[$rand_index];
+        $word_to_find = $utils->getRandomWord($parametre_longueur_mot);
         //--- Create a player
         $joueur = $this->entityManager->getRepository(Utilisateur::class)->find($this->getUser()->getId());
         //--- Create a game
-        $game = new Partie($parametre_longueur_mot, trim($word_to_find));
+        $game = new Partie();
+        $game->setLongueurLignes($parametre_longueur_mot);
+        $game->setMotATrouver(trim($word_to_find));
         $game->setDureeSessionLigne(50);
         $game->addIdJoueur($joueur);
         $game->setNombreTours(6);
