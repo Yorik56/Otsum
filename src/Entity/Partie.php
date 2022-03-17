@@ -6,6 +6,9 @@ use App\Repository\PartieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
+use JetBrains\PhpStorm\Pure;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: PartieRepository::class)]
 class Partie
@@ -25,41 +28,53 @@ class Partie
     private $id_joueurs;
 
     #[ORM\OneToOne(targetEntity: Utilisateur::class, cascade: ['persist', 'remove'])]
-    private $id_joueur_actuel;
+    private ?Utilisateur $id_joueur_actuel;
 
     #[ORM\OneToOne(targetEntity: Utilisateur::class, cascade: ['persist', 'remove'])]
-    private $id_joueur_gagnant;
+    private ?Utilisateur $id_joueur_gagnant;
 
     #[ORM\Column(type: 'integer')]
-    private $nombre_tours;
+    private ?int $nombre_tours;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nombre_tours_joues;
+    private ?int $nombre_tours_joues;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $mot_a_trouver;
+    private ?string $mot_a_trouver;
 
     #[ORM\OneToMany(mappedBy: 'partie', targetEntity: Ligne::class, orphanRemoval: true)]
     private $id_lignes;
 
     #[ORM\Column(type: 'integer')]
-    private $duree_session_ligne;
+    private ?int $duree_session_ligne;
 
     #[ORM\Column(type: 'integer')]
-    private $longueur_lignes;
+    private ?int $longueur_lignes;
 
+    #[ORM\OneToMany(mappedBy: 'partie', targetEntity: Team::class, orphanRemoval: true)]
+    private $teams;
 
-    public function __construct($longueur_lignes, $mot_a_trouver)
+    #[Pure] public function __construct()
     {
-        $this->mot_a_trouver = $mot_a_trouver;
-        $this->longueur_lignes = $longueur_lignes;
         $this->id_joueurs = new ArrayCollection();
         $this->id_lignes = new ArrayCollection();
+        $this->teams = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    /**
+     * @return mixed
+     */
+    public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param mixed $id
+     */
+    public function setId($id): void
+    {
+        $this->id = $id;
     }
 
     public function getDateDebut(): ?\DateTimeImmutable
@@ -94,7 +109,7 @@ class Partie
         return $this->id_joueurs;
     }
 
-    public function addIdJoueur(Utilisateur $idJoueur): self
+    public function addIdJoueur(UserInterface $idJoueur): self
     {
         if (!$this->id_joueurs->contains($idJoueur)) {
             $this->id_joueurs[] = $idJoueur;
@@ -103,7 +118,7 @@ class Partie
         return $this;
     }
 
-    public function removeIdJoueur(Utilisateur $idJoueur): self
+    public function removeIdJoueur(UserInterface $idJoueur): self
     {
         $this->id_joueurs->removeElement($idJoueur);
 
@@ -220,6 +235,36 @@ class Partie
     public function setLongueurLignes(int $longueur_lignes): self
     {
         $this->longueur_lignes = $longueur_lignes;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Team[]
+     */
+    public function getTeams(): Collection
+    {
+        return $this->teams;
+    }
+
+    public function addTeam(Team $team): self
+    {
+        if (!$this->teams->contains($team)) {
+            $this->teams[] = $team;
+            $team->setPartie($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTeam(Team $team): self
+    {
+        if ($this->teams->removeElement($team)) {
+            // set the owning side to null (unless already changed)
+            if ($team->getPartie() === $this) {
+                $team->setPartie(null);
+            }
+        }
 
         return $this;
     }

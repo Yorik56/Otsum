@@ -42,7 +42,6 @@ class DemandeContactRepository extends ServiceEntityRepository
         ;
     }
 
-
     /*
     public function findOneBySomeField($value): ?DemandeContact
     {
