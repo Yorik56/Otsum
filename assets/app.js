@@ -14,6 +14,7 @@ import './styles/accueil.scss';
 import './styles/app.scss';
 import './styles/sidenav.scss';
 import './styles/amis.scss';
+import './styles/hub.scss';
 // JS
 let $ = require('jquery')
 import './jkeyboard';
