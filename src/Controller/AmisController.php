@@ -2,20 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\DemandeContact;
-use App\Entity\Utilisateur;
+use App\Entity\{DemandeContact,Utilisateur};
 use App\Form\ContactRequestType;
+use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
+use Symfony\Component\{Form\FormError};
+use Symfony\Component\HttpFoundation\{Request, Response};
+use Symfony\Component\Mercure\{HubInterface, Update};
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
-use Symfony\Component\Serializer\Serializer;
+
 
 class AmisController extends AbstractController
 {
@@ -32,15 +28,7 @@ class AmisController extends AbstractController
     public function amis(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
     {
         //-- Contacts
-        $contacts = $entityManager->getRepository(entityName: DemandeContact::class)
-            ->mesContacts(userId: $this->getUser()->getId());
-        $usersContact = [];
-        foreach ($contacts as $index => $contact) {
-            $usersContact[] = $entityManager->getRepository(entityName: Utilisateur::class)
-                ->findOneBy([
-                    'id' => $contact['contact']
-            ]);
-        }
+        $usersContact = Utils::class->getContacts($this->getUser()->getId());
         //-- Demandes d'amis reçues
         $demandes_de_contact = $entityManager->getRepository(entityName: DemandeContact::class)
             ->findBy([
