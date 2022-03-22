@@ -113,10 +113,7 @@
                     let current_line_number = 0;
                     let essais = 6;
                     let n_case = 1;
-                    {% if id is defined %}
-                        difficultee = {{id}};
-                        init_partie({{id}});
-                    {% endif %}
+                    init_partie();
                     // Validation de l'essai / MAJ de la ligne
                     $('.return').click(function() {
                         let mot_valide = true;
@@ -228,15 +225,14 @@
                         }
                     });
                     // Création de la partie
-                    function init_partie(longueur){
+                    function init_partie(){
                         $.ajax({
                             method: "POST",
                             url: "{{ path('createGame') }}",
-                            data: {id: longueur},
                             success: function(reponse){
-                                id_partie = reponse[1];
-                                difficultee = longueur;
-                                creationDeLaGrille(reponse[0], difficultee);
+                                id_partie = reponse["id_partie"];
+                                difficultee = reponse["difficulte"];
+                                creationDeLaGrille(reponse["firstLetter"], difficultee);
                                 $('#drop_out_form_gameId').val(id_partie);
                             }
                         });

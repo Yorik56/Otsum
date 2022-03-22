@@ -72,17 +72,15 @@ class AccueilController extends AbstractController {
 
     /**
      * Start a game
-     * @param $id
      * @return Response
      */
-    #[Route('/otsum/{id}', name: 'otsum')]
-    public function otsum($id): Response
+    #[Route('/otsum', name: 'otsum')]
+    public function otsum(): Response
     {
         //--- Formulaire Abandon
         $dropOutForm = $this->createForm(DropOutFormType::class);
         return $this->render('otsum/index.html.twig', [
             'controller_name' => 'AccueilController',
-            'id' => $id,
             'dropOutForm' => $dropOutForm->createView(),
         ]);
     }
@@ -114,13 +112,13 @@ class AccueilController extends AbstractController {
     function createGame(Utils $utils, Request $request): JsonResponse
     {
         // Parameters to get a word
-        $parametre_longueur_mot = $request->request->get('id');
-        $word_to_find = $utils->getRandomWord($parametre_longueur_mot);
+        $difficulte = rand(7, 10);
+        $word_to_find = $utils->getRandomWord($difficulte);
         //--- Create a player
         $joueur = $this->entityManager->getRepository(Utilisateur::class)->find($this->getUser()->getId());
         //--- Create a game
         $game = new Partie();
-        $game->setLongueurLignes($parametre_longueur_mot);
+        $game->setLongueurLignes($difficulte);
         $game->setMotATrouver(trim($word_to_find));
         $game->setDureeSessionLigne(50);
         $game->addIdJoueur($joueur);
@@ -130,7 +128,11 @@ class AccueilController extends AbstractController {
         $this->entityManager->flush();
 
         // Send the first letter
-        return new JsonResponse([$word_to_find[0], $game->getId()]);
+        return new JsonResponse([
+            "firstLetter" => $word_to_find[0],
+            "id_partie"   => $game->getId(),
+            "difficulte"  => $difficulte
+        ]);
     }
 
     /**

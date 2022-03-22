@@ -30,7 +30,7 @@ class HubController extends AbstractController
         $this->cacheManager = $cacheManager;
     }
 
-    #[Route('/partiePrivee', name: 'initPartiePrivee')]
+    #[Route('/hubPrive', name: 'initHubPrive')]
     public function createHub(): Response
     {
         // Create a game
@@ -56,7 +56,7 @@ class HubController extends AbstractController
         $this->entityManager->persist($redTeam);
         $this->entityManager->flush();
         // Subscribe a topic
-        return $this->redirectToRoute('partiePrivee', ['id_partie' => $id_partie], 301);
+        return $this->redirectToRoute('hubPrive', ['id_partie' => $id_partie], 301);
     }
 
     /**
@@ -64,7 +64,7 @@ class HubController extends AbstractController
      * @param $id_partie
      * @return Response
      */
-    #[Route('/partiePrivee/{id_partie}', name: 'partiePrivee')]
+    #[Route('/hubPrive/{id_partie}', name: 'hubPrive')]
     public function renderHub(Request $request, $id_partie): Response
     {
 
@@ -105,7 +105,7 @@ class HubController extends AbstractController
                 '/hub/prive/'.$id_partie,
                 json_encode([
                     'topic' =>'/hub/prive/'.$id_partie,
-                    'url_partie' => $this->generateUrl('partiePrivee', ['id_partie' => $id_partie])
+                    'url_partie' => $this->generateUrl('hubPrive', ['id_partie' => $id_partie])
                 ])
             );
             $this->hub->publish($update);
@@ -267,7 +267,7 @@ class HubController extends AbstractController
             if($choice == "accepte"){
                 $flag_etat = InvitationToPlay::DEMANDE_PARTIE_ACCEPTEE;
                 $arrayResponse['code'] = "ok";
-                $arrayResponse['url'] = $this->generateUrl('partiePrivee', ['id_partie' => $game]);
+                $arrayResponse['url'] = $this->generateUrl('hubPrive', ['id_partie' => $game]);
 
             }
             else{
