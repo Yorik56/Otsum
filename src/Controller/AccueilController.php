@@ -112,13 +112,13 @@ class AccueilController extends AbstractController {
     function createGame(Utils $utils, Request $request): JsonResponse
     {
         // Parameters to get a word
-        $difficulte = rand(7, 10);
-        $word_to_find = $utils->getRandomWord($difficulte);
+        $difficulty = rand(7, 10);
+        $word_to_find = $utils->getRandomWord($difficulty);
         //--- Create a player
         $joueur = $this->entityManager->getRepository(Utilisateur::class)->find($this->getUser()->getId());
         //--- Create a game
         $game = new Partie();
-        $game->setLongueurLignes($difficulte);
+        $game->setLongueurLignes($difficulty);
         $game->setMotATrouver(trim($word_to_find));
         $game->setDureeSessionLigne(50);
         $game->addIdJoueur($joueur);
@@ -130,8 +130,8 @@ class AccueilController extends AbstractController {
         // Send the first letter
         return new JsonResponse([
             "firstLetter" => $word_to_find[0],
-            "id_partie"   => $game->getId(),
-            "difficulte"  => $difficulte
+            "idGame"   => $game->getId(),
+            "difficulty"  => $difficulty
         ]);
     }
 

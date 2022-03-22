@@ -1,0 +1,73 @@
+<input type="checkbox" class="hamburger_checkbox">
+<div class="hamburger" id="hamburger">
+    <span class="line"></span>
+    <span class="line"></span>
+    <span class="line"></span>
+    <div class="notification " style="color: #0b2e13">
+        <i class="fa-solid fa-bell"></i>
+    </div>
+</div>
+<div class="sidenav">
+    <div class="sidenav_content">
+        <ul>
+            <li>
+                <i class="fa-solid fa-house"></i>
+                <a href="{{ path('accueil') }}">Accueil</a>
+            </li>
+            {% if app.user %}
+                <li>
+                    <i class="fa-solid fa-user"></i>
+                    <a href="{{ path('mon_profil') }}">Mon Profil</a>
+                </li>
+                <li>
+                    <i class="fa-solid fa-user-group"></i>
+                    <a href="{{ path('amis') }}">Amis</a>
+                    <div class="notification-amis">
+                        <div class="notification-amis-cloche">
+                            <i class="fa-solid fa-bell" style="color: #0b2e13"></i>
+                        </div>
+                    </div>
+                </li>
+            {% else %}
+                <li>
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    <a href="{{ path('login') }}">Connexion</a>
+                </li>
+                <li>
+                    <i class="fa-solid fa-user-pen"></i>
+                    <a href="{{ path('app_register') }}">Inscription</a>
+                </li>
+            {% endif %}
+            <li>
+                <i class="fa-solid fa-star"></i>
+                <a href="{{ path('classement') }}">Classement</a>
+            </li>
+            {% if app.user %}
+                <li>
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <a href="{{ path('app_logout') }}">Déconnexion</a>
+                </li>
+            {% endif %}
+        </ul>
+        {% if listeAmis is defined %}
+            <ul class="listeAmis">
+                <li>Contacts</li>
+                {% for amis in listeAmis %}
+                    <li>
+                        <div class="item" data-id="{{ amis.getId() }}">
+                            <input class="amisId" type="hidden" value="{{ amis.getId() }}">
+                            {% if amis.getAvatar() %}
+                                <img class="avatar {% if amis.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~amis.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                            {% else %}
+                                <div class="avatar_par_defaut {% if amis.getConnected()  == true  %}connecte{% endif %}">
+                                    {{ amis.pseudo|first|upper }}
+                                </div>
+                            {% endif %}
+                            <span>{{ amis.pseudo }}</span>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
