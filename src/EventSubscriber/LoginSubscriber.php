@@ -161,6 +161,7 @@ class LoginSubscriber implements EventSubscriberInterface
 
     /**
      * Get array of contact id's
+     * @param $userId
      * @return array
      */
     public function getContacts($userId): array

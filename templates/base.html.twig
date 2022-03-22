@@ -279,6 +279,7 @@
                         // On ajoute des "topics" correspondants aux connexions/déconnexion des contacts
                         url.searchParams.append('topic','/imLogged/' + {{ app.user.id }})
                         url.searchParams.append('topic','/iLeave/' + {{ app.user.id }})
+                        url.searchParams.append('topic','/invitationPrivateGame/' + {{ app.user.id }})
                         //-- On écoute les évènements provenant de mercure
                         const eventSource = new EventSource(url)
                         eventSource.onmessage = (e) => {
@@ -308,6 +309,16 @@
                                 if(user.hasClass('connecte')){
                                     user.removeClass('connecte');
                                 }
+                            }
+                            // invitation à jouer à une partie privée
+                            if(JSON.parse(e.data).topic === '/invitationPrivateGame/' + {{ app.user.id }}) {
+                                let idPartie  = JSON.parse(e.data).idPartie;
+                                let toast = $('.toast');
+                                $('.toast-body').html(JSON.parse(e.data).idPartie)
+                                toast.toast({ autohide: false })
+                                toast.toast('show')
+                                $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display','flex')
+                                $('.sidenav .sidenav_content ul li .notification-amis').css('display','inline-block')
                             }
                         }
                         //-- Affichage des notifications de l'utilisateur courant

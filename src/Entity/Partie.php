@@ -54,11 +54,15 @@ class Partie
     #[ORM\OneToMany(mappedBy: 'partie', targetEntity: Team::class, orphanRemoval: true)]
     private $teams;
 
+    #[ORM\OneToMany(mappedBy: 'partie', targetEntity: InvitationToPlay::class)]
+    private $invitationToPlay;
+
     #[Pure] public function __construct()
     {
         $this->id_joueurs = new ArrayCollection();
         $this->id_lignes = new ArrayCollection();
         $this->teams = new ArrayCollection();
+        $this->invitationToPlay = new ArrayCollection();
     }
 
     /**
@@ -263,6 +267,36 @@ class Partie
             // set the owning side to null (unless already changed)
             if ($team->getPartie() === $this) {
                 $team->setPartie(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|InvitationToPlay[]
+     */
+    public function getInvitationToPlay(): Collection
+    {
+        return $this->invitationToPlay;
+    }
+
+    public function addInvitationToPlay(InvitationToPlay $invitationToPlay): self
+    {
+        if (!$this->invitationToPlay->contains($invitationToPlay)) {
+            $this->invitationToPlay[] = $invitationToPlay;
+            $invitationToPlay->setPartie($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitationToPlay(InvitationToPlay $invitationToPlay): self
+    {
+        if ($this->invitationToPlay->removeElement($invitationToPlay)) {
+            // set the owning side to null (unless already changed)
+            if ($invitationToPlay->getPartie() === $this) {
+                $invitationToPlay->setPartie(null);
             }
         }
 

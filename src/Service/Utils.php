@@ -11,8 +11,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
 class Utils
 {
     /** KernelInterface $appKernel */
-    private $appKernel;
-    private $entityManager;
+    private KernelInterface $appKernel;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager, KernelInterface $appKernel)
     {
@@ -32,13 +32,44 @@ class Utils
             ->mesContacts(userId: $idUser);
         $usersContact = [];
         foreach ($contacts as $index => $contact) {
-            $usersContact[] = $this->entityManager->getRepository(entityName: Utilisateur::class)
+            $user = $this->entityManager->getRepository(entityName: Utilisateur::class)
                 ->findOneBy([
                     'id' => $contact['contact']
                 ]);
+            if($user){
+                $usersContact[] = $user;
+            }
         }
+
         return $usersContact;
     }
+
+    /**
+     * Return the contact liste of the current user
+     *
+     * @param $idUser
+     * @return array
+     */
+    public function getContactsOnline($idUser): array
+    {
+        $contacts = $this->entityManager->getRepository(entityName: DemandeContact::class)
+            ->mesContacts(userId: $idUser);
+        $usersContact = [];
+        foreach ($contacts as $index => $contact) {
+            $user = $this->entityManager->getRepository(entityName: Utilisateur::class)
+                ->findOneBy([
+                    'id' => $contact['contact'],
+                    'connected' => 1
+                ]);
+            if($user){
+                $usersContact[] = $user;
+            }
+        }
+
+        return $usersContact;
+    }
+
+
 
     public function getRandomWord($parametre_longueur_mot){
         // Parameters to get a word

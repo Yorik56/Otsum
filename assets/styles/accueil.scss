@@ -10,6 +10,19 @@
     width: 70%;
 }
 
+.toast-body, .toast-header {
+    background-color: #170f0f;
+}
+
+.toast-header {
+    border-bottom: 1px solid #313335;
+}
+
+.toast {
+    background-color: unset;
+    border: solid 1px #313335;
+}
+
 @media screen and (max-width: 767px){
     .area {
         width: 80%;

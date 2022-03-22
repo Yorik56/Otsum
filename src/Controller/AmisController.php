@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\{DemandeContact,Utilisateur};
+use App\Entity\{DemandeContact, InvitationToPlay, Utilisateur};
 use App\Form\ContactRequestType;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,6 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AmisController extends AbstractController
 {
+    private $utils;
+
+    public function __construct(Utils $utils)
+    {
+        $this->utils = $utils;
+    }
+
     /**
      * - Manage the display of the "/amis" page
      * - Friend request form
@@ -28,13 +35,7 @@ class AmisController extends AbstractController
     public function amis(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
     {
         //-- Contacts
-        $usersContact = Utils::class->getContacts($this->getUser()->getId());
-        //-- Demandes d'amis reçues
-        $demandes_de_contact = $entityManager->getRepository(entityName: DemandeContact::class)
-            ->findBy([
-                'cible' => $this->getUser()->getId(),
-                'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
-            ]);
+        $usersContact = $this->utils->getContacts($this->getUser()->getId());
         //-- Formulaire demande de contact
         $form = $this->createForm(ContactRequestType::class);
         $form->handleRequest($request);
@@ -85,10 +86,24 @@ class AmisController extends AbstractController
                 $form->addError($error);
             }
         }
+        //-- Demandes d'amis reçues
+        $demandes_de_contact = $entityManager->getRepository(entityName: DemandeContact::class)
+            ->findBy([
+                'cible' => $this->getUser()->getId(),
+                'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
+            ]);
+        //-- Invitations à jouer reçues
+        $invitationToPlay = $entityManager->getRepository(entityName: InvitationToPlay::class)
+            ->findBy([
+                'invitedUser' => $this->getUser()->getId(),
+                'flag_etat' => InvitationToPlay::DEMANDE_PARTIE_EN_ATTENTE
+            ]);
+
         return $this->render('amis/index.html.twig', [
             'controller_name' => 'AmisController',
             'contact_request_form' => $form->createView(),
             'demandes_contact' => $demandes_de_contact,
+            'invitationToPlay' => $invitationToPlay,
             'users_ontact' => $usersContact
         ]);
     }

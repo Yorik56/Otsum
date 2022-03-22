@@ -63,6 +63,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean', nullable: true)]
     private $connected;
 
+    #[ORM\OneToMany(mappedBy: 'invitedUser', targetEntity: InvitationToPlay::class)]
+    private $invitationToPlay;
+
 
 
     #[Pure] public function __construct()
@@ -70,6 +73,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->parties = new ArrayCollection();
         $this->scoresJoueur = new ArrayCollection();
         $this->demandesContact = new ArrayCollection();
+        $this->invitationToPlay = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -322,6 +326,36 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setConnected(?bool $connected): self
     {
         $this->connected = $connected;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|InvitationToPlay[]
+     */
+    public function getInvitationToPlay(): Collection
+    {
+        return $this->invitationToPlay;
+    }
+
+    public function addInvitationToPlay(InvitationToPlay $invitationToPlay): self
+    {
+        if (!$this->invitationToPlay->contains($invitationToPlay)) {
+            $this->invitationToPlay[] = $invitationToPlay;
+            $invitationToPlay->setInvitedUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitationToPlay(InvitationToPlay $invitationToPlay): self
+    {
+        if ($this->invitationToPlay->removeElement($invitationToPlay)) {
+            // set the owning side to null (unless already changed)
+            if ($invitationToPlay->getInvitedUser() === $this) {
+                $invitationToPlay->setInvitedUser(null);
+            }
+        }
 
         return $this;
     }

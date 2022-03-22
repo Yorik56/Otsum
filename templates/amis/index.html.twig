@@ -9,18 +9,63 @@
             <div class="block_amis">
                 <div class="row">
                     <div class="col">
-                        <h2>Amis en ligne</h2>
-                        <div class="demandes_contact_reçues row">
-                            {% for contact in users_ontact %}
-                                <div class="utilisateur col-3 col-md-6">
-                                    {% if contact.getAvatar() %}
-                                        <img class="avatar " src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
-                                    {% else %}
-                                        <div class="avatar_par_defaut">
-                                            {{ contact.pseudo|first|upper }}
-                                        </div>
-                                    {% endif %}
-                                    <span>{{ contact.pseudo }}</span>
+                        <h2>Inviter un joueur</h2>
+                        <div class="demande_contact_formulaire">
+                            <div>
+                                {{ form_start(contact_request_form) }}
+                                <div class="my-custom-class-for-errors">
+                                    {{ form_errors(contact_request_form) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_label(contact_request_form.Pseudo) }}
+                                    {{ form_widget(contact_request_form.Pseudo, {'attr': {'class': 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_widget(contact_request_form.Demander, {'attr': {'class': 'btn'}}) }}
+                                </div>
+                                {{ form_end(contact_request_form) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="row area amis d-flex justify-content-center">
+            <div class="block_amis">
+                <div class="row">
+                    <div class="col col-12">
+                        <h2>Invitations à jouer</h2>
+                        <div class="demandes_contact_reçues">
+                            {% for invitation in invitationToPlay %}
+                                <div data-row_utilisateur="{{ invitation.UserWhoInvites.id }}" data-id_game="{{ invitation.partie.id }}" class="row">
+                                    <div class="utilisateur col-12 col-md-6">
+                                        {% if invitation.UserWhoInvites.getAvatar() %}
+                                            <img class="avatar" src="{{ ('images/avatars/'~invitation.UserWhoInvites.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                        {% else %}
+                                            <div class="avatar_par_defaut">
+                                                {{ invitation.UserWhoInvites.pseudo|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        {{ invitation.UserWhoInvites.pseudo }}
+                                    </div>
+                                    <div class="action col-12 col-md-6">
+                                        <button
+                                            class="btn play_request accept btn-success"
+                                            data-action="accepte"
+                                            data-id_game="{{ invitation.partie.id }}"
+                                            data-userWhoInvites="{{ invitation.userWhoInvites.id }}"
+                                        >
+                                            Accepter
+                                        </button>
+                                        <button
+                                            class="btn play_request decline btn-danger"
+                                            data-action="refuse"
+                                            data-id_game="{{ invitation.partie.id }}"
+                                            data-userWhoInvites="{{ invitation.userWhoInvites.id }}"
+                                        >
+                                            Refuser
+                                        </button>
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
@@ -47,8 +92,8 @@
                                         {{ demande.source.pseudo }}
                                     </div>
                                     <div class="action col-12 col-md-6">
-                                        <button class="btn accept btn-success" data-action="accepte" data-id="{{ demande.source.id }}">Accepter</button>
-                                        <button class="btn decline btn-danger" data-action="refuse" data-id="{{ demande.source.id }}">Refuser</button>
+                                        <button class="btn friend_request accept btn-success" data-action="accepte" data-id="{{ demande.source.id }}">Accepter</button>
+                                        <button class="btn friend_request decline btn-danger" data-action="refuse" data-id="{{ demande.source.id }}">Refuser</button>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -61,22 +106,20 @@
             <div class="block_amis">
                 <div class="row">
                     <div class="col">
-                        <h2>Inviter un joueur</h2>
-                        <div class="demande_contact_formulaire">
-                            <div>
-                                {{ form_start(contact_request_form) }}
-                                    <div class="my-custom-class-for-errors">
-                                        {{ form_errors(contact_request_form) }}
-                                    </div>
-                                    <div class="form-group">
-                                        {{ form_label(contact_request_form.Pseudo) }}
-                                        {{ form_widget(contact_request_form.Pseudo, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                    <div class="form-group">
-                                        {{ form_widget(contact_request_form.Demander, {'attr': {'class': 'btn'}}) }}
-                                    </div>
-                                {{ form_end(contact_request_form) }}
-                            </div>
+                        <h2>Amis en ligne</h2>
+                        <div class="demandes_contact_reçues row">
+                            {% for contact in users_ontact %}
+                                <div class="utilisateur col-3 col-md-6">
+                                    {% if contact.getAvatar() %}
+                                        <img class="avatar " src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                    {% else %}
+                                        <div class="avatar_par_defaut">
+                                            {{ contact.pseudo|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <span>{{ contact.pseudo }}</span>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -85,7 +128,7 @@
     </div>    
     <script>
         $(document).ready(function(){
-            $('.btn').on('click',function () {
+            $('.btn.friend_request').on('click',function () {
                 let utilisateur = $(this).data('id');
                 let action      = $(this).data('action');
                 //-- Répondre à une demande d'amis
@@ -102,6 +145,42 @@
                     // La fonction à appeler si la requête aboutie
                     success: function (data) {
                         $("[data-row_utilisateur=" + data + "]").remove()
+                    },
+                    // La fonction à appeler si la requête n'a pas abouti
+                    error: function() {
+
+                    }
+                });
+            })
+
+            $('.btn.play_request').on('click',function () {
+                let game = $(this).attr('data-id_game');
+                let userWhoInvites = $(this).attr('data-userWhoInvites');
+                let action      = $(this).attr('data-action');
+                //-- Répondre à une demande d'amis
+                $.ajax({
+                    // Adresse à laquelle la requête est envoyée
+                    method: "GET",
+                    url: "{{ path("reponseInvitationToPlay") }}",
+                    data: {
+                        game : game,
+                        userWhoInvites : userWhoInvites,
+                        reponse: action
+                    },
+                    // Le délai maximum en millisecondes de traitement de la demande
+                    timeout: 4000,
+                    // La fonction à appeler si la requête aboutie
+                    success: function (data) {
+                        let parsedData = JSON.parse(data);
+                        if(parsedData['userWhoInvites']){
+                            $("[data-row_utilisateur=" + parsedData['userWhoInvites'] + "]")
+                            .filter("[data-id_game=" + parsedData['id_partie'] + "]")
+                            .remove()
+                        }
+                        if(parsedData['code'] && (parsedData['code'] === "ok")){
+                            window.location.href = parsedData['url'];
+                        }
+
                     },
                     // La fonction à appeler si la requête n'a pas abouti
                     error: function() {
