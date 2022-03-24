@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Team;
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -27,7 +27,7 @@ class TeamRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('t')
             ->select('u.id')
-            ->leftJoin(Utilisateur::class,'u')
+            ->leftJoin(User::class,'u')
             ->Where('t.partie = :idPartie')
             ->setParameter('idPartie', $idPartie)
             ->getQuery()

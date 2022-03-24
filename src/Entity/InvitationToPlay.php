@@ -8,79 +8,79 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: InvitationToPlayRepository::class)]
 class InvitationToPlay
 {
-    const DEMANDE_PARTIE_EN_ATTENTE = 1;
-    const DEMANDE_PARTIE_ACCEPTEE   = 2;
-    const DEMANDE_PARTIE_REFUSEE    = 3;
+    const REQUEST_GAME_PENDING = 1;
+    const REQUEST_GAME_ACCEPTED   = 2;
+    const REQUEST_GAME_REFUSED    = 3;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\ManyToOne(targetEntity: Partie::class, inversedBy: 'invitationToPlay')]
+    #[ORM\ManyToOne(targetEntity: Game::class, inversedBy: 'invitationToPlay')]
     #[ORM\JoinColumn(nullable: false)]
-    private $partie;
+    private $game;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'invitationToPlay')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'invitationToPlay')]
     #[ORM\JoinColumn(nullable: false)]
     private $invitedUser;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private $userWhoInvites;
 
     #[ORM\Column(type: 'smallint', nullable: true)]
-    private $flag_etat;
+    private $flag_state;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getPartie(): ?Partie
+    public function getGame(): ?Game
     {
-        return $this->partie;
+        return $this->game;
     }
 
-    public function setPartie(?Partie $partie): self
+    public function setGame(?Game $game): self
     {
-        $this->partie = $partie;
+        $this->game = $game;
 
         return $this;
     }
 
-    public function getInvitedUser(): ?Utilisateur
+    public function getInvitedUser(): ?User
     {
         return $this->invitedUser;
     }
 
-    public function setInvitedUser(?Utilisateur $invitedUser): self
+    public function setInvitedUser(?User $invitedUser): self
     {
         $this->invitedUser = $invitedUser;
 
         return $this;
     }
 
-    public function getUserWhoInvites(): ?Utilisateur
+    public function getUserWhoInvites(): ?User
     {
         return $this->userWhoInvites;
     }
 
-    public function setUserWhoInvites(?Utilisateur $userWhoInvites): self
+    public function setUserWhoInvites(?User $userWhoInvites): self
     {
         $this->userWhoInvites = $userWhoInvites;
 
         return $this;
     }
 
-    public function getFlagEtat(): ?int
+    public function getFlagState(): ?int
     {
-        return $this->flag_etat;
+        return $this->flag_state;
     }
 
-    public function setFlagEtat(?int $flag_etat): self
+    public function setFlagState(?int $flag_state): self
     {
-        $this->flag_etat = $flag_etat;
+        $this->flag_state = $flag_state;
 
         return $this;
     }

@@ -4,8 +4,8 @@ namespace App\EventSubscriber;
 
 use App\Controller\LoginController;
 use App\Controller\RegistrationController;
-use App\Entity\DemandeContact;
-use App\Entity\Utilisateur;
+use App\Entity\ContactRequest;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -16,7 +16,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Twig\Environment;
 
 class LoginSubscriber implements EventSubscriberInterface
@@ -73,11 +72,12 @@ class LoginSubscriber implements EventSubscriberInterface
                  if($contacts){
                      $listeAmis = [];
                      foreach ($contacts as $contact) {
-                         $amis = $this->entityManager->getRepository(entityName: Utilisateur::class)
+                         $amis = $this->entityManager->getRepository(entityName: User::class)
                              ->findOneBy([
                                  'id' => $contact['contact']
                              ]);
                          $listeAmis[] = $amis;
+                         dump($listeAmis);
                      }
                      $this->twig->addGlobal('listeAmis', $listeAmis);
                  }
@@ -124,11 +124,11 @@ class LoginSubscriber implements EventSubscriberInterface
                     if($event == self::ACTION_LOGIN){
                         $topic = "/imLogged/".$contact['contact'];
                         dump($topic);
-                        $user->setConnected(Utilisateur::USER_CONNECTED_TRUE);
+                        $user->setConnected(User::USER_CONNECTED_TRUE);
                     }
                     if($event == self::ACTION_LOGOUT){
                         $topic = "/iLeave/".$contact['contact'];
-                        $user->setConnected(Utilisateur::USER_CONNECTED_FALSE);
+                        $user->setConnected(User::USER_CONNECTED_FALSE);
                     }
                     // Maj de la date de la dernière activité
                     $user->setLastActivityAt(new \DateTime());
@@ -166,7 +166,7 @@ class LoginSubscriber implements EventSubscriberInterface
      */
     public function getContacts($userId): array
     {
-        return $this->entityManager->getRepository(entityName: DemandeContact::class)
+        return $this->entityManager->getRepository(entityName: ContactRequest::class)
             ->mesContacts(userId: $userId);
     }
 }

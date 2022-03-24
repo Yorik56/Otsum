@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\{InvitationToPlay, Partie, Team, Utilisateur};
+use App\Entity\{InvitationToPlay, Game, Team, User};
 use App\Form\TeamType;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,111 +34,111 @@ class HubController extends AbstractController
     public function createHub(): Response
     {
         // Create a game
-        $longueurMot = rand(7,10);
-        $game = new Partie();
-        $game->addIdJoueur($this->getUser());
-        $game->setNombreTours(6);
-        $game->setMotATrouver($this->utils->getRandomWord($longueurMot));
-        $game->setDureeSessionLigne(50);
-        $game->setLongueurLignes($longueurMot);
+        $wordLength = rand(7,10);
+        $game = new Game();
+        $game->addPlayer($this->getUser());
+        $game->setNumberOfRounds(6);
+        $game->setWordToFind($this->utils->getRandomWord($wordLength));
+        $game->setLineSessionTime(50);
+        $game->setLineLength($wordLength);
         $this->entityManager->persist($game);
         $this->entityManager->flush();
-        $id_partie = $game->getId();
-        // création de l'équipe bleue
+        $idGame = $game->getId();
+        // Creation of the blue team
         $blueTeam = new Team();
-        $blueTeam->setPartie($game);
-        $blueTeam->setCouleur('blue');
+        $blueTeam->setGame($game);
+        $blueTeam->setColor('blue');
         $this->entityManager->persist($blueTeam);
-        // création de l'équipe rouge
+        // Creation of the red team
         $redTeam = new Team();
-        $redTeam->setPartie($game);
-        $redTeam->setCouleur('red');
+        $redTeam->setGame($game);
+        $redTeam->setColor('red');
         $this->entityManager->persist($redTeam);
         $this->entityManager->flush();
         // Subscribe a topic
-        return $this->redirectToRoute('hubPrive', ['id_partie' => $id_partie], 301);
+        return $this->redirectToRoute('hubPrive', ['idGame' => $idGame], 301);
     }
 
     /**
      * @param Request $request
-     * @param $id_partie
+     * @param $idGame
      * @return Response
      */
-    #[Route('/hubPrive/{id_partie}', name: 'hubPrive')]
-    public function renderHub(Request $request, $id_partie): Response
+    #[Route('/hubPrive/{idGame}', name: 'hubPrive')]
+    public function renderHub(Request $request, $idGame): Response
     {
 
-        //--- Récupération de la partie
-        $game = $this->entityManager->getRepository(Partie::class)->find($id_partie);
-        //--- Formulaire Team
+        //--- Recovery of the game
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        //--- Form Team
         $teamForm = $this->createForm(TeamType::class);
-        $teamForm->get('partie')->setData($id_partie);
+        $teamForm->get('partie')->setData($idGame);
         $teamForm->handleRequest($request);
-        //--- Récupération des équipes
-        $tableTeam = $this->entityManager->getRepository(Team::class)->findBy(['partie'=>$id_partie]);
+        //--- Recovery of the teams
+        $tableTeam = $this->entityManager->getRepository(Team::class)->findBy(['game'=>$idGame]);
         $newArrayTeam = [];
         foreach ($tableTeam as $team){
-            $newArrayTeam[$team->getCouleur()] = $team;
+            $newArrayTeam[$team->getColor()] = $team;
         }
         $tableTeam = $newArrayTeam;
         if ($teamForm->isSubmitted() && $teamForm->isValid()) {
-            // On retire le joueur courant des équipes rejointes précédemment
+            // The current player is removed from the previously joined teams
             $newArrayTeam = [];
             foreach ($tableTeam as $team){
-                $team->removeJoueur($this->getUser());
+                $team->removePlayer($this->getUser());
                 $this->entityManager->persist($team);
-                $newArrayTeam[$team->getCouleur()] = $team;
+                $newArrayTeam[$team->getColor()] = $team;
             }
             $tableTeam = $newArrayTeam;
-            // Récupération des équipes liées à la partie
+            // Recovery of the teams related to the game
             if($teamForm->get('team_blue')->isClicked()){
                 // Ajout du joueur courant dans l'équipe
-                $tableTeam['blue']->addJoueur($this->getUser());
+                $tableTeam['blue']->addPlayer($this->getUser());
                 $this->entityManager->persist($tableTeam['blue']);
             } else if ($teamForm->get('team_red')->isClicked()){
-                $tableTeam['red']->addJoueur($this->getUser());
+                $tableTeam['red']->addPlayer($this->getUser());
                 $this->entityManager->persist($tableTeam['red']);
             }
             $this->entityManager->flush();
-            // Notification Mercure contenant l'id du joueur actuel
+            // Mercure notification containing the current player id
             $update = new Update(
-                '/hub/prive/'.$id_partie,
+                '/hub/prive/'.$idGame,
                 json_encode([
-                    'topic' =>'/hub/prive/'.$id_partie,
-                    'url_partie' => $this->generateUrl('hubPrive', ['id_partie' => $id_partie])
+                    'topic' =>'/hub/prive/'.$idGame,
+                    'url_partie' => $this->generateUrl('hubPrive', ['idGame' => $idGame])
                 ])
             );
             $this->hub->publish($update);
         }
-
-        // Regroupe tous les joueurs dans un tableau
+        // Groups all players in a table
         $playersArray = self::getPlayerArray($tableTeam);
-        // Récupère les contacts de l'utilisateur qui ne sont pas présents dans la partie
-        $contactList = self::getContactList($playersArray, $id_partie);
-
-        // Récupération de tous les joueurs liés à la partie
+        // Retrieves the user's contacts that are not present in the game
+        $contactList = self::getContactList($playersArray, $idGame);
+        // Recovery of all players related to the game
         return $this->render('hub/index.html.twig', [
             'controller_name' => 'HubController',
             'teamForm'        => $teamForm->createView(),
-            'id_partie'       => $id_partie,
+            'idGame'       => $idGame,
             'tablePlayer'     => $tableTeam,
             'contactList'     => $contactList
         ]);
     }
 
     /**
+     * Update of the team players
+     *
      * @param Request $request
      * @return Response
      */
     #[Route('/reloadPlayerList', name: 'reloadPlayerList')]
     public function reloadPlayerList(Request $request): Response
     {
-        $id_partie = $request->request->get('id_partie');
-        //--- Récupération des équipes
-        $tableTeam = $this->entityManager->getRepository(Team::class)->findBy(['partie'=>$id_partie]);
+        $idGame = $request->request->get('idGame');
+        //--- Recovery of the teams
+        $tableTeam = $this->entityManager->getRepository(Team::class)->findBy(['game'=>$idGame]);
         $ArrayTeam = [];
         foreach ($tableTeam as $team){
-            foreach ($team->getJoueurs() as $joueur){
+            foreach ($team->getPlayers() as $joueur){
                 $avatar = null;
                 if($joueur->getAvatar()){
                     $avatar = $this->cacheManager
@@ -147,7 +147,7 @@ class HubController extends AbstractController
                             'my_thumb_filter'
                         );
                 }
-                $ArrayTeam[$team->getCouleur()][] = [
+                $ArrayTeam[$team->getColor()][] = [
                     'id_player' => $joueur->getId(),
                     'pseudo'    => $joueur->getPseudo(),
                     'avatar'    => $avatar
@@ -158,6 +158,7 @@ class HubController extends AbstractController
     }
 
     /**
+     * Groups all players in a table
      * @param $tableTeam
      * @return array
      */
@@ -165,7 +166,7 @@ class HubController extends AbstractController
     {
         $playersArray = [];
         foreach ($tableTeam as $team){
-            foreach ($team->getJoueurs() as $joueur){
+            foreach ($team->getPlayers() as $joueur){
                 $playersArray[] = $joueur;
             }
         }
@@ -177,22 +178,22 @@ class HubController extends AbstractController
      * Filtre les contacts déjà présents dans la partie
      *
      * @param $playersArray
-     * @param $id_partie
+     * @param $idGame
      * @return mixed
      */
-    public function getContactList($playersArray, $id_partie): mixed
+    public function getContactList($playersArray, $idGame): mixed
     {
         $contactList = $this->utils->getContactsOnline($this->getUser()->getId());
 
         foreach ($playersArray as $player){
             foreach ($contactList as $index => $contact){
-                // Si le joueur a rejoint une équipe
+                // If the player has joined a team
                 if($contact->getId() == $player->getId()){
                     unset($contactList[$index]);
                 }
-                // Si le joueur a rejoint la partie
+                // If the player has joined the game
                 $checkPresence = $this->entityManager->getRepository(InvitationToPlay::class)->findBy([
-                    'partie' => $id_partie,
+                    'game' => $idGame,
                     'invitedUser'   => $contact->getId(),
                     'userWhoInvites' => $this->getUser()->getId()
                 ]);
@@ -208,38 +209,38 @@ class HubController extends AbstractController
     #[Route('/inviteUser', name: 'inviteUser')]
     function inviteUser(HubInterface $hub, Request $request)
     {
-        $id_user = $request->request->get('id_user');
-        $id_partie = $request->request->get('id_partie');
+        $idUser = $request->request->get('id_user');
+        $idGame = $request->request->get('idGame');
         // Send topic
         $update = new Update(
-            '/invitationPrivateGame/'.$id_user,
+            '/invitationPrivateGame/'.$idUser,
             json_encode([
-                'topic' => '/invitationPrivateGame/'.$id_user,
-                'idPartie' => $id_partie
+                'topic' => '/invitationPrivateGame/'.$idUser,
+                'idPartie' => $idGame
             ])
         );
         $hub->publish($update);
         // Save invitation
         $invitationToPlay = $this->entityManager->getRepository(InvitationToPlay::class)
             ->findOneBy([
-                'partie' => $id_partie,
-                'invitedUser'   => $id_user,
+                'game' => $idGame,
+                'invitedUser'   => $idUser,
                 'userWhoInvites' => $this->getUser()->getId()
             ]);
         if(!$invitationToPlay){
-            $partie = $this->entityManager->getRepository(Partie::class)->findOneBy(['id' => $id_partie]);
-            $invitedUser = $this->entityManager->getRepository(Utilisateur::class)->findOneBy(['id' => $id_user]);
+            $partie = $this->entityManager->getRepository(Game::class)->findOneBy(['id' => $idGame]);
+            $invitedUser = $this->entityManager->getRepository(User::class)->findOneBy(['id' => $idUser]);
             $invitation = new InvitationToPlay();
-            $invitation->setPartie($partie);
+            $invitation->setGame($partie);
             $invitation->setInvitedUser($invitedUser);
             $invitation->setUserWhoInvites($this->getUser());
-            $invitation->setFlagEtat(InvitationToPlay::DEMANDE_PARTIE_EN_ATTENTE);
+            $invitation->setFlagState(InvitationToPlay::REQUEST_GAME_PENDING);
             $this->entityManager->persist($invitation);
             $this->entityManager->flush();
         }
 
 
-        return new JsonResponse($id_user, 200);
+        return new JsonResponse($idUser, 200);
     }
 
     /**
@@ -257,28 +258,27 @@ class HubController extends AbstractController
         //Maj de la demande de contact
         $invitationToPlay = $entityManager->getRepository(InvitationToPlay::class)
             ->findOneBy([
-                'partie' => $game,
+                'game' => $game,
                 'invitedUser'   => $this->getUser()->getId(),
                 'userWhoInvites' => $userWhoInvites
             ]);
-        $flag_etat = "";
         $arrayResponse = [];
         if($invitationToPlay && ($choice=="accepte" || $choice == "refuse") ){
             if($choice == "accepte"){
-                $flag_etat = InvitationToPlay::DEMANDE_PARTIE_ACCEPTEE;
+                $flag_state = InvitationToPlay::REQUEST_GAME_ACCEPTED;
                 $arrayResponse['code'] = "ok";
-                $arrayResponse['url'] = $this->generateUrl('hubPrive', ['id_partie' => $game]);
+                $arrayResponse['url'] = $this->generateUrl('hubPrive', ['idGame' => $game]);
 
             }
             else{
-                $flag_etat = InvitationToPlay::DEMANDE_PARTIE_REFUSEE;
+                $flag_state = InvitationToPlay::REQUEST_GAME_REFUSED;
                 $arrayResponse['code'] = "nok";
             }
-            $invitationToPlay->setFlagEtat($flag_etat);
+            $invitationToPlay->setFlagState($flag_state);
             $entityManager->persist($invitationToPlay);
             $entityManager->flush();
         }
-        $arrayResponse['id_partie'] = $game;
+        $arrayResponse['idGame'] = $game;
         $arrayResponse['userWhoInvites'] = $userWhoInvites;
 
         return new Response(json_encode($arrayResponse));

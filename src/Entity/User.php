@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\UtilisateurRepository;
+use App\Repository\UserRepository;
 use Datetime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,8 +17,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @UniqueEntity(fields={"email"}, message="There is already an account with this email")
  * @UniqueEntity(fields={"pseudo"}, message="There is already an account with this pseudo")
  */
-#[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     const USER_CONNECTED_TRUE  = 1;
     const USER_CONNECTED_FALSE = 0;
@@ -40,19 +40,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string')]
     private string $password;
 
-    #[ORM\ManyToMany(targetEntity: Partie::class, mappedBy: 'id_joueurs')]
-    private $parties;
+    #[ORM\ManyToMany(targetEntity: Game::class, mappedBy: 'players')]
+    private $games;
 
-    #[ORM\OneToMany(mappedBy: 'id_joueur', targetEntity: ScoreJoueur::class)]
-    private $scoresJoueur;
+    #[ORM\OneToMany(mappedBy: 'player', targetEntity: PlayerScore::class)]
+    private $scoresPlayer;
 
     /**
      * @ORM\Column(type="boolean")
      */
     private $isVerified = false;
 
-    #[ORM\OneToMany(mappedBy: 'source', targetEntity: DemandeContact::class)]
-    private $demandesContact;
+    #[ORM\OneToMany(mappedBy: 'source', targetEntity: ContactRequest::class)]
+    private $requestsContact;
 
     #[ORM\OneToOne(targetEntity: Avatar::class, cascade: ['persist', 'remove'])]
     private $avatar;
@@ -70,9 +70,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Pure] public function __construct()
     {
-        $this->parties = new ArrayCollection();
-        $this->scoresJoueur = new ArrayCollection();
-        $this->demandesContact = new ArrayCollection();
+        $this->games = new ArrayCollection();
+        $this->scoresPlayer = new ArrayCollection();
+        $this->requestsContact = new ArrayCollection();
         $this->invitationToPlay = new ArrayCollection();
     }
 
@@ -140,17 +140,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return ArrayCollection
      */
-    public function getScoreJoueurs(): ArrayCollection
+    public function getScoresPlayer(): ArrayCollection
     {
-        return $this->scoreJoueurs;
+        return $this->scoresPlayer;
     }
 
     /**
-     * @param ArrayCollection $scoreJoueurs
+     * @param ArrayCollection $scoresPlayer
      */
-    public function setScoreJoueurs(ArrayCollection $scoreJoueurs): void
+    public function setScoresPlayer(ArrayCollection $scoresPlayer): void
     {
-        $this->scoreJoueurs = $scoreJoueurs;
+        $this->scoresPlayer = $scoresPlayer;
     }
 
     /**
@@ -172,24 +172,24 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection
      */
-    public function getParties(): Collection
+    public function getGames(): Collection
     {
-        return $this->parties;
+        return $this->games;
     }
-    public function addParty(Partie $party): self
+    public function addGame(Game $games): self
     {
-        if (!$this->parties->contains($party)) {
-            $this->parties[] = $party;
-            $party->addIdJoueur($this);
+        if (!$this->games->contains($games)) {
+            $this->games[] = $games;
+            $games->addPlayer($this);
         }
 
         return $this;
     }
 
-    public function removeParty(Partie $party): self
+    public function removeGame(Game $games): self
     {
-        if ($this->parties->removeElement($party)) {
-            $party->removeIdJoueur($this);
+        if ($this->games->removeElement($games)) {
+            $games->removePlayer($this);
         }
 
         return $this;
@@ -200,25 +200,25 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getScoresJoueur(): Collection
     {
-        return $this->scoresJoueur;
+        return $this->scoresPlayer;
     }
 
-    public function addScoresJoueur(ScoreJoueur $scoresJoueur): self
+    public function addScoresJoueur(PlayerScore $scoresPlayer): self
     {
-        if (!$this->scoresJoueur->contains($scoresJoueur)) {
-            $this->scoresJoueur[] = $scoresJoueur;
-            $scoresJoueur->setIdJoueur($this);
+        if (!$this->scoresPlayer->contains($scoresPlayer)) {
+            $this->scoresPlayer[] = $scoresPlayer;
+            $scoresPlayer->setPlayer($this);
         }
 
         return $this;
     }
 
-    public function removeScoresJoueur(ScoreJoueur $scoresJoueur): self
+    public function removeScoresJoueur(PlayerScore $scoresPlayer): self
     {
-        if ($this->scoresJoueur->removeElement($scoresJoueur)) {
+        if ($this->scoresPlayer->removeElement($scoresPlayer)) {
             // set the owning side to null (unless already changed)
-            if ($scoresJoueur->getIdJoueur() === $this) {
-                $scoresJoueur->setIdJoueur(null);
+            if ($scoresPlayer->getPlayer() === $this) {
+                $scoresPlayer->setPlayer(null);
             }
         }
 
@@ -251,27 +251,27 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection
      */
-    public function getDemandesContact(): Collection
+    public function getRequestsContact(): Collection
     {
-        return $this->demandesContact;
+        return $this->requestsContact;
     }
 
-    public function addDemandesContact(DemandeContact $demandesContact): self
+    public function addRequestsContact(ContactRequest $requestsContact): self
     {
-        if (!$this->demandesContact->contains($demandesContact)) {
-            $this->demandesContact[] = $demandesContact;
-            $demandesContact->setSource($this);
+        if (!$this->requestsContact->contains($requestsContact)) {
+            $this->requestsContact[] = $requestsContact;
+            $requestsContact->setSource($this);
         }
 
         return $this;
     }
 
-    public function removeDemandesContact(DemandeContact $demandesContact): self
+    public function removeRequestsContact(ContactRequest $requestsContact): self
     {
-        if ($this->demandesContact->removeElement($demandesContact)) {
+        if ($this->requestsContact->removeElement($requestsContact)) {
             // set the owning side to null (unless already changed)
-            if ($demandesContact->getSource() === $this) {
-                $demandesContact->setSource(null);
+            if ($requestsContact->getSource() === $this) {
+                $requestsContact->setSource(null);
             }
         }
 
@@ -359,6 +359,4 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
-
 }

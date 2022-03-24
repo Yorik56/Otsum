@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\CelluleRepository;
+use App\Repository\CellRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CelluleRepository::class)]
-class Cellule
+#[ORM\Entity(repositoryClass: CellRepository::class)]
+class Cell
 {
     const FLAG_TEST_TRUE       = 1;
     const FLAG_TEST_FALSE      = 0;
@@ -36,7 +36,7 @@ class Cellule
     #[ORM\Column(type: 'integer')]
     private $position;
 
-    #[ORM\ManyToOne(targetEntity: Ligne::class, cascade: ["remove"], inversedBy: 'id_cellules')]
+    #[ORM\ManyToOne(targetEntity: Line::class, cascade: ["remove"], inversedBy: 'cells')]
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private $ligne;
 
@@ -105,12 +105,12 @@ class Cellule
         return $this;
     }
 
-    public function getLigne(): ?Ligne
+    public function getLigne(): ?Line
     {
         return $this->ligne;
     }
 
-    public function setLigne(?Ligne $ligne): self
+    public function setLigne(?Line $ligne): self
     {
         $this->ligne = $ligne;
 

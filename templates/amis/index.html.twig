@@ -12,18 +12,18 @@
                         <h2>Inviter un joueur</h2>
                         <div class="demande_contact_formulaire">
                             <div>
-                                {{ form_start(contact_request_form) }}
+                                {{ form_start(contactRequestsForm) }}
                                 <div class="my-custom-class-for-errors">
-                                    {{ form_errors(contact_request_form) }}
+                                    {{ form_errors(contactRequestsForm) }}
                                 </div>
                                 <div class="form-group">
-                                    {{ form_label(contact_request_form.Pseudo) }}
-                                    {{ form_widget(contact_request_form.Pseudo, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_label(contactRequestsForm.Pseudo) }}
+                                    {{ form_widget(contactRequestsForm.Pseudo, {'attr': {'class': 'form-control'}}) }}
                                 </div>
                                 <div class="form-group">
-                                    {{ form_widget(contact_request_form.Demander, {'attr': {'class': 'btn'}}) }}
+                                    {{ form_widget(contactRequestsForm.Demander, {'attr': {'class': 'btn'}}) }}
                                 </div>
-                                {{ form_end(contact_request_form) }}
+                                {{ form_end(contactRequestsForm) }}
                             </div>
                         </div>
                     </div>
@@ -37,7 +37,7 @@
                         <h2>Invitations à jouer</h2>
                         <div class="demandes_contact_reçues">
                             {% for invitation in invitationToPlay %}
-                                <div data-row_utilisateur="{{ invitation.UserWhoInvites.id }}" data-id_game="{{ invitation.partie.id }}" class="row">
+                                <div data-row_utilisateur="{{ invitation.UserWhoInvites.id }}" data-id_game="{{ invitation.game.id }}" class="row">
                                     <div class="utilisateur col-12 col-md-6">
                                         {% if invitation.UserWhoInvites.getAvatar() %}
                                             <img class="avatar" src="{{ ('images/avatars/'~invitation.UserWhoInvites.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
@@ -52,7 +52,7 @@
                                         <button
                                             class="btn play_request accept btn-success"
                                             data-action="accepte"
-                                            data-id_game="{{ invitation.partie.id }}"
+                                            data-id_game="{{ invitation.game.id }}"
                                             data-userWhoInvites="{{ invitation.userWhoInvites.id }}"
                                         >
                                             Accepter
@@ -60,7 +60,7 @@
                                         <button
                                             class="btn play_request decline btn-danger"
                                             data-action="refuse"
-                                            data-id_game="{{ invitation.partie.id }}"
+                                            data-id_game="{{ invitation.game.id }}"
                                             data-userWhoInvites="{{ invitation.userWhoInvites.id }}"
                                         >
                                             Refuser
@@ -79,7 +79,7 @@
                     <div class="col col-12">
                         <h2>Demandes d'amis</h2>
                         <div class="demandes_contact_reçues">
-                            {% for demande in demandes_contact %}
+                            {% for demande in contactRequests %}
                                 <div data-row_utilisateur="{{ demande.source.id }}" class="row">
                                     <div class="utilisateur col-12 col-md-6">
                                         {% if demande.source.getAvatar() %}
@@ -108,7 +108,7 @@
                     <div class="col">
                         <h2>Amis en ligne</h2>
                         <div class="demandes_contact_reçues row">
-                            {% for contact in users_ontact %}
+                            {% for contact in userContacts %}
                                 <div class="utilisateur col-3 col-md-6">
                                     {% if contact.getAvatar() %}
                                         <img class="avatar " src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
@@ -135,10 +135,10 @@
                 $.ajax({
                     // Adresse à laquelle la requête est envoyée
                     method: "GET",
-                    url: "{{ path("reponseDemandeAmis") }}",
+                    url: "{{ path("replyFriendRequest") }}",
                     data: {
-                        idUtilisateur : utilisateur,
-                        reponse: action
+                        idUser : utilisateur,
+                        response: action
                     },
                     // Le délai maximum en millisecondes de traitement de la demande
                     timeout: 4000,
@@ -174,7 +174,7 @@
                         let parsedData = JSON.parse(data);
                         if(parsedData['userWhoInvites']){
                             $("[data-row_utilisateur=" + parsedData['userWhoInvites'] + "]")
-                            .filter("[data-id_game=" + parsedData['id_partie'] + "]")
+                            .filter("[data-id_game=" + parsedData['id_game'] + "]")
                             .remove()
                         }
                         if(parsedData['code'] && (parsedData['code'] === "ok")){

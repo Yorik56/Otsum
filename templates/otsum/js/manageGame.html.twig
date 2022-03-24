@@ -34,7 +34,7 @@
         function creationDeLaGrille(mot, difficulty) {
             let box = $('.table');
             let box_line;
-            $('.mot_a_trouver').append(mot);
+            $('.word_to_find').append(mot);
             for (let i = 0; i < numberOfLines; i++) {
                 box.append('<tr></tr>')
                 box_line = $('div tr:last-child');
@@ -61,7 +61,7 @@
         $('.return').click(function () {
             let mot_valide = true;
             let mot = "";
-            $(".line_" + currentLineNumber).each(function (index, element) {
+            $(".line_" + currentLineNumber).each(function (index) {
                 mot += $(this).text();
                 if ($(this).text() === "." || $(this).text() === "_") {
                     mot_valide = false;

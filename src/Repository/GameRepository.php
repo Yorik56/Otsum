@@ -2,21 +2,21 @@
 
 namespace App\Repository;
 
-use App\Entity\Partie;
+use App\Entity\Game;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Partie|null find($id, $lockMode = null, $lockVersion = null)
- * @method Partie|null findOneBy(array $criteria, array $orderBy = null)
- * @method Partie[]    findAll()
- * @method Partie[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Game|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Game|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Game[]    findAll()
+ * @method Game[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PartieRepository extends ServiceEntityRepository
+class GameRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Partie::class);
+        parent::__construct($registry, Game::class);
     }
 
     // /**

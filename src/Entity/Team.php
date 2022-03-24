@@ -16,22 +16,22 @@ class Team
     private $id;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbr_joueur;
+    private $number_of_player;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $couleur;
+    private $color;
 
-    #[ORM\ManyToOne(targetEntity: Partie::class, inversedBy: 'teams')]
+    #[ORM\ManyToOne(targetEntity: Game::class, inversedBy: 'teams')]
     #[ORM\JoinColumn(nullable: false)]
-    private $partie;
+    private $game;
 
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class)]
-    private $joueurs;
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    private $players;
 
     public function __construct()
     {
-        $this->joueurs = new ArrayCollection();
-        $this->setNbrJoueur(0);
+        $this->players = new ArrayCollection();
+        $this->setNumberOfPlayer(0);
     }
 
     public function getId(): ?int
@@ -39,62 +39,62 @@ class Team
         return $this->id;
     }
 
-    public function getNbrJoueur(): ?int
+    public function getNumberOfPlayer(): ?int
     {
-        return $this->nbr_joueur;
+        return $this->number_of_player;
     }
 
-    public function setNbrJoueur(?int $nbr_joueur): self
+    public function setNumberOfPlayer(?int $number_of_player): self
     {
-        $this->nbr_joueur = $nbr_joueur;
+        $this->number_of_player = $number_of_player;
 
         return $this;
     }
 
-    public function getCouleur(): ?string
+    public function getColor(): ?string
     {
-        return $this->couleur;
+        return $this->color;
     }
 
-    public function setCouleur(?string $couleur): self
+    public function setColor(?string $color): self
     {
-        $this->couleur = $couleur;
+        $this->color = $color;
 
         return $this;
     }
 
-    public function getPartie(): ?Partie
+    public function getGame(): ?Game
     {
-        return $this->partie;
+        return $this->game;
     }
 
-    public function setPartie(?Partie $partie): self
+    public function setGame(?Game $game): self
     {
-        $this->partie = $partie;
+        $this->game = $game;
 
         return $this;
     }
 
     /**
-     * @return Collection|Utilisateur[]
+     * @return Collection|User[]
      */
-    public function getJoueurs(): Collection
+    public function getPlayers(): Collection
     {
-        return $this->joueurs;
+        return $this->players;
     }
 
-    public function addJoueur(Utilisateur $joueur): self
+    public function addPlayer(User $player): self
     {
-        if (!$this->joueurs->contains($joueur)) {
-            $this->joueurs[] = $joueur;
+        if (!$this->players->contains($player)) {
+            $this->players[] = $player;
         }
 
         return $this;
     }
 
-    public function removeJoueur(Utilisateur $joueur): self
+    public function removePlayer(User $player): self
     {
-        $this->joueurs->removeElement($joueur);
+        $this->players->removeElement($player);
 
         return $this;
     }

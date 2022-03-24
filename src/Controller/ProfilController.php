@@ -10,16 +10,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class MonProfilController extends AbstractController
+class ProfilController extends AbstractController
 {
-    #[Route('/mon/profil', name: 'mon_profil')]
+    #[Route('/mon/profil', name: 'profile')]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        $utilisateur = $this->getUser();
-        $avatar = $entityManager->getRepository(Avatar::class)->findOneBy(['utilisateur'=>$utilisateur]);
+        $user = $this->getUser();
+        $avatar = $entityManager->getRepository(Avatar::class)->findOneBy(['utilisateur'=>$user]);
 
-        return $this->render('mon_profil/index.html.twig', [
-            'utilisateur' => $utilisateur,
+        return $this->render('profile/index.html.twig', [
+            'utilisateur' => $user,
             'avatar' => $avatar
         ]);
     }
@@ -27,25 +27,25 @@ class MonProfilController extends AbstractController
     #[Route('majAvatar', name: 'majAvatar')]
     public function majAvatar(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $utilisateur = $this->getUser();
+        $user = $this->getUser();
         $form = $this->createForm(MajAvatarFormType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $avatar = $entityManager->getRepository(Avatar::class)->findOneBy(['utilisateur'=>$utilisateur]);
+            $avatar = $entityManager->getRepository(Avatar::class)->findOneBy(['utilisateur'=>$user]);
             if(!$avatar){
                 $avatar = new Avatar();
             }
             // encode the plain password
             $avatar->setAvatarFile( $form->get('avatarFile')->getData());
-            $avatar->setUtilisateur($utilisateur);
-            $utilisateur->setAvatar($avatar);
+            $avatar->setUser($user);
+            $user->setAvatar($avatar);
             $entityManager->persist($avatar);
-            $entityManager->persist($utilisateur);
+            $entityManager->persist($user);
             $entityManager->flush();
-            return $this->redirectToRoute('mon_profil');
+            return $this->redirectToRoute('profile');
         }
 
-        return $this->render('mon_profil/majAvatar.html.twig', [
+        return $this->render('profile/majAvatar.html.twig', [
             'avatarForm' => $form->createView(),
         ]);
     }

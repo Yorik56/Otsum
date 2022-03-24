@@ -34,7 +34,7 @@ class Avatar implements \Serializable
     #[ORM\Column(type: 'datetime', nullable: true)]
     private $updated_at;
 
-    #[ORM\OneToOne(targetEntity: Utilisateur::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: User::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private $utilisateur;
 
@@ -99,12 +99,12 @@ class Avatar implements \Serializable
         return $this;
     }
 
-    public function getUtilisateur(): ?UserInterface
+    public function getUser(): ?UserInterface
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(UserInterface $utilisateur): self
+    public function setUser(UserInterface $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
 

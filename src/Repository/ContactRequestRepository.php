@@ -2,21 +2,21 @@
 
 namespace App\Repository;
 
-use App\Entity\DemandeContact;
+use App\Entity\ContactRequest;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method DemandeContact|null find($id, $lockMode = null, $lockVersion = null)
- * @method DemandeContact|null findOneBy(array $criteria, array $orderBy = null)
- * @method DemandeContact[]    findAll()
- * @method DemandeContact[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method ContactRequest|null find($id, $lockMode = null, $lockVersion = null)
+ * @method ContactRequest|null findOneBy(array $criteria, array $orderBy = null)
+ * @method ContactRequest[]    findAll()
+ * @method ContactRequest[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DemandeContactRepository extends ServiceEntityRepository
+class ContactRequestRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, DemandeContact::class);
+        parent::__construct($registry, ContactRequest::class);
     }
 
 
@@ -29,14 +29,14 @@ class DemandeContactRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('d')
             ->addSelect(
             "CASE
-                        WHEN IDENTITY(d.source) = :userId THEN IDENTITY(d.cible) 
-                        WHEN IDENTITY(d.cible)  = :userId THEN IDENTITY(d.source) 
+                        WHEN IDENTITY(d.source) = :userId THEN IDENTITY(d.target) 
+                        WHEN IDENTITY(d.target)  = :userId THEN IDENTITY(d.source) 
                         ELSE 0 
                   END AS contact")
-            ->where('IDENTITY(d.source) = :userId OR IDENTITY(d.cible) = :userId')
-            ->andWhere("d.flag_etat = :acceptee")
+            ->where('IDENTITY(d.source) = :userId OR IDENTITY(d.target) = :userId')
+            ->andWhere("d.flag_state = :acceptee")
             ->setParameter('userId', $userId)
-            ->setParameter('acceptee', DemandeContact::DEMANDE_CONTACT_ACCEPTEE)
+            ->setParameter('acceptee', ContactRequest::REQUEST_CONTACT_ACCEPTED)
             ->getQuery()
             ->getResult()
         ;

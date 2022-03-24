@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\{DemandeContact, InvitationToPlay, Utilisateur};
+use App\Entity\{ContactRequest, InvitationToPlay, User};
 use App\Form\ContactRequestType;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -13,9 +13,9 @@ use Symfony\Component\Mercure\{HubInterface, Update};
 use Symfony\Component\Routing\Annotation\Route;
 
 
-class AmisController extends AbstractController
+class ContactController extends AbstractController
 {
-    private $utils;
+    private Utils $utils;
 
     public function __construct(Utils $utils)
     {
@@ -36,75 +36,75 @@ class AmisController extends AbstractController
     {
         //-- Contacts
         $usersContact = $this->utils->getContacts($this->getUser()->getId());
-        //-- Formulaire demande de contact
+        //-- Contact request form
         $form = $this->createForm(ContactRequestType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $pseudo = $form->getData();
-            // Recherche de l'utilisateur ciblé
-            $utilisateur_cible = $entityManager
-                ->getRepository(Utilisateur::class)
+            // Search for the targeted user
+            $targetedUser = $entityManager
+                ->getRepository(User::class)
                 ->findOneBy(['pseudo'=> $pseudo['Pseudo']]);
-            // Si l'utilisateur existe
-            if($utilisateur_cible){
-                // Au cas où l'utilisateur s'envoie une demande à lui-même
-                if ($utilisateur_cible->getId() == $this->getUser()->getId()) {
+            // If the user exists
+            if($targetedUser){
+                // In case the user sends a request to himself
+                if ($targetedUser->getId() == $this->getUser()->getId()) {
                     $error = new FormError("Vous ne pouvez pas vous ajouter en tant que contact.");
                     $form->addError($error);
                 } else {
-                    $demande_de_contact = $entityManager->getRepository(DemandeContact::class)
+                    $contactRequest = $entityManager->getRepository(ContactRequest::class)
                         ->findOneBy([
                                 'source'=>$this->getUser()->getId(),
-                                'cible' =>$utilisateur_cible,
+                                'target' =>$targetedUser,
                         ]);
-                    // On vérifie que cette demande n'a pas déjà été envoyée
-                    if(!$demande_de_contact){
-                        //Enregistrement de la demande de contact
-                        $demande_de_contact = new DemandeContact($this->getUser(),$utilisateur_cible);
-                        $demande_de_contact->setFlagEtat(DemandeContact::DEMANDE_CONTACT_EN_ATTENTE);
-                        $entityManager->persist($demande_de_contact);
+                    // We check that this request has not already been sent
+                    if(!$contactRequest){
+                        // Registration of the contact request
+                        $contactRequest = new ContactRequest($this->getUser(),$targetedUser);
+                        $contactRequest->setFlagState(ContactRequest::REQUEST_CONTACT_PENDING);
+                        $entityManager->persist($contactRequest);
                         $entityManager->flush();
-                        //Envois de la notification
+                        // Sending of the notification
                         $update = new Update(
-                            '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
+                            '/accueil/notifications/demande_ajout/'.$targetedUser->getId(),
                             json_encode([
-                                'topic' => '/accueil/notifications/demande_ajout/'.$utilisateur_cible->getId(),
+                                'topic' => '/accueil/notifications/demande_ajout/'.$targetedUser->getId(),
                                 'notification' => "Vous avez une demande d'amis de ".$this->getUser()->getPseudo(),
                                 'id_source' => $this->getUser()->getId()
                             ])
                         );
                         $hub->publish($update);
                     } else {
-                        // On prévient le demandeur que la demande a déjà été envoyée
+                        // The applicant is notified that the request has already been sent
                         $error = new FormError("La demande à déjà été envoyée à ce contact.");
                         $form->addError($error);
                     }
                 }
             } else {
-                // On prévient le demandeur que le contact recherché n'existe pas
+                // The applicant is informed that the contact does not exist
                 $error = new FormError("L'utilisateur avec ce pseudo n'existe pas.");
                 $form->addError($error);
             }
         }
-        //-- Demandes d'amis reçues
-        $demandes_de_contact = $entityManager->getRepository(entityName: DemandeContact::class)
+        //-- Friend requests received
+        $demandes_de_contact = $entityManager->getRepository(entityName: ContactRequest::class)
             ->findBy([
-                'cible' => $this->getUser()->getId(),
-                'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
+                'target' => $this->getUser()->getId(),
+                'flag_state' => ContactRequest::REQUEST_CONTACT_PENDING
             ]);
         //-- Invitations à jouer reçues
         $invitationToPlay = $entityManager->getRepository(entityName: InvitationToPlay::class)
             ->findBy([
                 'invitedUser' => $this->getUser()->getId(),
-                'flag_etat' => InvitationToPlay::DEMANDE_PARTIE_EN_ATTENTE
+                'flag_state' => InvitationToPlay::REQUEST_GAME_PENDING
             ]);
 
         return $this->render('amis/index.html.twig', [
             'controller_name' => 'AmisController',
-            'contact_request_form' => $form->createView(),
-            'demandes_contact' => $demandes_de_contact,
+            'contactRequestsForm' => $form->createView(),
+            'contactRequests' => $demandes_de_contact,
             'invitationToPlay' => $invitationToPlay,
-            'users_ontact' => $usersContact
+            'userContacts' => $usersContact
         ]);
     }
 
@@ -114,29 +114,29 @@ class AmisController extends AbstractController
      * @param Request $request
      * @return Response
      */
-    #[Route('/reponseDemandeAmis', name: 'reponseDemandeAmis')]
-    public function reponseDemandeAmis(EntityManagerInterface $entityManager, Request $request): Response
+    #[Route('/replyFriendRequest', name: 'replyFriendRequest')]
+    public function replyFriendRequest(EntityManagerInterface $entityManager, Request $request): Response
     {
-        $reponse     = $request->query->get('reponse');
-        $utilisateur = $request->query->get('idUtilisateur');
+        $response     = $request->query->get('response');
+        $user = $request->query->get('idUser');
         //Maj de la demande de contact
-        $demande_de_contact = $entityManager->getRepository(DemandeContact::class)
+        $contactRequest = $entityManager->getRepository(ContactRequest::class)
         ->findOneBy([
-            'source'=>$utilisateur,
-            'cible' =>$this->getUser()->getId(),
+            'source' => $user,
+            'target' => $this->getUser()->getId(),
         ]);
-        if($demande_de_contact && ($reponse=="accepte" || $reponse == "refuse") ){
-            if($reponse == "accepte"){
-                $flag_etat = DemandeContact::DEMANDE_CONTACT_ACCEPTEE;
+        if($contactRequest && ($response=="accepte" || $response == "refuse") ){
+            if($response == "accepte"){
+                $flag_state = ContactRequest::REQUEST_CONTACT_ACCEPTED;
             }
             else{
-                $flag_etat = DemandeContact::DEMANDE_CONTACT_REFUSEE;
+                $flag_state = ContactRequest::REQUEST_CONTACT_REFUSED;
             }
-            $demande_de_contact->setFlagEtat($flag_etat);
-            $entityManager->persist($demande_de_contact);
+            $contactRequest->setFlagState($flag_state);
+            $entityManager->persist($contactRequest);
             $entityManager->flush();
         }
-        return new Response($utilisateur);
+        return new Response($user);
     }
 
 }

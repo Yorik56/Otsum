@@ -46,7 +46,6 @@
                 }
                 // invitation private game
                 if(JSON.parse(e.data).topic === '/invitationPrivateGame/' + {{ app.user.id }}) {
-                    let idPartie  = JSON.parse(e.data).idPartie;
                     let toast = $('.toast');
                     $('.toast-body').html(JSON.parse(e.data).idPartie)
                     toast.toast({ autohide: false })
@@ -60,7 +59,7 @@
             //-- On load: display user notifications
             $.ajax({
                 // Adresse à laquelle la requête est envoyée
-                url: '{{ path('mes_notifications') }}',
+                url: '{{ path('myNotifications') }}',
                 // Le délai maximum en millisecondes de traitement de la demande
                 timeout: 4000,
                 // Affichage de l'icône de notification dans la side barre

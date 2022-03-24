@@ -73,7 +73,7 @@
                                         </div>
                                         <div class="row team_blue">
                                             {% if tablePlayer['blue'] is defined %}
-                                                {% for player in tablePlayer['blue'].getJoueurs() %}
+                                                {% for player in tablePlayer['blue'].getPlayers() %}
                                                     <div class="col-3 playerRow">
                                                         <input class="playerId" type="hidden" value="{{ player.getId() }}">
                                                         {% if player.getAvatar() %}
@@ -99,7 +99,7 @@
                                         </div>
                                         <div class="row team_red">
                                             {% if tablePlayer['red'] is defined %}
-                                                {% for player in tablePlayer['red'].getJoueurs() %}
+                                                {% for player in tablePlayer['red'].getPlayers() %}
                                                     <div class="col-3 playerRow">
                                                         <input class="playerId" type="hidden" value="{{ player.getId() }}">
                                                         {% if player.getAvatar() %}
@@ -131,18 +131,18 @@
                 // Initialisation de l'Url mercure
                 const url = new URL('http://localhost:3000/.well-known/mercure')
                 // On ajoute le "topic" correspondant aux notifications de l'utilisateur courant
-                url.searchParams.append('topic','/hub/prive/' + {{ id_partie }})
+                url.searchParams.append('topic','/hub/prive/' + {{ idGame }})
                 //-- On écoute les évènements provenant de mercure
                 const eventSource = new EventSource(url)
                 eventSource.onmessage = (e) => {
                     // notification nouveau joueur
-                    if(JSON.parse(e.data).topic === '/hub/prive/' + {{ id_partie }}){
+                    if(JSON.parse(e.data).topic === '/hub/prive/' + {{ idGame }}){
                         // window.location.href = JSON.parse(e.data).url_partie;
                         $.ajax({
                             method: "POST",
                             url: "{{ path('reloadPlayerList') }}",
                             data: {
-                                id_partie: {{ id_partie }}
+                                idGame: {{ idGame }}
                             },
                             success: function(data){
                                 let arrayTeam = JSON.parse(data);
@@ -172,7 +172,7 @@
                                         avatar = "<img class='avatar connecte' src='"+ value.avatar +"' alt='avatar'>";
                                     } else {
                                         avatar = "<div class='avatar_par_defaut' > " +
-                                            value.pseudo.substring(1).toUpperCase() +
+                                            value.pseudo.slice(0,1).toUpperCase() +
                                             "</div>";
                                     }
                                     $('.team_red')
@@ -201,7 +201,7 @@
                         url: "{{ path('inviteUser') }}",
                         data: {
                             id_user: $(this).attr("data-userId"),
-                            id_partie: {{ id_partie }}
+                            idGame: {{ idGame }}
                         },
                         success: function(data){
                             $("li.inviteUser[data-userId='" + data + "']").remove();

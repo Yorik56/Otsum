@@ -3,14 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\{
-    Cellule,
-    DemandeContact,
-    Ligne,
-    Partie,
-    Utilisateur
+    Cell,
+    ContactRequest,
+    Line,
+    Game,
+    User
 };
 use App\Form\DropOutFormType;
-use App\Repository\CelluleRepository;
+use App\Repository\CellRepository;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-class AccueilController extends AbstractController {
+class HomeController extends AbstractController {
 
 
     private EntityManagerInterface $entityManager;
@@ -33,10 +33,10 @@ class AccueilController extends AbstractController {
     /**
      * Display the home page
      */
-    #[Route('/', name: 'accueil')]
-    public function index(HubInterface $hub, EntityManagerInterface $entityManager, Request $request): Response
+    #[Route('/', name: 'home')]
+    public function index(): Response
     {
-        return $this->render('accueil/index.html.twig', [
+        return $this->render('home/index.html.twig', [
             'controller_name' => 'AccueilController'
         ]);
     }
@@ -46,28 +46,16 @@ class AccueilController extends AbstractController {
      * @param Request $request
      * @return Response
      */
-    #[Route('/mes-notifications', name: 'mes_notifications')]
-    public function mes_notifications(Request $request): Response
+    #[Route('/myNotifications', name: 'myNotifications')]
+    public function myNotifications(Request $request): Response
     {
-        $demande_de_contact = $this->entityManager->getRepository(DemandeContact::class)
+        $contactRequest = $this->entityManager->getRepository(ContactRequest::class)
             ->findOneBy([
-                'cible' =>$this->getUser()->getId(),
-                'flag_etat' => DemandeContact::DEMANDE_CONTACT_EN_ATTENTE
+                'target' =>$this->getUser()->getId(),
+                'flag_state' => ContactRequest::REQUEST_CONTACT_PENDING
             ]);
-        ($demande_de_contact)?$demandes=true:$demandes=false;
-        return new Response($demandes);
-    }
-
-    /**
-     * Display a hub
-     * @return Response
-     */
-    #[Route('/choixDifficulte', name: 'choixDifficulte')]
-    public function hub(): Response
-    {
-        return $this->render('hub/choix_difficulte.html.twig', [
-            'controller_name' => 'AccueilController',
-        ]);
+        ($contactRequest)?$response=true:$response=false;
+        return new Response($response);
     }
 
     /**
@@ -80,7 +68,7 @@ class AccueilController extends AbstractController {
         //--- Formulaire Abandon
         $dropOutForm = $this->createForm(DropOutFormType::class);
         return $this->render('otsum/index.html.twig', [
-            'controller_name' => 'AccueilController',
+            'controller_name' => 'HomeController',
             'dropOutForm' => $dropOutForm->createView(),
         ]);
     }
@@ -91,12 +79,14 @@ class AccueilController extends AbstractController {
         $dropOutForm->handleRequest($request);
         if ($dropOutForm->isSubmitted() && $dropOutForm->isValid()) {
             $game = $this->entityManager
-                ->getRepository(Partie::class)
+                ->getRepository(Game::class)
                 ->find($dropOutForm->getData()['gameId']);
             $this->entityManager->remove($game);
             $this->entityManager->flush();
-            return $this->redirectToRoute('accueil');
+            return $this->redirectToRoute('home');
         }
+
+        return false;
     }
 
     /**
@@ -113,23 +103,23 @@ class AccueilController extends AbstractController {
     {
         // Parameters to get a word
         $difficulty = rand(7, 10);
-        $word_to_find = $utils->getRandomWord($difficulty);
+        $wordToFind = $utils->getRandomWord($difficulty);
         //--- Create a player
-        $joueur = $this->entityManager->getRepository(Utilisateur::class)->find($this->getUser()->getId());
+        $joueur = $this->entityManager->getRepository(User::class)->find($this->getUser()->getId());
         //--- Create a game
-        $game = new Partie();
-        $game->setLongueurLignes($difficulty);
-        $game->setMotATrouver(trim($word_to_find));
-        $game->setDureeSessionLigne(50);
-        $game->addIdJoueur($joueur);
-        $game->setNombreTours(6);
-        $game->setNombreToursJoues(1);
+        $game = new Game();
+        $game->setLineLength($difficulty);
+        $game->setWordToFind(trim($wordToFind));
+        $game->setLineSessionTime(50);
+        $game->addPlayer($joueur);
+        $game->setNumberOfRounds(6);
+        $game->setNumberOfRoundsPlayed(1);
         $this->entityManager->persist($game);
         $this->entityManager->flush();
 
         // Send the first letter
         return new JsonResponse([
-            "firstLetter" => $word_to_find[0],
+            "firstLetter" => $wordToFind[0],
             "idGame"   => $game->getId(),
             "difficulty"  => $difficulty
         ]);
@@ -145,42 +135,42 @@ class AccueilController extends AbstractController {
     #[Route('/updateLine', name: 'updateLine')]
     function updateLine(Request $request): JsonResponse
     {
-        $id_game = $request->request->get('id_partie');
+        $idGame = $request->request->get('idGame');
         //Game in progress
-        $game = $this->entityManager->getRepository(Partie::class)->find($id_game);
-        $number_of_try = $request->request->get('current_line_number') + 1;
-        $this->persistCurrentLineNumber($game, $number_of_try);
-        $word_to_find = $game->getMotATrouver();
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        $numberOfTry = $request->request->get('currentLineNumber') + 1;
+        $this->persistCurrentLineNumber($game, $numberOfTry);
+        $wordToFind = $game->getWordToFind();
         // Counting in the word to be found,
         // the number of existing occurrences of each letter
-        $word_search_array = str_split($word_to_find);
-        $counts_occurrences_placed = $this->countOccurrencesPlaced($word_search_array, $word_to_find);
+        $wordSearchArray = str_split($wordToFind);
+        $countsOccurrencesPlaced = $this->countOccurrencesPlaced($wordSearchArray, $wordToFind);
         //-- Update of the current line
         // Last word tried
-        $last_try = $request->request->get('mot');
-        $table_of_the_last_try = str_split($last_try);
-        $actual_line = $this->updateNewLineState(
-            $word_search_array, $counts_occurrences_placed,
-            $table_of_the_last_try, $word_to_find
+        $lastTry = $request->request->get('mot');
+        $tableOfTheLastTry = str_split($lastTry);
+        $actualLine = $this->updateNewLineState(
+            $wordSearchArray, $countsOccurrencesPlaced,
+            $tableOfTheLastTry, $wordToFind
         );
-        $valid_letters = $actual_line['valid_letters'];
+        $validLetters = $actualLine['valid_letters'];
         // Save the new line in database
-        $this->persistNewLineInDatabase($actual_line['actual_line'], $game);
+        $this->persistNewLineInDatabase($actualLine['actual_line'], $game);
         // Update keyboard keys
-        $arrayMajKeyboard = $this->updateKeyboardKeys($id_game);
+        $arrayMajKeyboard = $this->updateKeyboardKeys($idGame);
         // Set victory variable
-        ($valid_letters == count($word_search_array))?$victory = true:$victory = false;
+        ($validLetters == count($wordSearchArray))?$victory = true:$victory = false;
         $response = [
-            "mot_a_trouver"    => $word_search_array,
-            "dernier_essai"    => $table_of_the_last_try,
-            "ligne_precedente" => $actual_line['actual_line'],
+            "word_to_find"     => $wordSearchArray,
+            "dernier_essai"    => $tableOfTheLastTry,
+            "ligne_precedente" => $actualLine['actual_line'],
             "arrayMajKeyboard" => $arrayMajKeyboard,
-            "essais"           => $number_of_try,
+            "numberOfLines"    => $numberOfTry,
             "victoire"         => $victory
         ];
         // If you made it to the last round and the word was not found
-        if($game->getNombreTours() == $game->getNombreToursJoues() && $victory == false){
-            $response['mot_a_trouver'] = $word_to_find;
+        if($game->getNumberOfRounds() == $game->getNumberOfRoundsPlayed() && $victory == false){
+            $response['word_to_find'] = $wordToFind;
         }
         return new JsonResponse($response);
     }
@@ -188,61 +178,61 @@ class AccueilController extends AbstractController {
     /**
      * Update states of the last played line
      *
-     * @param $word_search_array
-     * @param $counts_occurrences_placed
-     * @param $table_of_the_last_try
-     * @param $word_to_find
+     * @param $wordSearchArray
+     * @param $countsOccurrencesPlaced
+     * @param $tableOfTheLastTry
+     * @param $wordToFind
      * @return array
      */
     #[ArrayShape(['actual_line' => "array", 'valid_letters' => "int"])]
     public function updateNewLineState(
-        $word_search_array, $counts_occurrences_placed, $table_of_the_last_try, $word_to_find
+        $wordSearchArray, $countsOccurrencesPlaced, $tableOfTheLastTry, $wordToFind
     ): array
     {
-        $valid_letters = 0;
-        $actual_line = [];
+        $validLetters = 0;
+        $actualLine = [];
         //-- It is also necessary to count the occurrences of all the letters tested
-        $test_occurrence_counter = $counts_occurrences_placed;
+        $testOccurrenceCounter = $countsOccurrencesPlaced;
         // For each letter of the word to find
-        foreach ($word_search_array as $index_word_to_find => $letter){
-            $actual_line[$index_word_to_find]['valeur'] = $table_of_the_last_try[$index_word_to_find];
-            $actual_line[$index_word_to_find]['test']   = true;
-            $actual_line[$index_word_to_find]['comparaison']   = $table_of_the_last_try[$index_word_to_find] . " -> " . $letter;
+        foreach ($wordSearchArray as $indexWordToFind => $letter){
+            $actualLine[$indexWordToFind]['valeur'] = $tableOfTheLastTry[$indexWordToFind];
+            $actualLine[$indexWordToFind]['test']   = true;
+            $actualLine[$indexWordToFind]['comparaison']   = $tableOfTheLastTry[$indexWordToFind] . " -> " . $letter;
             // If the letter is in the word
-            if(preg_match('/'.$table_of_the_last_try[$index_word_to_find].'/', $word_to_find)){
-                $actual_line[$index_word_to_find]['presence'] = true;
+            if(preg_match('/'.$tableOfTheLastTry[$indexWordToFind].'/', $wordToFind)){
+                $actualLine[$indexWordToFind]['presence'] = true;
                 // If the letter is well-placed
-                if($table_of_the_last_try[$index_word_to_find] === $letter) {
-                    $counts_occurrences_placed[$table_of_the_last_try[$index_word_to_find]]--;
-                    $actual_line[$index_word_to_find]['placement'] = true;
-                    $valid_letters++;
+                if($tableOfTheLastTry[$indexWordToFind] === $letter) {
+                    $countsOccurrencesPlaced[$tableOfTheLastTry[$indexWordToFind]]--;
+                    $actualLine[$indexWordToFind]['placement'] = true;
+                    $validLetters++;
                 } else {
-                    $actual_line[$index_word_to_find]['placement'] = false;
+                    $actualLine[$indexWordToFind]['placement'] = false;
                     // If the total number of this occurrence have been played in the last attempt
                     // then this occurrence is not considered to be present in the line
-                    if($test_occurrence_counter[$table_of_the_last_try[$index_word_to_find]] < 1){
-                        $actual_line[$index_word_to_find]['presence']  = false;
+                    if($testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]] < 1){
+                        $actualLine[$indexWordToFind]['presence']  = false;
                     }
-                    $test_occurrence_counter[$table_of_the_last_try[$index_word_to_find]]--;
+                    $testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]]--;
                 }
             } else {
-                $actual_line[$index_word_to_find]['presence']  = false;
-                $actual_line[$index_word_to_find]['placement'] = false;
+                $actualLine[$indexWordToFind]['presence']  = false;
+                $actualLine[$indexWordToFind]['placement'] = false;
             }
         }
         // We remove the presence flag from the misplaced letters whose placement counter is at zero
-        foreach($actual_line as $index => $letter){
+        foreach($actualLine as $index => $letter){
             if(
                 ($letter['placement'] == false && $letter['presence'] == true) &&
-                $counts_occurrences_placed[$letter['valeur']] < 1
+                $countsOccurrencesPlaced[$letter['valeur']] < 1
             )
             {
-                $actual_line[$index]['presence']  = false;
+                $actualLine[$index]['presence']  = false;
             }
         }
         return [
-            'actual_line' => $actual_line,
-            'valid_letters' => $valid_letters
+            'actual_line' => $actualLine,
+            'valid_letters' => $validLetters
         ];
     }
 
@@ -254,7 +244,7 @@ class AccueilController extends AbstractController {
      * @return void
      */
     public function persistCurrentLineNumber($game, $current_number_line){
-        $game->setNombreToursJoues($current_number_line);
+        $game->setNumberOfRoundsPlayed($current_number_line);
         $this->entityManager->persist($game);
         $this->entityManager->flush();
     }
@@ -262,34 +252,34 @@ class AccueilController extends AbstractController {
     /**
      * Persist the last generated line in database
      *
-     * @param $actual_line
+     * @param $actualLine
      * @param $game
      * @return void
      */
-    public function persistNewLineInDatabase($actual_line, $game){
+    public function persistNewLineInDatabase($actualLine, $game){
         // Registration of the new line
-        $ligne = new Ligne($this->getUser(), $game);
+        $ligne = new Line($this->getUser(), $game);
         $this->entityManager->persist($ligne);
         // Update of letters
-        foreach ($actual_line as $index => $letter){
-            $cellule = new Cellule();
+        foreach ($actualLine as $index => $letter){
+            $cellule = new Cell();
             $cellule->setLigne($ligne);
             $cellule->setValeur($letter['valeur']);
             $cellule->setPosition($index);
             if($letter['placement']){
-                $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_TRUE);
+                $cellule->setFlagPlacee(Cell::FLAG_PLACEMENT_TRUE);
             } else {
-                $cellule->setFlagPlacee(Cellule::FLAG_PLACEMENT_FALSE);
+                $cellule->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
             }
             if($letter['presence']){
-                $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_TRUE);
+                $cellule->setFlagPresente(Cell::FLAG_PRESENCE_TRUE);
             } else {
-                $cellule->setFlagPresente(Cellule::FLAG_PRESENCE_FALSE);
+                $cellule->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
             }
             if($letter['test']){
-                $cellule->setFlagTestee(Cellule::FLAG_TEST_TRUE);
+                $cellule->setFlagTestee(Cell::FLAG_TEST_TRUE);
             } else {
-                $cellule->setFlagTestee(Cellule::FLAG_TEST_FALSE);
+                $cellule->setFlagTestee(Cell::FLAG_TEST_FALSE);
             }
             $this->entityManager->persist($cellule);
         }
@@ -339,34 +329,34 @@ class AccueilController extends AbstractController {
     /**
      * Count occurrences for each letters
      *
-     * @param $word_search_array
-     * @param $word_to_find
+     * @param $wordSearchArray
+     * @param $wordToFind
      * @return array
      */
-    public function countOccurrencesPlaced($word_search_array, $word_to_find): array
+    public function countOccurrencesPlaced($wordSearchArray, $wordToFind): array
     {
-        $counts_occurrences_placed = [];
-        foreach ($word_search_array as $value){
+        $countsOccurrencesPlaced = [];
+        foreach ($wordSearchArray as $value){
             // If this letter has not been counted
             if(!isset($compteur_occurrence[$value])){
-                $counts_occurrences_placed[$value] = substr_count($word_to_find, $value);
+                $countsOccurrencesPlaced[$value] = substr_count($wordToFind, $value);
             }
         }
-        return $counts_occurrences_placed;
+        return $countsOccurrencesPlaced;
     }
 
     /**
      * Update the keyboard displayed in game
      *
-     * @param $id_game
+     * @param $idGame
      * @return array
      */
-    public function updateKeyboardKeys($id_game): array
+    public function updateKeyboardKeys($idGame): array
     {
         //-- Update of the keyboard keys
-        $celluleRepository = $this->entityManager->getRepository(Cellule::class);
+        $celluleRepository = $this->entityManager->getRepository(Cell::class);
         // Update letters placed
-        $majKeyboardPlaced = $celluleRepository->getPlaced($id_game);
+        $majKeyboardPlaced = $celluleRepository->getPlaced($idGame);
         $arrayMajKeyboard = [];
         foreach ($majKeyboardPlaced as $cellule){
             $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
@@ -374,18 +364,18 @@ class AccueilController extends AbstractController {
             $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
         }
         // Update of missing letters
-        $majKeyboardNotPresent = $celluleRepository->getNotPresent($id_game);
+        $majKeyboardNotPresent = $celluleRepository->getNotPresent($idGame);
         $arrayMajKeyboard = $this->arrayMajKeyboard(
             $celluleRepository,
-            $id_game,
+            $idGame,
             $arrayMajKeyboard,
             $majKeyboardNotPresent
         );
         // Update letters present and not placed
-        $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($id_game);
+        $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($idGame);
         return $this->arrayMajKeyboard(
             $celluleRepository,
-            $id_game,
+            $idGame,
             $arrayMajKeyboard,
             $majKeyboardPresentAndNotPlaced
         );
@@ -394,17 +384,17 @@ class AccueilController extends AbstractController {
     /**
      * Updating the keyboard keys
      *
-     * @param CelluleRepository $celluleRepository
-     * @param int $id_game
+     * @param CellRepository $celluleRepository
+     * @param int $idGame
      * @param array $arrayMajKeyboard
-     * @param Cellule[] $majKeyboardArrayCell
+     * @param Cell[] $majKeyboardArrayCell
      * @return array
      */
-    public function arrayMajKeyboard(ObjectRepository $celluleRepository, int $id_game, array $arrayMajKeyboard, array $majKeyboardArrayCell): array
+    public function arrayMajKeyboard(ObjectRepository $celluleRepository, int $idGame, array $arrayMajKeyboard, array $majKeyboardArrayCell): array
     {
         foreach ($majKeyboardArrayCell as $cellule) {
             // Check if the letter has already been placed
-            if (!$celluleRepository->getPlacedOrFalse($id_game, $cellule->getValeur())) {
+            if (!$celluleRepository->getPlacedOrFalse($idGame, $cellule->getValeur())) {
                 // Update the status of the letter
                 $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
                 $arrayMajKeyboard[$cellule->getValeur()]['presence'] = $cellule->getFlagPresente();

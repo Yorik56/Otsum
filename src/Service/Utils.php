@@ -2,8 +2,8 @@
 
 namespace App\Service;
 
-use App\Entity\DemandeContact;
-use App\Entity\Utilisateur;
+use App\Entity\ContactRequest;
+use App\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -28,11 +28,11 @@ class Utils
      */
     public function getContacts($idUser): array
     {
-        $contacts = $this->entityManager->getRepository(entityName: DemandeContact::class)
+        $contacts = $this->entityManager->getRepository(entityName: ContactRequest::class)
             ->mesContacts(userId: $idUser);
         $usersContact = [];
         foreach ($contacts as $index => $contact) {
-            $user = $this->entityManager->getRepository(entityName: Utilisateur::class)
+            $user = $this->entityManager->getRepository(entityName: User::class)
                 ->findOneBy([
                     'id' => $contact['contact']
                 ]);
@@ -52,11 +52,11 @@ class Utils
      */
     public function getContactsOnline($idUser): array
     {
-        $contacts = $this->entityManager->getRepository(entityName: DemandeContact::class)
+        $contacts = $this->entityManager->getRepository(entityName: ContactRequest::class)
             ->mesContacts(userId: $idUser);
         $usersContact = [];
         foreach ($contacts as $index => $contact) {
-            $user = $this->entityManager->getRepository(entityName: Utilisateur::class)
+            $user = $this->entityManager->getRepository(entityName: User::class)
                 ->findOneBy([
                     'id' => $contact['contact'],
                     'connected' => 1
