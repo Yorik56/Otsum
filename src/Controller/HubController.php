@@ -41,6 +41,8 @@ class HubController extends AbstractController
         $game->setWordToFind($this->utils->getRandomWord($wordLength));
         $game->setLineSessionTime(50);
         $game->setLineLength($wordLength);
+        $game->setFlagTypeOfGame(Game::PRIVATE_MULTPLAYER_GAME);
+        $game->setHost($this->getUser());
         $this->entityManager->persist($game);
         $this->entityManager->flush();
         $idGame = $game->getId();
@@ -118,7 +120,8 @@ class HubController extends AbstractController
         return $this->render('hub/index.html.twig', [
             'controller_name' => 'HubController',
             'teamForm'        => $teamForm->createView(),
-            'idGame'       => $idGame,
+            'idGame'          => $idGame,
+            'host'            => $game->getHost(),
             'tablePlayer'     => $tableTeam,
             'contactList'     => $contactList
         ]);

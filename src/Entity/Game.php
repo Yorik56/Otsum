@@ -13,6 +13,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 class Game
 {
+
+    const SOLO_GAME               = 1;
+    const PRIVATE_MULTPLAYER_GAME = 2;
+    const PUBLIC_MULTPLAYER_GAME  = 3;
+
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -56,6 +62,12 @@ class Game
 
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: InvitationToPlay::class)]
     private $invitationToPlay;
+
+    #[ORM\Column(type: 'smallint', nullable: true)]
+    private $flagTypeOfGame;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    private $host;
 
     #[Pure] public function __construct()
     {
@@ -299,6 +311,30 @@ class Game
                 $invitationToPlay->setGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFlagTypeOfGame(): ?int
+    {
+        return $this->flagTypeOfGame;
+    }
+
+    public function setFlagTypeOfGame(?int $flagTypeOfGame): self
+    {
+        $this->flagTypeOfGame = $flagTypeOfGame;
+
+        return $this;
+    }
+
+    public function getHost(): ?User
+    {
+        return $this->host;
+    }
+
+    public function setHost(?User $host): self
+    {
+        $this->host = $host;
 
         return $this;
     }

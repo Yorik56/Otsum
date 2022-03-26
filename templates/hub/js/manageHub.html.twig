@@ -1,0 +1,29 @@
+<script>
+    $(document).ready(function(){
+        // Si l'utilisateur est connecté
+        {% if app.user %}
+        //-- Invitation to play
+        $('#invitationModal').on('click','li.inviteUser',function() {
+            $.ajax({
+                method: "POST",
+                url: "{{ path('inviteUser') }}",
+                data: {
+                    id_user: $(this).attr("data-userId"),
+                    idGame: {{ idGame }}
+                },
+                success: function(data){
+                    $("li.inviteUser[data-userId='" + data + "']").remove();
+                    $('#invitationModal .modal-body ul').prepend(
+                        '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                        'Invitation envoyée' +
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>'
+                    );
+                }
+            });
+        });
+        {% endif %}
+    });
+</script>

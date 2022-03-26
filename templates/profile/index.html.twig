@@ -14,7 +14,7 @@
                                 {% if avatar %}
                                     <img src="{{ ('images/avatars/'~avatar.avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
                                 {% else %}
-                                    <div class="avatar_par_defaut">
+                                    <div class="defaultAvatar">
                                         {{ utilisateur.pseudo|first|upper }}
                                     </div>
                                 {% endif %}

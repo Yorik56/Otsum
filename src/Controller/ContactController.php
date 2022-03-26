@@ -92,18 +92,11 @@ class ContactController extends AbstractController
                 'target' => $this->getUser()->getId(),
                 'flag_state' => ContactRequest::REQUEST_CONTACT_PENDING
             ]);
-        //-- Invitations à jouer reçues
-        $invitationToPlay = $entityManager->getRepository(entityName: InvitationToPlay::class)
-            ->findBy([
-                'invitedUser' => $this->getUser()->getId(),
-                'flag_state' => InvitationToPlay::REQUEST_GAME_PENDING
-            ]);
 
         return $this->render('amis/index.html.twig', [
             'controller_name' => 'AmisController',
             'contactRequestsForm' => $form->createView(),
             'contactRequests' => $demandes_de_contact,
-            'invitationToPlay' => $invitationToPlay,
             'userContacts' => $usersContact
         ]);
     }

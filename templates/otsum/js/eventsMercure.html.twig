@@ -29,19 +29,25 @@
                 // login
                 if(JSON.parse(e.data).topic === '/imLogged/' + {{ app.user.id }}) {
                     let idUser  = JSON.parse(e.data).idUser;
-                    let user = $(`[data-id='${idUser}']`).find('img');
-                    console.log(user);
-                    if(!user.hasClass('connecte')){
-                        user.addClass('connecte');
+                    let userAvatarImg     = $(`[data-id='${idUser}']`).find('img');
+                    let userAvatarDefault = $(`[data-id='${idUser}']`).find('.defaultAvatar');
+                    if(!userAvatarImg.hasClass('connecte')){
+                        userAvatarImg.addClass('connecte');
+                    }
+                    if(!userAvatarDefault.hasClass('connecte')){
+                        userAvatarDefault.addClass('connecte');
                     }
                 }
                 // logout
                 if(JSON.parse(e.data).topic === '/iLeave/' + {{ app.user.id }}) {
                     let idUser  = JSON.parse(e.data).idUser;
-                    let user = $(`[data-id='${idUser}']`).find('img');
-                    console.log(user);
-                    if(user.hasClass('connecte')){
-                        user.removeClass('connecte');
+                    let userAvatarImg     = $(`[data-id='${idUser}']`).find('img');
+                    let userAvatarDefault = $(`[data-id='${idUser}']`).find('.defaultAvatar');
+                    if(userAvatarImg.hasClass('connecte')){
+                        userAvatarImg.removeClass('connecte');
+                    }
+                    if(userAvatarDefault.hasClass('connecte')){
+                        userAvatarDefault.removeClass('connecte');
                     }
                 }
                 // invitation private game
@@ -51,7 +57,7 @@
                     toast.toast({ autohide: false })
                     toast.toast('show')
                     $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display','flex')
-                    $('.sidenav .sidenav_content ul li .notification-amis').css('display','inline-block')
+                    $('.sidenav .sidenav_content ul li .notification-notifications').css('display','inline-block')
                 }
             }
 

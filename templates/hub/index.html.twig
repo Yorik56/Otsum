@@ -15,6 +15,11 @@
                                 <button type="button" class="btn" data-toggle="modal" data-target="#invitationModal">
                                     Inviter
                                 </button>
+                                {% if (app.user is defined) and (app.user.id is same as (host.getId())) %}
+                                    <button type="button" class="btn">
+                                        Lancer la partie
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                         {{ form_start(teamForm) }}
@@ -46,7 +51,7 @@
                                                     {% if contact.getAvatar() %}
                                                         <img class="avatar {% if contact.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
                                                     {% else %}
-                                                        <div class="avatar_par_defaut {% if contact.getConnected()  == true  %}connecte{% endif %}">
+                                                        <div class="defaultAvatar {% if contact.getConnected()  == true  %}connecte{% endif %}">
                                                             {{ contact.pseudo|first|upper }}
                                                         </div>
                                                     {% endif %}
@@ -79,7 +84,7 @@
                                                         {% if player.getAvatar() %}
                                                             <img class="avatar {% if player.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
                                                         {% else %}
-                                                            <div class="avatar_par_defaut {% if player.getConnected()  == true  %}connecte{% endif %}">
+                                                            <div class="defaultAvatar {% if player.getConnected()  == true  %}connecte{% endif %}">
                                                                 {{ player.pseudo|first|upper }}
                                                             </div>
                                                         {% endif %}
@@ -105,7 +110,7 @@
                                                         {% if player.getAvatar() %}
                                                             <img class="avatar {% if player.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
                                                         {% else %}
-                                                            <div class="avatar_par_defaut {% if player.getConnected()  == true  %}connecte{% endif %}">
+                                                            <div class="defaultAvatar {% if player.getConnected()  == true  %}connecte{% endif %}">
                                                                 {{ player.pseudo|first|upper }}
                                                             </div>
                                                         {% endif %}
@@ -123,100 +128,8 @@
             </div>
         </section>
     </div>
-    <script>
-        $(document).ready(function(){
-            // Si l'utilisateur est connecté
-            {% if app.user %}
-                //-- Inscription aux topics mercure.
-                // Initialisation de l'Url mercure
-                const url = new URL('http://localhost:3000/.well-known/mercure')
-                // On ajoute le "topic" correspondant aux notifications de l'utilisateur courant
-                url.searchParams.append('topic','/hub/prive/' + {{ idGame }})
-                //-- On écoute les évènements provenant de mercure
-                const eventSource = new EventSource(url)
-                eventSource.onmessage = (e) => {
-                    // notification nouveau joueur
-                    if(JSON.parse(e.data).topic === '/hub/prive/' + {{ idGame }}){
-                        // window.location.href = JSON.parse(e.data).url_partie;
-                        $.ajax({
-                            method: "POST",
-                            url: "{{ path('reloadPlayerList') }}",
-                            data: {
-                                idGame: {{ idGame }}
-                            },
-                            success: function(data){
-                                let arrayTeam = JSON.parse(data);
-                                $('.team_blue').empty();
-                                $('.team_red').empty();
-                                $.each(arrayTeam.blue, function (index, value) {
-                                    let avatar;
-                                    if(value.avatar){
-                                        avatar = "<img class='avatar connecte' src='"+ value.avatar +"' alt='avatar'>";
-                                    } else {
-                                        avatar = "<div class='avatar_par_defaut' > " +
-                                            value.pseudo.slice(0,1).toUpperCase() +
-                                            "</div>";
-                                    }
-                                    $('.team_blue')
-                                        .append(
-                                            "<div class='col-3 playerRow'>" +
-                                            "<input class='playerId' type='hidden' value='"+ value.id_player +"'>" +
-                                            avatar +
-                                            value.pseudo +
-                                            "</div>"
-                                        )
-                                })
-                                $.each(arrayTeam.red, function (index, value) {
-                                    let avatar;
-                                    if(value.avatar){
-                                        avatar = "<img class='avatar connecte' src='"+ value.avatar +"' alt='avatar'>";
-                                    } else {
-                                        avatar = "<div class='avatar_par_defaut' > " +
-                                            value.pseudo.slice(0,1).toUpperCase() +
-                                            "</div>";
-                                    }
-                                    $('.team_red')
-                                        .append(
-                                            "<div class='col-3 playerRow'>" +
-                                            "<input class='playerId' type='hidden' value='"+ value.id_player +"'>" +
-                                            avatar +
-                                            value.pseudo +
-                                            "</div>"
-                                        )
-                                })
-                            }
-                        });
-                    }
-                }
-                //-- Désinscription aux topics mercure
-                window.addEventListener('beforeunload', function () {
-                    if(eventSource != null){
-                        eventSource.close()
-                    }
-                })
-                //-- Invitation to play
-                $('#invitationModal').on('click','li.inviteUser',function() {
-                    $.ajax({
-                        method: "POST",
-                        url: "{{ path('inviteUser') }}",
-                        data: {
-                            id_user: $(this).attr("data-userId"),
-                            idGame: {{ idGame }}
-                        },
-                        success: function(data){
-                            $("li.inviteUser[data-userId='" + data + "']").remove();
-                            $('#invitationModal .modal-body ul').prepend(
-                                '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
-                                    'Invitation envoyée' +
-                                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                                        '<span aria-hidden="true">&times;</span>' +
-                                    '</button>' +
-                                '</div>'
-                            );
-                        }
-                    });
-                });
-            {% endif %}
-        });
-    </script>
+    {# --- JAVASCRIPT --- #}
+    {{ include('hub/js/eventsMercure.html.twig') }}
+    {{ include('hub/js/manageHub.html.twig') }}
+    {# --- JAVASCRIPT --- #}
 {% endblock %}
