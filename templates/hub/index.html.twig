@@ -7,125 +7,128 @@
     <div class="container d-flex justify-content-center">
         <section class="row area d-flex justify-content-center">
             <div class="block_bouton col-12 ">
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group form-row mb-2">
-                            <div class="col-12 p-0">
-                                <!-- Button trigger modal -->
-                                <button type="button" class="btn" data-toggle="modal" data-target="#invitationModal">
-                                    Inviter
+                <div class="form-group form-row mb-2">
+                    <div class="col-12 p-0">
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn" data-toggle="modal" data-target="#invitationModal">
+                            Inviter
+                        </button>
+                        {% if (app.user is defined) and (app.user.id is same as (host.getId())) %}
+                            <button type="button" class="btn">
+                                Lancer la partie
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="invitationModal" tabindex="-1" role="dialog" aria-labelledby="invitationModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="invitationModalLabel">Inviter un contact</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
                                 </button>
-                                {% if (app.user is defined) and (app.user.id is same as (host.getId())) %}
-                                    <button type="button" class="btn">
-                                        Lancer la partie
-                                    </button>
-                                {% endif %}
+                            </div>
+                            <div class="modal-body">
+                                <ul>
+                                    {% for contact in contactList %}
+                                        <li class="inviteUser" data-userId="{{ contact.getId() }}">
+                                            <input type="hidden" class="inputUser">
+                                            {% if contact.getAvatar() %}
+                                                <img class="avatar {% if contact.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                            {% else %}
+                                                <div class="defaultAvatar {% if contact.getConnected()  == true  %}connecte{% endif %}">
+                                                    {{ contact.pseudo|first|upper }}
+                                                </div>
+                                            {% endif %}
+                                            {{ contact.pseudo }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
-                        {{ form_start(teamForm) }}
-                             <div class="form-group form-row">
-                                <div class="col-6 p-0">
-                                    {{ form_widget(teamForm.team_blue) }}
-                                </div>
-                                <div class="col-6 p-0">
-                                    {{ form_widget(teamForm.team_red) }}
-                                </div>
-                            </div>
-                            {{ form_widget(teamForm.partie) }}
-                        {{ form_end(teamForm) }}
-                        <!-- Modal -->
-                        <div class="modal fade" id="invitationModal" tabindex="-1" role="dialog" aria-labelledby="invitationModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="invitationModalLabel">Inviter un contact</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
+                    </div>
+                </div>
+            </div>
+            {{ form_start(teamForm, {'attr': {'class': 'w-100'}}) }}
+                <div class="col-12">
+                    <div class="teams">
+                        <div class="row mt-2 w-100">
+                            <div class="card w-100" style="background: #5454b3ad;">
+                                <div class="card-header">
+                                    <div class="row">
+                                        <div class="col-6 d-flex align-items-center">
+                                            <p class="m-0">Équipe bleue</p>
+                                        </div>
+                                        <div class="col-6">
+                                            {{ form_widget(teamForm.team_blue) }}
+                                        </div>
                                     </div>
-                                    <div class="modal-body">
-                                        <ul>
-                                            {% for contact in contactList %}
-                                                <li class="inviteUser" data-userId="{{ contact.getId() }}">
-                                                    <input type="hidden" class="inputUser">
-                                                    {% if contact.getAvatar() %}
-                                                        <img class="avatar {% if contact.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                </div>
+                                <div class="card-body">
+                                    <div class="row team_blue">
+                                        {% if tablePlayer['blue'] is defined %}
+                                            {% for player in tablePlayer['blue'].getPlayers() %}
+                                                <div class="col-3 playerRow">
+                                                    <input class="playerId" type="hidden" value="{{ player.getId() }}">
+                                                    {% if player.getAvatar() %}
+                                                        <img class="avatar {% if player.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
                                                     {% else %}
-                                                        <div class="defaultAvatar {% if contact.getConnected()  == true  %}connecte{% endif %}">
-                                                            {{ contact.pseudo|first|upper }}
+                                                        <div class="defaultAvatar {% if player.getConnected()  == true  %}connecte{% endif %}">
+                                                            {{ player.pseudo|first|upper }}
                                                         </div>
                                                     {% endif %}
-                                                    {{ contact.pseudo }}
-                                                </li>
+                                                    {{ player.pseudo }}
+                                                </div>
                                             {% endfor %}
-                                        </ul>
-
+                                        {% endif %}
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                   </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12">
-                            <div class="teams">
-                                <div class="row mt-2 w-100">
-                                    <div class="card w-100 py-3" style="background: #5454b3ad;">
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <h3>Équipe bleue</h3>
-                                            </div>
+                        <div class="row  mt-2 w-100" >
+                            <div class="card w-100" style="background: #b35454ad;">
+                                <div class="card-header">
+                                    <div class="row">
+                                        <div class="col-6 d-flex align-items-center">
+                                            <p class="m-0">Équipe rouge</p>
                                         </div>
-                                        <div class="row team_blue">
-                                            {% if tablePlayer['blue'] is defined %}
-                                                {% for player in tablePlayer['blue'].getPlayers() %}
-                                                    <div class="col-3 playerRow">
-                                                        <input class="playerId" type="hidden" value="{{ player.getId() }}">
-                                                        {% if player.getAvatar() %}
-                                                            <img class="avatar {% if player.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
-                                                        {% else %}
-                                                            <div class="defaultAvatar {% if player.getConnected()  == true  %}connecte{% endif %}">
-                                                                {{ player.pseudo|first|upper }}
-                                                            </div>
-                                                        {% endif %}
-                                                        {{ player.pseudo }}
-                                                    </div>
-                                                {% endfor %}
-                                            {% endif %}
+                                        <div class="col-6">
+                                            {{ form_widget(teamForm.team_red) }}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row  mt-2 w-100" >
-                                    <div class="card w-100 py-3" style="background: #b35454ad;">
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <h3>Équipe rouge</h3>
-                                            </div>
-                                        </div>
-                                        <div class="row team_red">
-                                            {% if tablePlayer['red'] is defined %}
-                                                {% for player in tablePlayer['red'].getPlayers() %}
-                                                    <div class="col-3 playerRow">
-                                                        <input class="playerId" type="hidden" value="{{ player.getId() }}">
-                                                        {% if player.getAvatar() %}
-                                                            <img class="avatar {% if player.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
-                                                        {% else %}
-                                                            <div class="defaultAvatar {% if player.getConnected()  == true  %}connecte{% endif %}">
-                                                                {{ player.pseudo|first|upper }}
-                                                            </div>
-                                                        {% endif %}
-                                                        {{ player.pseudo }}
-                                                    </div>
-                                                {% endfor %}
-                                            {% endif %}
-                                        </div>
+                                <div class="card-body">
+                                    <div class="row team_red">
+                                        {% if tablePlayer['red'] is defined %}
+                                            {% for player in tablePlayer['red'].getPlayers() %}
+                                                <div class="col-3 playerRow">
+                                                    <input class="playerId" type="hidden" value="{{ player.getId() }}">
+                                                    {% if player.getAvatar() %}
+                                                        <img class="avatar {% if player.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                                    {% else %}
+                                                        <div class="defaultAvatar {% if player.getConnected()  == true  %}connecte{% endif %}">
+                                                            {{ player.pseudo|first|upper }}
+                                                        </div>
+                                                    {% endif %}
+                                                    {{ player.pseudo }}
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            {{ form_widget(teamForm.partie) }}
+            {{ form_end(teamForm) }}
+
         </section>
     </div>
     {# --- JAVASCRIPT --- #}

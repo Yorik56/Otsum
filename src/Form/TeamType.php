@@ -21,13 +21,13 @@ class TeamType extends AbstractType
                 'attr' => [
                     'class' => 'btn btn-primary',
                 ],
-                'label' => 'Rejoindre l\'équipe bleue'
+                'label' => 'Rejoindre'
             ])
             ->add('team_red', SubmitType::class,[
                 'attr' => [
                     'class' => 'btn btn-danger'
                 ],
-                'label' => 'Rejoindre l\'équipe rouge'
+                'label' => 'Rejoindre'
             ])
         ;
     }
