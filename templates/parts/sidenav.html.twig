@@ -28,6 +28,15 @@
                         </div>
                     </div>
                 </li>
+                <li>
+                    <i class="fa-solid fa-envelope"></i>
+                    <a href="{{ path('notification') }}">Notifications</a>
+                    <div class="notification-notifications">
+                        <div class="notification-notifications-cloche">
+                            <i class="fa-solid fa-bell" style="color: #0b2e13"></i>
+                        </div>
+                    </div>
+                </li>
             {% else %}
                 <li>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
@@ -59,7 +68,7 @@
                             {% if amis.getAvatar() %}
                                 <img class="avatar {% if amis.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~amis.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
                             {% else %}
-                                <div class="avatar_par_defaut {% if amis.getConnected()  == true  %}connecte{% endif %}">
+                                <div class="defaultAvatar {% if amis.getConnected()  == true  %}connecte{% endif %}">
                                     {{ amis.pseudo|first|upper }}
                                 </div>
                             {% endif %}
