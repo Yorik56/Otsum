@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Game;
 
-use App\Entity\{InvitationToPlay, Game, Team, User};
+use App\Entity\{Game, InvitationToPlay, Team, User};
 use App\Form\TeamType;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{JsonResponse, RedirectResponse, Request, Response};
+use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
-use \Liip\ImagineBundle\Imagine\Cache\CacheManager;
 
 class HubController extends AbstractController
 {

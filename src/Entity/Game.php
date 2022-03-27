@@ -25,37 +25,37 @@ class Game
     private $id;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $start_date;
+    private $startDate;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $end_date;
+    private $endDate;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'games')]
     private $players;
 
     #[ORM\OneToOne(targetEntity: User::class, cascade: ['persist', 'remove'])]
-    private ?User $current_player;
+    private ?User $currentPlayer;
 
     #[ORM\OneToOne(targetEntity: User::class, cascade: ['persist', 'remove'])]
-    private ?User $player_winning;
+    private ?User $playerWinning;
 
     #[ORM\Column(type: 'integer')]
-    private ?int $number_of_rounds;
+    private ?int $numberOfRounds;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $number_of_rounds_played;
+    private ?int $numberOfRoundsPlayed;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private ?string $word_to_find;
+    private ?string $wordToFind;
 
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: Line::class, orphanRemoval: true)]
     private $lines;
 
     #[ORM\Column(type: 'integer')]
-    private ?int $line_session_time;
+    private ?int $lineSessionTime;
 
     #[ORM\Column(type: 'integer')]
-    private ?int $line_length;
+    private ?int $lineLength;
 
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: Team::class, orphanRemoval: true)]
     private $teams;
@@ -95,24 +95,24 @@ class Game
 
     public function getStartDate(): ?\DateTimeImmutable
     {
-        return $this->start_date;
+        return $this->startDate;
     }
 
-    public function setStartDate(?\DateTimeImmutable $start_date): self
+    public function setStartDate(?\DateTimeImmutable $startDate): self
     {
-        $this->start_date = $start_date;
+        $this->startDate = $startDate;
 
         return $this;
     }
 
     public function getEndDate(): ?\DateTimeImmutable
     {
-        return $this->end_date;
+        return $this->endDate;
     }
 
-    public function setEndDate(?\DateTimeImmutable $end_date): self
+    public function setEndDate(?\DateTimeImmutable $endDate): self
     {
-        $this->end_date = $end_date;
+        $this->endDate = $endDate;
 
         return $this;
     }
@@ -143,60 +143,60 @@ class Game
 
     public function getCurrentPlayer(): ?User
     {
-        return $this->current_player;
+        return $this->currentPlayer;
     }
 
-    public function setCurrentPlayer(?User $current_player): self
+    public function setCurrentPlayer(?User $currentPlayer): self
     {
-        $this->current_player = $current_player;
+        $this->currentPlayer = $currentPlayer;
 
         return $this;
     }
 
     public function getPlayerWinning(): ?User
     {
-        return $this->player_winning;
+        return $this->playerWinning;
     }
 
-    public function setPlayerWinning(?User $player_winning): self
+    public function setPlayerWinning(?User $playerWinning): self
     {
-        $this->player_winning = $player_winning;
+        $this->playerWinning = $playerWinning;
 
         return $this;
     }
 
     public function getNumberOfRounds(): ?int
     {
-        return $this->number_of_rounds;
+        return $this->numberOfRounds;
     }
 
-    public function setNumberOfRounds(int $number_of_rounds): self
+    public function setNumberOfRounds(int $numberOfRounds): self
     {
-        $this->number_of_rounds = $number_of_rounds;
+        $this->numberOfRounds = $numberOfRounds;
 
         return $this;
     }
 
     public function getNumberOfRoundsPlayed(): ?int
     {
-        return $this->number_of_rounds_played;
+        return $this->numberOfRoundsPlayed;
     }
 
-    public function setNumberOfRoundsPlayed(?int $number_of_rounds_played): self
+    public function setNumberOfRoundsPlayed(?int $numberOfRoundsPlayed): self
     {
-        $this->number_of_rounds_played = $number_of_rounds_played;
+        $this->numberOfRoundsPlayed = $numberOfRoundsPlayed;
 
         return $this;
     }
 
     public function getWordToFind(): ?string
     {
-        return $this->word_to_find;
+        return $this->wordToFind;
     }
 
-    public function setWordToFind(string $word_to_find): self
+    public function setWordToFind(string $wordToFind): self
     {
-        $this->word_to_find = $word_to_find;
+        $this->wordToFind = $wordToFind;
 
         return $this;
     }
@@ -233,24 +233,24 @@ class Game
 
     public function getLineSessionTime(): ?int
     {
-        return $this->line_session_time;
+        return $this->lineSessionTime;
     }
 
-    public function setLineSessionTime(int $line_session_time): self
+    public function setLineSessionTime(int $lineSessionTime): self
     {
-        $this->line_session_time = $line_session_time;
+        $this->lineSessionTime = $lineSessionTime;
 
         return $this;
     }
 
     public function getLineLength(): ?int
     {
-        return $this->line_length;
+        return $this->lineLength;
     }
 
-    public function setLineLength(int $line_length): self
+    public function setLineLength(int $lineLength): self
     {
-        $this->line_length = $line_length;
+        $this->lineLength = $lineLength;
 
         return $this;
     }
@@ -286,7 +286,7 @@ class Game
     }
 
     /**
-     * @return Collection|InvitationToPlay[]
+     * @return Collection
      */
     public function getInvitationToPlay(): Collection
     {
