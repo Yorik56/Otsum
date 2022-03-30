@@ -58,7 +58,7 @@
         }
 
         // Validation de l'essai / MAJ de la ligne
-        $('.return').click(function () {
+        $('.return').on("click", function () {
             let mot_valide = true;
             let mot = "";
             $(".line_" + currentLineNumber).each(function (index) {
