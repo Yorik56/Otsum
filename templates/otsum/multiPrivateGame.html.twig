@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Otsum{% endblock %}
+
+{% block body %}
+    <input type="hidden" class="current_line_number" value="">
+    <h1 class="text-center w-100">OTSUM</h1>
+    <div class="container  contenu d-flex justify-content-center align-items-center mt-3">
+        <div class="row">
+            <div class="col-12  ">
+                <div class="grille" id="grille">
+                    <table class="table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container multiPrivateGame">
+        <div class="row w-100">
+            <div class="col-12 d-flex ">
+                {% for team in tableTeam %}
+                    <div class="card col-6 {{ team.getColor() }} py-1">
+                        {% for player in team.getPlayers() %}
+                            <div class="row">
+                                {% if player.inGamePlayerStatus.getFlagPresenceInGame == 2 %}
+                                    {% set presence = "absent" %}
+                                {% else %}
+                                    {% set presence = "" %}
+                                {% endif %}
+                                <div class="avatarBox col-4 presence {{ presence }}">
+                                    {% if player.getAvatar() %}
+                                        <img class="avatar " src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                    {% else %}
+                                        <div class="defaultAvatar">
+                                            {{ player.pseudo|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    {% if player.inGamePlayerStatus.getFlagPresenceInGame == 2 %}
+                                        <div class="position-absolute">
+                                            <div class="snippet" data-title=".dot-flashing">
+                                                <div class="stage">
+                                                    <div class="dot-flashing"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <input type="hidden" id="search_field">
+                <div id="keyboard"></div>
+            </div>
+        </div>
+    </div>
+    {{ include('otsum/js/manageMultiPrivateGame.html.twig') }}
+{% endblock %}
