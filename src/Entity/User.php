@@ -66,6 +66,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'invitedUser', targetEntity: InvitationToPlay::class)]
     private $invitationToPlay;
 
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: InGamePlayerStatus::class, cascade: ['persist', 'remove'])]
+    private $inGamePlayerStatus;
+
 
 
     #[Pure] public function __construct()
@@ -356,6 +359,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $invitationToPlay->setInvitedUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getInGamePlayerStatus(): ?InGamePlayerStatus
+    {
+        return $this->inGamePlayerStatus;
+    }
+
+    public function setInGamePlayerStatus(InGamePlayerStatus $inGamePlayerStatus): self
+    {
+        // set the owning side of the relation if necessary
+        if ($inGamePlayerStatus->getUser() !== $this) {
+            $inGamePlayerStatus->setUser($this);
+        }
+
+        $this->inGamePlayerStatus = $inGamePlayerStatus;
 
         return $this;
     }
