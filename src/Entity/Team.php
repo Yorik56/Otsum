@@ -6,6 +6,7 @@ use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JetBrains\PhpStorm\Pure;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 class Team
@@ -97,5 +98,15 @@ class Team
         $this->players->removeElement($player);
 
         return $this;
+    }
+
+    #[Pure] public function playerExists(User $player): bool
+    {
+        if ($this->players->contains($player)) {
+            $response = true;
+        } else {
+            $response = false;
+        }
+        return $response;
     }
 }
