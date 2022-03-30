@@ -57,13 +57,14 @@ h1 {
 }
 
 .cell div {
-    background-color: #185a82;
-    border: 1px solid #fff;
+    background-color: #5454b3ad;
+    border: 1px solid #170f0f;
     color: #fff;
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: .25rem;
 }
 
 .cell:not(.current_cell) div {
@@ -79,6 +80,10 @@ h1 {
         transform: rotateY(0deg);
         animation: unset;
     }
+}
+
+.table {
+    border-radius: .25rem;
 }
 
 .table td {
@@ -119,14 +124,87 @@ h1 {
 }
 
 .valide_cell div{
-    background-color: rgb(179, 15, 15);
+    background-color: #b35454ad;
 }
 
 .table td {
     border: none;
 }
 
+.multiPrivateGame .absent .avatar,
+.multiPrivateGame .absent .defaultAvatar
+{
+    filter: brightness(16%);
+}
+
+.multiPrivateGame .avatarBox {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+// Dot Flashing
+
+.dot-flashing {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    border-radius: 5px;
+    background-color: #9880ff;
+    color: #9880ff;
+    animation: dotFlashing .7s infinite linear alternate;
+    animation-delay: .5s;
+}
+
+.dot-flashing::before, .dot-flashing::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+.dot-flashing::before {
+    left: -12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 5px;
+    background-color: #9880ff;
+    color: #9880ff;
+    animation: dotFlashing .7s infinite alternate;
+    animation-delay: 0s;
+}
+
+.dot-flashing::after {
+    left: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 5px;
+    background-color: #9880ff;
+    color: #9880ff;
+    animation: dotFlashing .7s infinite alternate;
+    animation-delay: .7s;
+}
+// Dot Flashing
+
+
+@keyframes dotFlashing {
+    0% {
+        background-color: #9880ff;
+    }
+    50%,
+    100% {
+        background-color: #ebe6ff;
+    }
+}
+
 @media screen and (max-width: 500px){
+    .multiPrivateGame {
+        width: 300px;
+        padding: 0;
+    }
     .cell {
         height: 30px;
         width: 30px;
@@ -135,9 +213,12 @@ h1 {
 }
 
 @media screen and (min-width: 501px) and (max-width: 900px){
+    .multiPrivateGame .col-12{
+        padding: 0 15px;
+    }
     .cell {
-        height: 63px;
-        width: 63px;
+        height: 48px;
+        width: 48px;
     }
 }
 
@@ -169,3 +250,21 @@ h1 {
     color: #2d2d2d;
 }
 
+.multiPrivateGame{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .red {
+        background-color: #b35454ad;
+        border: 1px solid #170f0f;
+    }
+    .blue {
+        background-color: #5454b3ad;
+        border: 1px solid #170f0f;
+    }
+    .avatar, .defaultAvatar{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+}
