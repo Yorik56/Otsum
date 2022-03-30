@@ -12,18 +12,18 @@ use Symfony\Component\HttpFoundation\{JsonResponse, RedirectResponse, Request, R
 use Symfony\Component\Routing\Annotation\Route;
 
 
-class GameSoloController extends GameController
+class SoloGameController extends GameController
 {
     /**
      * Start a game
      * @return Response
      */
-    #[Route('/otsum', name: 'otsum')]
+    #[Route('/otsum/soloGame', name: 'otsum.soloGame')]
     public function otsum(): Response
     {
         //--- Formulaire Abandon
         $dropOutForm = $this->createForm(DropOutFormType::class);
-        return $this->render('otsum/index.html.twig', [
+        return $this->render('otsum/soloGame.html.twig', [
             'controller_name' => 'HomeController',
             'dropOutForm' => $dropOutForm->createView(),
         ]);
@@ -118,8 +118,8 @@ class GameSoloController extends GameController
         // Set victory variable
         ($validLetters == count($wordSearchArray))?$victory = true:$victory = false;
         $response = [
-            "wordToFind"     => $wordSearchArray,
-            "lastTry"    => $tableOfTheLastTry,
+            "wordToFind"       => $wordSearchArray,
+            "lastTry"          => $tableOfTheLastTry,
             "ligne_precedente" => $actualLine['actual_line'],
             "arrayMajKeyboard" => $arrayMajKeyboard,
             "numberOfLines"    => $numberOfTry,
