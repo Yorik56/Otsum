@@ -14,9 +14,9 @@
                             Inviter
                         </button>
                         {% if (app.user is defined) and (app.user.id is same as (host.getId())) %}
-                            <button type="button" class="btn">
+                            <a href="{{ path('otsum.multiPrivateGame', {idGame: idGame}) }}" class="btn">
                                 Lancer la partie
-                            </button>
+                            </a>
                         {% endif %}
                     </div>
                 </div>
