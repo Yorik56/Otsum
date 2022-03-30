@@ -7,6 +7,7 @@
         const url = new URL('http://localhost:3000/.well-known/mercure')
         // On ajoute le "topic" correspondant aux notifications de l'utilisateur courant
         url.searchParams.append('topic','/hub/prive/' + {{ idGame }})
+        url.searchParams.append('topic','/hub/prive/start/' + {{ idGame }})
         //-- On écoute les évènements provenant de mercure
         const eventSource = new EventSource(url)
         eventSource.onmessage = (e) => {
@@ -61,6 +62,9 @@
                         })
                     }
                 });
+            }
+            if(JSON.parse(e.data).topic === '/hub/prive/start/' + {{ idGame }}){
+                window.location = '{{ path('otsum.multiPrivateGame', {idGame: idGame}) }}';
             }
         }
         //-- Désinscription aux topics mercure

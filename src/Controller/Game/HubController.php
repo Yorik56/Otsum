@@ -2,7 +2,7 @@
 
 namespace App\Controller\Game;
 
-use App\Entity\{Game, InvitationToPlay, Team, User};
+use App\Entity\{Game, InGamePlayerStatus, InvitationToPlay, Team, User};
 use App\Form\TeamType;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -85,20 +85,53 @@ class HubController extends AbstractController
             // The current player is removed from the previously joined teams
             $newArrayTeam = [];
             foreach ($tableTeam as $team){
-                $team->removePlayer($this->getUser());
+                if($team->playerExists($this->getUser())){
+                    $team->removePlayer($this->getUser());
+                    $team->setNumberOfPlayer($team->getNumberOfPlayer()-1);
+                }
                 $this->entityManager->persist($team);
                 $newArrayTeam[$team->getColor()] = $team;
             }
             $tableTeam = $newArrayTeam;
             // Recovery of the teams related to the game
+            $colorTeam = null;
             if($teamForm->get('team_blue')->isClicked()){
-                // Ajout du joueur courant dans l'équipe
+                // Adding the current player in the team
                 $tableTeam['blue']->addPlayer($this->getUser());
+                $tableTeam['blue']->setNumberOfPlayer($tableTeam['blue']->getNumberOfPlayer()+1);
                 $this->entityManager->persist($tableTeam['blue']);
+                $colorTeam = "blue";
             } else if ($teamForm->get('team_red')->isClicked()){
+                // Adding the current player in the team
                 $tableTeam['red']->addPlayer($this->getUser());
+                $tableTeam['red']->setNumberOfPlayer($tableTeam['red']->getNumberOfPlayer()+1);
                 $this->entityManager->persist($tableTeam['red']);
+                $colorTeam = "red";
             }
+
+            //--- Creat the player status
+            // Check existence of the player status
+            $teamOfTheCurrentUser = $this->entityManager
+                ->getRepository(Team::class)
+                ->findOneBy([
+                    'game'  => $idGame,
+                    'color' => $colorTeam
+                ]);
+            $playerStatus = $this->entityManager
+                ->getRepository(InGamePlayerStatus::class)
+                ->findOneBy([
+                    'user'=>$this->getUser()->getId()
+                ]);
+            if(!$playerStatus){
+                $playerStatus = new InGamePlayerStatus();
+                $playerStatus->setUser($this->getUser());
+            }
+            // Set position in team and presence,
+            // also warns that the player is not playing
+            $playerStatus->setFlagPresenceInGame(InGamePlayerStatus::FLAG_PRESENCE_FALSE);
+            $playerStatus->setPositionInTeam($teamOfTheCurrentUser->getNumberOfPlayer()+1);
+            $playerStatus->setFlagActualPlayer(InGamePlayerStatus::FLAG_ACTUAL_PLAYER_FALSE);
+            $this->entityManager->persist($playerStatus);
             $this->entityManager->flush();
             // Mercure notification containing the current player id
             $update = new Update(
