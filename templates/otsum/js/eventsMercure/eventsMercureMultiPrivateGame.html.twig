@@ -1,0 +1,36 @@
+<script>
+    $(document).ready(function(){
+        //--- EVENTS MERCURE ---//
+        // Si l'utilisateur est connecté
+        {% if app.user %}
+            //--- TOPICS INSCRIPTIONS ---//
+            // Url mercure server
+            const url = new URL('http://localhost:3000/.well-known/mercure')
+            // Topic joining private game
+            url.searchParams.append('topic','/joiningPrivateGame/' + {{ idGame }})
+
+            //--- LISTENING FOR MERCURE EVENTS ---//
+            const eventSource = new EventSource(url)
+            eventSource.onmessage = (e) => {
+                // joining private game
+                if(JSON.parse(e.data).topic === '/joiningPrivateGame/' + {{ idGame }}) {
+                    let idPlayer = JSON.parse(e.data).idPlayer;
+                    let userAvatarBox = $(`[data-idUser='${idPlayer}']`).find('.avatarBox');
+                    console.log(idPlayer);
+                    console.log(userAvatarBox);
+                    if(userAvatarBox.hasClass('absent')){
+                        userAvatarBox.removeClass('absent');
+                        userAvatarBox.find('.absent').remove();
+                    }
+                }
+            }
+
+            //-- Before unload:  Unsubscribe mercure topics
+            window.addEventListener('beforeunload', function () {
+                if(eventSource != null){
+                    eventSource.close()
+                }
+            })
+        {% endif %}
+    });
+</script>

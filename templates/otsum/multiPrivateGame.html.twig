@@ -20,7 +20,7 @@
                 {% for team in tableTeam %}
                     <div class="card col-6 {{ team.getColor() }} py-1">
                         {% for player in team.getPlayers() %}
-                            <div class="row">
+                            <div class="row player" data-idUser="{{ player.getId() }}">
                                 {% if player.inGamePlayerStatus.getFlagPresenceInGame == 2 %}
                                     {% set presence = "absent" %}
                                 {% else %}
@@ -35,7 +35,7 @@
                                         </div>
                                     {% endif %}
                                     {% if player.inGamePlayerStatus.getFlagPresenceInGame == 2 %}
-                                        <div class="position-absolute">
+                                        <div class="position-absolute absent">
                                             <div class="snippet" data-title=".dot-flashing">
                                                 <div class="stage">
                                                     <div class="dot-flashing"></div>
@@ -60,4 +60,5 @@
         </div>
     </div>
     {{ include('otsum/js/manageMultiPrivateGame.html.twig') }}
+    {{ include('otsum/js/eventsMercure/eventsMercureMultiPrivateGame.html.twig') }}
 {% endblock %}

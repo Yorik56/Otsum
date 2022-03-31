@@ -6,6 +6,8 @@ use App\Entity\Game;
 use App\Entity\InGamePlayerStatus;
 use App\Entity\Team;
 use App\Form\DropOutFormType;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
@@ -57,6 +59,32 @@ class MultiPrivateGameController extends GameController
             "idGame"      => $game->getId(),
             "difficulty"  => $game->getLineLength(),
             "tableTeam"   => $tableTeam
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Route('/joiningPrivateGame', name: 'joiningPrivateGame')]
+    public function joiningPrivateGame(Request $request): JsonResponse
+    {
+        $idGame   = $request->request->get('idGame');
+        $idPlayer = $request->request->get('idPlayer');
+
+        // Mercure notification joiningPrivateGame
+        $update = new Update(
+            '/joiningPrivateGame/'.$idGame,
+            json_encode([
+                'topic' =>'/joiningPrivateGame/'.$idGame,
+                'idGame' => $idGame,
+                'idPlayer' => $idPlayer
+            ])
+        );
+        $this->hub->publish($update);
+        return new JsonResponse([
+            'idGame' => $idGame,
+            'idPlayer' => $idPlayer
         ]);
     }
 }

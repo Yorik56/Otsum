@@ -1,6 +1,15 @@
 <script>
     $(document).ready(function() {
-    {#    // --- GESTION DU JEU ---//#}
+    {# //---* JOININGPRIVATEGAME *---// #}
+        $.ajax({
+            method: "POST",
+            url: "{{ path('joiningPrivateGame') }}",
+            data: {
+                idGame  : {{ idGame }},
+                idPlayer: {{ app.user.id }}
+            }
+        });
+    {# //---*   GESTION DU JEU   *---// #}
         // Variables de la grille de jeu
         let idGame = {{ idGame }};
         let difficulty = {{ difficulty }};
