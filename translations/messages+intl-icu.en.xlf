@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="fr" target-language="en" datatype="plaintext" original="file.ext">
+    <header>
+      <tool tool-id="symfony" tool-name="Symfony"/>
+    </header>
+    <body>
+      <trans-unit id="44LNeUE" resname="symfony.great">
+        <source>symfony.great</source>
+        <target><![CDATA[The term <b>"internationalization"</b> (often, abbreviated <a href="https://en.wikipedia.org/wiki/Internationalization_and_localization" class="reference external" rel="external noopener noreferrer" target="_blank">i18n</a>) refers to the process of abstracting strings and other locale-specific pieces out of your application into a layer where they can be translated and converted based on the user's locale (i.e. language and country). For text, this means wrapping each with a function capable of translating the text (or "message") into the language of the user:]]></target>
+      </trans-unit>
+      <trans-unit id="a8Wgiqx" resname="&lt;h3&gt;foo&lt;/h3&gt;">
+        <source>&lt;h3&gt;foo&lt;/h3&gt;</source>
+        <target><![CDATA[__<h3>foo</h3>]]></target>
+      </trans-unit>
+      <trans-unit id="biU6ukk" resname="&lt;h3&gt;bar&lt;/h3&gt;">
+        <source>&lt;h3&gt;bar&lt;/h3&gt;</source>
+        <target><![CDATA[__<h3>bar</h3>]]></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
