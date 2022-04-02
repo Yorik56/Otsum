@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AmisController!{% endblock %}
+
+{% block body %}
+    <h1 class="text-center">Notifications</h1>
+    <div class="container d-flex justify-content-center flex-column">
+        <section class="row area amis d-flex justify-content-center">
+            <div class="block_amis">
+                <div class="row">
+                    <div class="col col-12">
+                        <h2>Invitations à jouer reçues</h2>
+                        <div class="demandes_contact_reçues">
+                            {% for invitation in invitationToPlay %}
+                                <div data-row_utilisateur="{{ invitation.UserWhoInvites.id }}" data-id_game="{{ invitation.game.id }}" class="row">
+                                    <div class="utilisateur col-12 col-md-6">
+                                        {% if invitation.UserWhoInvites.getAvatar() %}
+                                            <img class="avatar" src="{{ ('images/avatars/'~invitation.UserWhoInvites.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                        {% else %}
+                                            <div class="defaultAvatar">
+                                                {{ invitation.UserWhoInvites.pseudo|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        {{ invitation.UserWhoInvites.pseudo }}
+                                    </div>
+                                    <div class="action col-12 col-md-6">
+                                        <button
+                                                class="btn play_request accept btn-success"
+                                                data-action="accepte"
+                                                data-id_game="{{ invitation.game.id }}"
+                                                data-userWhoInvites="{{ invitation.userWhoInvites.id }}"
+                                        >
+                                            Accepter
+                                        </button>
+                                        <button
+                                                class="btn play_request decline btn-danger"
+                                                data-action="refuse"
+                                                data-id_game="{{ invitation.game.id }}"
+                                                data-userWhoInvites="{{ invitation.userWhoInvites.id }}"
+                                        >
+                                            Refuser
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>
+        $(document).ready(function(){
+            $('.btn.play_request').on('click',function () {
+                let game = $(this).attr('data-id_game');
+                let userWhoInvites = $(this).attr('data-userWhoInvites');
+                let action      = $(this).attr('data-action');
+                //-- Répondre à une demande d'amis
+                $.ajax({
+                    // Adresse à laquelle la requête est envoyée
+                    method: "GET",
+                    url: "{{ path("reponseInvitationToPlay") }}",
+                    data: {
+                        game : game,
+                        userWhoInvites : userWhoInvites,
+                        reponse: action
+                    },
+                    // Le délai maximum en millisecondes de traitement de la demande
+                    timeout: 4000,
+                    // La fonction à appeler si la requête aboutie
+                    success: function (data) {
+                        let parsedData = JSON.parse(data);
+                        if(parsedData['userWhoInvites']){
+                            $("[data-row_utilisateur=" + parsedData['userWhoInvites'] + "]")
+                                .filter("[data-id_game=" + parsedData['id_game'] + "]")
+                                .remove()
+                        }
+                        if(parsedData['code'] && (parsedData['code'] === "ok")){
+                            window.location.href = parsedData['url'];
+                        }
+                    },
+                    // La fonction à appeler si la requête n'a pas abouti
+                    error: function() {
+
+                    }
+                });
+            })
+        });
+    </script>
+{% endblock %}
