@@ -16,7 +16,7 @@
         <div class="changeLocale">
             {% for locale in locales %}
                 {% if locale != app.request.locale %}
-                    <a href="{{ path('change_locale', {'locale': locale}) }}">{{ locale }}</a>
+                    <a href="{{ path(app.request.get('_route'), {'_locale': locale}) }}">{{ locale }}</a>
                 {% endif %}
             {% endfor %}
         </div>

@@ -17,6 +17,10 @@
         <source>&lt;h3&gt;bar&lt;/h3&gt;</source>
         <target><![CDATA[__<h3>bar</h3>]]></target>
       </trans-unit>
+      <trans-unit id="3zCJo5o" resname="Rejoindre">
+        <source>Rejoindre</source>
+        <target>Join</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
