@@ -149,12 +149,15 @@ class HubController extends AbstractController
         $contactList = self::getContactList($playersArray, $idGame);
         // Recovery of all players related to the game
         return $this->render('hub/index.html.twig', [
-            'controller_name' => 'HubController',
-            'teamForm'        => $teamForm->createView(),
-            'idGame'          => $idGame,
-            'host'            => $game->getHost(),
-            'tablePlayer'     => $tableTeam,
-            'contactList'     => $contactList
+            'controller_name'  => 'HubController',
+            'teamForm'         => $teamForm->createView(),
+            'idGame'           => $idGame,
+            'host'             => $game->getHost(),
+            'tablePlayer'      => $tableTeam,
+            'contactList'      => $contactList,
+            'additionalParams' => [
+                'idGame' => $idGame
+            ]
         ]);
     }
 

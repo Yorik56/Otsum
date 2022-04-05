@@ -58,7 +58,10 @@ class MultiPrivateGameController extends GameController
             "firstLetter" => $game->getWordToFind()[0],
             "idGame"      => $game->getId(),
             "difficulty"  => $game->getLineLength(),
-            "tableTeam"   => $tableTeam
+            "tableTeam"   => $tableTeam,
+            'additionalParams' => [
+                'idGame' => $idGame
+            ]
         ]);
     }
 

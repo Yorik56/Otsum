@@ -16,7 +16,14 @@
         <div class="changeLocale">
             {% for locale in locales %}
                 {% if locale != app.request.locale %}
-                    <a href="{{ path(app.request.get('_route'), {'_locale': locale}) }}">{{ locale }}</a>
+                    {% set routeParams = [] %}
+                    {% set routeParams = routeParams|merge({
+                        '_locale': locale
+                    }) %}
+                    {% if additionalParams is defined %}
+                        {% set routeParams = routeParams|merge(additionalParams) %}
+                    {% endif %}
+                    <a href="{{ path(app.request.get('_route'), routeParams) }}">{{ locale }}</a>
                 {% endif %}
             {% endfor %}
         </div>
