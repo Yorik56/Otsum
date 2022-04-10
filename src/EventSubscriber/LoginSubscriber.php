@@ -77,7 +77,6 @@ class LoginSubscriber implements EventSubscriberInterface
                                  'id' => $contact['contact']
                              ]);
                          $listeAmis[] = $amis;
-                         dump($listeAmis);
                      }
                      $this->twig->addGlobal('listeAmis', $listeAmis);
                  }
@@ -123,7 +122,6 @@ class LoginSubscriber implements EventSubscriberInterface
                 foreach ($contacts as $contact) {
                     if($event == self::ACTION_LOGIN){
                         $topic = "/imLogged/".$contact['contact'];
-                        dump($topic);
                         $user->setConnected(User::USER_CONNECTED_TRUE);
                     }
                     if($event == self::ACTION_LOGOUT){
