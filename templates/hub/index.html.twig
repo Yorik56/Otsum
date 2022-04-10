@@ -8,15 +8,27 @@
         <section class="row area d-flex justify-content-center">
             <div class="block_bouton col-12 ">
                 <div class="form-group form-row mb-2">
-                    <div class="col-12 p-0">
+                    <div class="col-2  p-0">
                         <!-- Button trigger modal -->
                         <button type="button" class="btn" data-toggle="modal" data-target="#invitationModal">
                             Inviter
                         </button>
+                    </div>
+                    <div class="col-12 col-sm-10 p-0">
                         {% if (app.user is defined) and (app.user.id is same as (host.getId())) %}
-                            <a href="{{ path('otsum.multiPrivateGame', {idGame: idGame}) }}" class="btn">
-                                Lancer la partie
-                            </a>
+                            <div class="d-flex justify-content-end">
+                                {{ form_start(versusTypeForm, {'attr': {'class': 'versusTypeChoice'}}) }}
+                                    {{ form_row(versusTypeForm.idGame) }}
+                                    {{ form_widget(versusTypeForm.versusType, {'attr': {'class': 'btn versusType'}}) }}
+                                {{ form_end(versusTypeForm) }}
+                                {{ form_start(launchGameForm, {'attr': {'class': 'formLaunchGame'}}) }}
+                                    {{ form_row(launchGameForm.idGame) }}
+                                    <div class="d-flex justify-content-end w-100">
+                                        {{ form_row(launchGameForm.submit, {'attr': {'class': 'btn launchGame'}}) }}
+                                    </div>
+                                    {{ form_errors(launchGameForm) }}
+                                {{ form_end(launchGameForm) }}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -55,6 +67,11 @@
                     </div>
                 </div>
             </div>
+            {% if game.getVersusType() is not null %}
+                <div id="versusType" class="col-12">
+                    <h2>{{ constant('App\\Entity\\Game::VERSUS_TYPE')[game.getVersusType()] }}</h2>
+                </div>
+            {% endif %}
             {{ form_start(teamForm, {'attr': {'class': 'w-100'}}) }}
                 <div class="col-12">
                     <div class="teams">

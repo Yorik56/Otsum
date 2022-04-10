@@ -18,6 +18,11 @@ class Game
     const PRIVATE_MULTPLAYER_GAME = 2;
     const PUBLIC_MULTPLAYER_GAME  = 3;
 
+    const VERSUS_TYPE = [
+        '1' => "1 Vs 1",
+        '2' => "2 Vs 2",
+        '3' => "3 Vs 3",
+    ];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -68,6 +73,9 @@ class Game
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     private $host;
+
+    #[ORM\Column(type: 'smallint', nullable: true)]
+    private $versusType;
 
     #[Pure] public function __construct()
     {
@@ -335,6 +343,18 @@ class Game
     public function setHost(?User $host): self
     {
         $this->host = $host;
+
+        return $this;
+    }
+
+    public function getVersusType(): ?int
+    {
+        return $this->versusType;
+    }
+
+    public function setVersusType(?int $versusType): self
+    {
+        $this->versusType = $versusType;
 
         return $this;
     }

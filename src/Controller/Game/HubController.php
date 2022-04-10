@@ -2,6 +2,8 @@
 
 namespace App\Controller\Game;
 
+use App\Form\LaunchGameType;
+use App\Form\VersusType;
 use App\Entity\{Game, InGamePlayerStatus, InvitationToPlay, Team, User};
 use App\Form\TeamType;
 use App\Service\Utils;
@@ -9,9 +11,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class HubController extends AbstractController
 {
@@ -67,15 +71,55 @@ class HubController extends AbstractController
     #[Route('/hubPrive/{idGame}', name: 'hubPrive')]
     public function renderHub(Request $request, $idGame): Response
     {
-
-        //--- Recovery of the game
+        //--- Retrieve the game
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
         //--- Form Team
         $teamForm = $this->createForm(TeamType::class);
         $teamForm->get('partie')->setData($idGame);
         $teamForm->handleRequest($request);
+        //--- Form LaunchGame
+        $launchGameForm = $this->createForm(LaunchGameType::class);
+        $launchGameForm->get('idGame')->setData($idGame);
+        $launchGameForm->handleRequest($request);
+        //--- Form VersusType Choice
+        $versusTypeForm = $this->createForm(VersusType::class, null, [
+            'action' => $this->generateUrl('versusTypeChoice')
+        ]);
+        $versusTypeForm->get('idGame')->setData($idGame);
+
         //--- Recovery of the teams
         $tableTeam = $this->entityManager->getRepository(Team::class)->findBy(['game'=>$idGame]);
+        if ($launchGameForm->isSubmitted() && $launchGameForm->isValid()) {
+            $validTeams = true;
+            // Checking the number of players in each team
+            foreach ($tableTeam as $team){
+                // If the number of players on the team is insufficient,
+                if($team->getNumberOfPlayer() < $game->getVersusType()){
+                    $validTeams = false;
+                    // An error is displayed
+                    $error = new FormError(
+                        "Le nombre de joueurs de l'équipe ".$team->getColor()." est insuffisant."
+                    );
+                    $launchGameForm->addError($error);
+                }
+                // If the number of players in the team is too high,
+                if($team->getNumberOfPlayer() > $game->getVersusType()){
+                    $validTeams = false;
+                    // An error is displayed
+                    $error = new FormError(
+                        "Le nombre de joueurs de l'équipe ".$team->getColor()." est trop élevé."
+                    );
+                    $launchGameForm->addError($error);
+                }
+            }
+            if($validTeams){
+                return $this->redirectToRoute(
+                    'otsum.multiPrivateGame', [
+                        'idGame' => $versusTypeForm->get('idGame')->getData()]
+                );
+            }
+        }
+
         $newArrayTeam = [];
         foreach ($tableTeam as $team){
             $newArrayTeam[$team->getColor()] = $team;
@@ -147,18 +191,53 @@ class HubController extends AbstractController
         $playersArray = self::getPlayerArray($tableTeam);
         // Retrieves the user's contacts that are not present in the game
         $contactList = self::getContactList($playersArray, $idGame);
+
         // Recovery of all players related to the game
         return $this->render('hub/index.html.twig', [
             'controller_name'  => 'HubController',
             'teamForm'         => $teamForm->createView(),
+            'launchGameForm'   => $launchGameForm->createView(),
+            'versusTypeForm'   => $versusTypeForm->createView(),
             'idGame'           => $idGame,
             'host'             => $game->getHost(),
             'tablePlayer'      => $tableTeam,
             'contactList'      => $contactList,
+            'game'             => $game,
             'additionalParams' => [
                 'idGame' => $idGame
             ]
         ]);
+    }
+
+    #[Route('/versusTypeChoice', name: 'versusTypeChoice')]
+    function versusTypeChoice(HubInterface $hub, Request $request)
+    {
+        //--- Form LaunchGame
+        $versusTypeForm = $this->createForm(VersusType::class);
+        $versusTypeForm->handleRequest($request);
+
+        if ($versusTypeForm->isSubmitted() && $versusTypeForm->isValid()) {
+            //--- Retrieve the game
+            $game = $this->entityManager->getRepository(Game::class)
+                ->find($versusTypeForm->get('idGame')->getData());
+            $game->setVersusType($versusTypeForm->get('versusType')->getData());
+            $this->entityManager->persist($game);
+            $this->entityManager->flush();
+
+            // Send Update Mercure
+            $update = new Update(
+                '/updateVersusType/'.$versusTypeForm->get('idGame')->getData(),
+                json_encode([
+                    'topic' => '/updateVersusType/'.$versusTypeForm->get('idGame')->getData(),
+                    'versusType'  => Game::VERSUS_TYPE[$game->getVersusType()]
+                ])
+            );
+            $hub->publish($update);
+        }
+        return $this->redirectToRoute(
+            'hubPrive', [
+            'idGame' => $versusTypeForm->get('idGame')->getData()]
+        );
     }
 
     /**

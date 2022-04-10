@@ -1,48 +1,60 @@
 .teams {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .teams .playerRow {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  .avatar {
-    width: 50px;
-    border-radius: 50%;
-  }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    .avatar {
+        width: 50px;
+        border-radius: 50%;
+    }
 }
 
 #invitationModal {
-  .modal-footer, .modal-header, .modal-body, .modal-content {
-    background-color: #170f0f;
-  }
-  ul {
-    padding: 0;
-    li {
-      cursor: pointer;
-      transition: all .5s;
-      border-radius: 10px;
-      background-color: #313335;
-      display: flex;
-      justify-content: start;
-      align-items: center;
-      list-style: none;
-      margin: 10px 0;
-      padding: 2%;
-      .avatar, .defaultAvatar {
-        margin-right: 20px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-      }
-      &:hover {
-        background-color: #bec6ce;
-        color: #313335;
-      }
+    .modal-footer, .modal-header, .modal-body, .modal-content {
+        background-color: #170f0f;
     }
-  }
+    ul {
+        padding: 0;
+        li {
+            cursor: pointer;
+            transition: all .5s;
+            border-radius: 10px;
+            background-color: #313335;
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            list-style: none;
+            margin: 10px 0;
+            padding: 2%;
+            .avatar, .defaultAvatar {
+                margin-right: 20px;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+            }
+            &:hover {
+                background-color: #bec6ce;
+                color: #313335;
+            }
+        }
+    }
+}
+
+.formLaunchGame {
+    .versusType {
+        background: #2B2B2B;
+        border: none;
+        border-radius: 5px 0 0 5px;
+        padding: 0 0 0 11px;
+    }
+    .launchGame {
+        border-radius: 0 5px 5px 0;
+    }
 }

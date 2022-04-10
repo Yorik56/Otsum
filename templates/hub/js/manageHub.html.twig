@@ -24,6 +24,15 @@
                 }
             });
         });
+        //-- Maj versus Type
+        $('.versusType').on("change", function () {
+            if($(this).val() !== 0){
+                let obj = $('.versusTypeChoice');
+                // obj.attr(url)
+                obj.submit()
+            }
+        })
+
         {% endif %}
     });
 </script>

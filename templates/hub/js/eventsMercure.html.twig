@@ -8,6 +8,7 @@
         // On ajoute le "topic" correspondant aux notifications de l'utilisateur courant
         url.searchParams.append('topic','/hub/prive/' + {{ idGame }})
         url.searchParams.append('topic','/hub/prive/start/' + {{ idGame }})
+        url.searchParams.append('topic','/updateVersusType/' + {{ idGame }})
         //-- On écoute les évènements provenant de mercure
         const eventSource = new EventSource(url)
         eventSource.onmessage = (e) => {
@@ -65,6 +66,9 @@
             }
             if(JSON.parse(e.data).topic === '/hub/prive/start/' + {{ idGame }}){
                 window.location = '{{ path('otsum.multiPrivateGame', {idGame: idGame}) }}';
+            }
+            if(JSON.parse(e.data).topic === '/updateVersusType/' + {{ idGame }}){
+                $('#versusType h2').html(JSON.parse(e.data).versusType);
             }
         }
         //-- Désinscription aux topics mercure

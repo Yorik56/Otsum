@@ -24,6 +24,8 @@ class MultiPrivateGameController extends GameController
     {
         //Retrieve Game
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+
+        // Send mercure Update
         if($game->getHost()->getId() == $this->getUser()->getId()){
             // Mercure notification containing the current player id
             $update = new Update(
@@ -50,6 +52,7 @@ class MultiPrivateGameController extends GameController
             ->findOneBy([
                 'user'=>$this->getUser()->getId()
             ]);
+
         $playerStatus->setFlagPresenceInGame(InGamePlayerStatus::FLAG_PRESENCE_TRUE);
         $this->entityManager->persist($playerStatus);
         $this->entityManager->flush();
