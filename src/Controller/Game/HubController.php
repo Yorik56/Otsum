@@ -91,25 +91,35 @@ class HubController extends AbstractController
         $tableTeam = $this->entityManager->getRepository(Team::class)->findBy(['game'=>$idGame]);
         if ($launchGameForm->isSubmitted() && $launchGameForm->isValid()) {
             $validTeams = true;
-            // Checking the number of players in each team
-            foreach ($tableTeam as $team){
-                // If the number of players on the team is insufficient,
-                if($team->getNumberOfPlayer() < $game->getVersusType()){
-                    $validTeams = false;
-                    // An error is displayed
-                    $error = new FormError(
-                        "Le nombre de joueurs de l'équipe ".$team->getColor()." est insuffisant."
-                    );
-                    $launchGameForm->addError($error);
-                }
-                // If the number of players in the team is too high,
-                if($team->getNumberOfPlayer() > $game->getVersusType()){
-                    $validTeams = false;
-                    // An error is displayed
-                    $error = new FormError(
-                        "Le nombre de joueurs de l'équipe ".$team->getColor()." est trop élevé."
-                    );
-                    $launchGameForm->addError($error);
+            // Checking the type of game
+            if(!$game->getVersusType() || $game->getVersusType() == 0){
+                $validTeams = false;
+                // An error is displayed
+                $error = new FormError(
+                    "Choisissez un type de partie."
+                );
+                $launchGameForm->addError($error);
+            } else {
+                // Checking the number of players in each team
+                foreach ($tableTeam as $team){
+                    // If the number of players on the team is insufficient,
+                    if($team->getNumberOfPlayer() < $game->getVersusType()){
+                        $validTeams = false;
+                        // An error is displayed
+                        $error = new FormError(
+                            "Le nombre de joueurs de l'équipe ".$team->getColor()." est insuffisant."
+                        );
+                        $launchGameForm->addError($error);
+                    }
+                    // If the number of players in the team is too high,
+                    if($team->getNumberOfPlayer() > $game->getVersusType()){
+                        $validTeams = false;
+                        // An error is displayed
+                        $error = new FormError(
+                            "Le nombre de joueurs de l'équipe ".$team->getColor()." est trop élevé."
+                        );
+                        $launchGameForm->addError($error);
+                    }
                 }
             }
             if($validTeams){
