@@ -15,9 +15,17 @@ import './styles/app.scss';
 import './styles/sidenav.scss';
 import './styles/amis.scss';
 import './styles/hub.scss';
+import 'slick-carousel/slick/slick.css'
+import 'slick-carousel/slick/slick-theme.css'
+import 'photoswipe/style.css';
 // JS
 let $ = require('jquery')
 import './jkeyboard';
 import './partie';
+import './photoSwipe'
+import './slickCarousel'
+// LIBS
+
+
 
 

@@ -2269,15 +2269,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bootstrap@npm:^5.1.3":
-  version: 5.1.3
-  resolution: "bootstrap@npm:5.1.3"
-  peerDependencies:
-    "@popperjs/core": ^2.10.2
-  checksum: 301b5ed872efba061104cf22ac93568e3837867fb5527ab9326a51510fb752bd4883e1d488225c8be72f86d9d3a55ef5b166aa7fa62c2fdd077c3f05b65752f8
-  languageName: node
-  linkType: hard
-
 "brace-expansion@npm:^1.1.7":
   version: 1.1.11
   resolution: "brace-expansion@npm:1.1.11"
@@ -5117,6 +5108,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"photoswipe@npm:^5.2.4":
+  version: 5.2.4
+  resolution: "photoswipe@npm:5.2.4"
+  checksum: a81e1c6e12df2de566d005bd75fde04a6f75cae1c4c69c12d4668169bcc6e7116e3132db0dbd504aea4db8be9adc66abae85deb3537b5c19d514def0c9595a2f
+  languageName: node
+  linkType: hard
+
 "picocolors@npm:^1.0.0":
   version: 1.0.0
   resolution: "picocolors@npm:1.0.0"
@@ -5965,14 +5963,15 @@ __metadata:
     "@symfony/stimulus-bridge": ^3.0.0
     "@symfony/webpack-encore": ^1.7.0
     autoprefixer: ^10.4.2
-    bootstrap: ^5.1.3
     core-js: ^3.0.0
     file-loader: ^6.0.0
     jquery: ^3.6.0
+    photoswipe: ^5.2.4
     popper.js: ^1.16.1
     regenerator-runtime: ^0.13.2
     sass: ^1.49.0
     sass-loader: ^12.0.0
+    slick-carousel: ^1.8.1
     webpack-notifier: ^1.6.0
   languageName: unknown
   linkType: soft
@@ -6258,6 +6257,15 @@ __metadata:
   version: 3.0.0
   resolution: "slash@npm:3.0.0"
   checksum: 94a93fff615f25a999ad4b83c9d5e257a7280c90a32a7cb8b4a87996e4babf322e469c42b7f649fd5796edd8687652f3fb452a86dc97a816f01113183393f11c
+  languageName: node
+  linkType: hard
+
+"slick-carousel@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "slick-carousel@npm:1.8.1"
+  peerDependencies:
+    jquery: ">=1.8.0"
+  checksum: acaad391e4d8bc1c7fdb8d361faa1f1d60829b31d618b54bc38c0550a59b26de36537e0ab4bc0364176ec11d1a61d0cf11e99d8d5b1285d656673c9a1a719257
   languageName: node
   linkType: hard
 
