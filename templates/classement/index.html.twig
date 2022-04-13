@@ -3,94 +3,165 @@
 {% block title %}Hello ClassementController!{% endblock %}
 
 {% block body %}
+    <style>
+        img {
+            background: #F1F1FA;
+            width: 400px;
+            height: 300px;
+            display: block;
+            margin: 10px auto;
+            border: 0;
+        }
+    </style>
     <h1>Classement</h1>
     <div class="container d-flex justify-content-center">
         <section class="row area d-flex justify-content-center">
-            <div class="block_classement col-12">
+            <div class="block_classement col-12 mb-5">
+                <div class="row">
+                    <h2>Classement en ligne</h2>
+                </div>
+            </div>
+            <div class="block_classement col-12 mb-5">
                 <div class="row">
                     <div class="col">
-                        <h2>Classement en ligne</h2>
-                        <div class="pswp-gallery pswp-gallery--single-column" id="my-gallery">
-                            <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg"
-                               data-pswp-width="1669"
-                               data-pswp-height="2500"
-                               target="_blank">
-                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-200.jpg" alt="" />
-                            </a>
-                            <!-- cropped thumbnail: -->
-                            <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-2500.jpg"
-                               data-pswp-width="1875"
-                               data-pswp-height="2500"
-                               data-cropped="true"
-                               target="_blank">
-                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-200.jpg" alt="" />
-                                Cropped
-                            </a>
-                            <!-- data-pswp-src with custom URL in href -->
-                            <a href="https://unsplash.com"
-                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"
-                               data-pswp-width="2500"
-                               data-pswp-height="1666"
-                               target="_blank">
-                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-200.jpg" alt="" />
-                            </a>
-                            <!-- Without thumbnail: -->
-                            <a href="http://example.com"
-                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/5/img-2500.jpg"
-                               data-pswp-width="2500"
-                               data-pswp-height="1668"
-                               target="_blank">
-                                No thumbnail
-                            </a>
-                            <!-- wrapped with any element: -->
-                            <div>
-                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"
-                                   data-pswp-width="2500"
-                                   data-pswp-height="1667"
-                                   target="_blank">
-                                    <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />
-                                </a>
-                            </div>
-                        </div>
+                        <button type="button">Get URL</button>
                     </div>
                 </div>
             </div>
-            <div class="block_classement col-12">
+            <div class="block_classement col-12 mb-5">
                 <div class="row">
                     <div class="col">
-                        <h2>Classement en ligne</h2>
-                        <div class="your-class" id="my-gallery">
-                            <div>
-                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"
-                                   data-pswp-width="2500"
-                                   data-pswp-height="1667"
-                                   target="_blank">
-                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />
-                                </a>
-                            </div>
-                            <div>
-                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"
-                                   data-pswp-width="2500"
-                                   data-pswp-height="1667"
-                                   target="_blank">
-                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />
-                                </a>
-                            </div>
-                            <div>
-                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"
-                                   data-pswp-width="2500"
-                                   data-pswp-height="1667"
-                                   target="_blank">
-                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />
-                                </a>
-                            </div>
-                        </div>
+                        <img src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" />
+                        <img src="https://ik.imagekit.io/demo/img/image2.jpeg?tr=w-400,h-300" />
+                        <img src="https://ik.imagekit.io/demo/img/image3.jpg?tr=w-400,h-300" />
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image4.jpeg?tr=w-400,h-300" />
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image5.jpeg?tr=w-400,h-300" />
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image6.jpeg?tr=w-400,h-300" />
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image7.jpeg?tr=w-400,h-300" />
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image8.jpeg?tr=w-400,h-300" />
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image9.jpeg?tr=w-400,h-300" />
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image10.jpeg?tr=w-400,h-300" />
+
                     </div>
                 </div>
             </div>
+{#            <div class="block_classement col-12 mb-5">#}
+{#                <div class="row">#}
+{#                    <div class="col">#}
+{#                        <div class="pswp-gallery pswp-gallery--single-column" id="my-gallery">#}
+{#                            <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg"#}
+{#                               data-pswp-width="1669"#}
+{#                               data-pswp-height="2500"#}
+{#                               target="_blank">#}
+{#                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-200.jpg" alt="" />#}
+{#                            </a>#}
+{#                            <!-- cropped thumbnail: -->#}
+{#                            <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-2500.jpg"#}
+{#                               data-pswp-width="1875"#}
+{#                               data-pswp-height="2500"#}
+{#                               data-cropped="true"#}
+{#                               target="_blank">#}
+{#                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-200.jpg" alt="" />#}
+{#                                Cropped#}
+{#                            </a>#}
+{#                            <!-- data-pswp-src with custom URL in href -->#}
+{#                            <a href="https://unsplash.com"#}
+{#                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"#}
+{#                               data-pswp-width="2500"#}
+{#                               data-pswp-height="1666"#}
+{#                               target="_blank">#}
+{#                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-200.jpg" alt="" />#}
+{#                            </a>#}
+{#                            <!-- Without thumbnail: -->#}
+{#                            <a href="http://example.com"#}
+{#                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/5/img-2500.jpg"#}
+{#                               data-pswp-width="2500"#}
+{#                               data-pswp-height="1668"#}
+{#                               target="_blank">#}
+{#                                No thumbnail#}
+{#                            </a>#}
+{#                            <!-- wrapped with any element: -->#}
+{#                            <div>#}
+{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"#}
+{#                                   data-pswp-width="2500"#}
+{#                                   data-pswp-height="1667"#}
+{#                                   target="_blank">#}
+{#                                    <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
+{#                                </a>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="block_classement col-12">#}
+{#                <div class="row">#}
+{#                    <div class="col">#}
+{#                        <div class="your-class" id="my-gallery">#}
+{#                            <div>#}
+{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"#}
+{#                                   data-pswp-width="2500"#}
+{#                                   data-pswp-height="1667"#}
+{#                                   target="_blank">#}
+{#                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
+{#                                </a>#}
+{#                            </div>#}
+{#                            <div>#}
+{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"#}
+{#                                   data-pswp-width="2500"#}
+{#                                   data-pswp-height="1667"#}
+{#                                   target="_blank">#}
+{#                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
+{#                                </a>#}
+{#                            </div>#}
+{#                            <div>#}
+{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"#}
+{#                                   data-pswp-width="2500"#}
+{#                                   data-pswp-height="1667"#}
+{#                                   target="_blank">#}
+{#                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
+{#                                </a>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
         </section>
     </div>
     <script>
+        $(document).ready(function(){
+            $("button").click(function(){
+                var pageURL = $(location).attr("href");
+                alert(pageURL);
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            var lazyloadImages = document.querySelectorAll("img.lazy");
+            var lazyloadThrottleTimeout;
 
+            function lazyload () {
+                if(lazyloadThrottleTimeout) {
+                    clearTimeout(lazyloadThrottleTimeout);
+                }
+
+                lazyloadThrottleTimeout = setTimeout(function() {
+                    var scrollTop = window.pageYOffset;
+                    lazyloadImages.forEach(function(img) {
+                        if(img.offsetTop < (window.innerHeight + scrollTop)) {
+                            img.src = img.dataset.src;
+                            img.classList.remove('lazy');
+                        }
+                    });
+                    if(lazyloadImages.length === 0) {
+                        document.removeEventListener("scroll", lazyload);
+                        window.removeEventListener("resize", lazyload);
+                        window.removeEventListener("orientationChange", lazyload);
+                    }
+                }, 20);
+            }
+
+            document.addEventListener("scroll", lazyload);
+            window.addEventListener("resize", lazyload);
+            window.addEventListener("orientationChange", lazyload);
+        });
     </script>
 {% endblock %}
