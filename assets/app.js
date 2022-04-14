@@ -8,6 +8,7 @@
 // any CSS you import will output into a single css file (app.css in this case)
 
 // CSS
+import 'bootstrap/dist/css/bootstrap.css'
 import './styles/polices.scss';
 import './styles/jkeyboard.scss';
 import './styles/accueil.scss';
@@ -20,8 +21,13 @@ import 'slick-carousel/slick/slick-theme.css'
 import 'photoswipe/style.css';
 import 'glightbox/dist/css/glightbox.css'
 // JS
-let $ = require('jquery')
+// import 'jquery'
+// create global $ and jQuery variables
+const $ = require('jquery');
+global.$ = global.jQuery = $;
 import './jkeyboard';
+require('bootstrap')
+
 import './partie';
 import './photoSwipe'
 import './slickCarousel'
