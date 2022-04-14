@@ -28,7 +28,9 @@
                                 {% endif %}
                                 <div class="avatarBox col-4 presence {{ presence }}">
                                     {% if player.getAvatar() %}
-                                        <img class="avatar " src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                        <img class="avatar "
+                                             src="{{ ('images/avatars/'~player.getAvatar().avatar) | imagine_filter('my_thumb_filter') }}"
+                                             alt="avatar">
                                     {% else %}
                                         <div class="defaultAvatar">
                                             {{ player.pseudo|first|upper }}

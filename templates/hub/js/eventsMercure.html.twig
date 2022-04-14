@@ -1,19 +1,19 @@
 <script>
-    $(document).ready(function(){
+    $(document).ready(function () {
         // Si l'utilisateur est connecté
         {% if app.user %}
         //-- Inscription aux topics mercure.
         // Initialisation de l'Url mercure
         const url = new URL('http://localhost:3000/.well-known/mercure')
         // On ajoute le "topic" correspondant aux notifications de l'utilisateur courant
-        url.searchParams.append('topic','/hub/prive/' + {{ idGame }})
-        url.searchParams.append('topic','/hub/prive/start/' + {{ idGame }})
-        url.searchParams.append('topic','/updateVersusType/' + {{ idGame }})
+        url.searchParams.append('topic', '/hub/prive/' + {{ idGame }})
+        url.searchParams.append('topic', '/hub/prive/start/' + {{ idGame }})
+        url.searchParams.append('topic', '/updateVersusType/' + {{ idGame }})
         //-- On écoute les évènements provenant de mercure
         const eventSource = new EventSource(url)
         eventSource.onmessage = (e) => {
             // notification nouveau joueur
-            if(JSON.parse(e.data).topic === '/hub/prive/' + {{ idGame }}){
+            if (JSON.parse(e.data).topic === '/hub/prive/' + {{ idGame }}) {
                 // window.location.href = JSON.parse(e.data).url_partie;
                 $.ajax({
                     method: "POST",
@@ -21,23 +21,23 @@
                     data: {
                         idGame: {{ idGame }}
                     },
-                    success: function(data){
+                    success: function (data) {
                         let arrayTeam = JSON.parse(data);
                         $('.team_blue').empty();
                         $('.team_red').empty();
                         $.each(arrayTeam.blue, function (index, value) {
                             let avatar;
-                            if(value.avatar){
-                                avatar = "<img class='avatar connecte' src='"+ value.avatar +"' alt='avatar'>";
+                            if (value.avatar) {
+                                avatar = "<img class='avatar connecte' src='" + value.avatar + "' alt='avatar'>";
                             } else {
                                 avatar = "<div class='defaultAvatar' > " +
-                                    value.pseudo.slice(0,1).toUpperCase() +
+                                    value.pseudo.slice(0, 1).toUpperCase() +
                                     "</div>";
                             }
                             $('.team_blue')
                                 .append(
                                     "<div class='col-3 playerRow'>" +
-                                    "<input class='playerId' type='hidden' value='"+ value.id_player +"'>" +
+                                    "<input class='playerId' type='hidden' value='" + value.id_player + "'>" +
                                     avatar +
                                     value.pseudo +
                                     "</div>"
@@ -45,17 +45,17 @@
                         })
                         $.each(arrayTeam.red, function (index, value) {
                             let avatar;
-                            if(value.avatar){
-                                avatar = "<img class='avatar connecte' src='"+ value.avatar +"' alt='avatar'>";
+                            if (value.avatar) {
+                                avatar = "<img class='avatar connecte' src='" + value.avatar + "' alt='avatar'>";
                             } else {
                                 avatar = "<div class='defaultAvatar' > " +
-                                    value.pseudo.slice(0,1).toUpperCase() +
+                                    value.pseudo.slice(0, 1).toUpperCase() +
                                     "</div>";
                             }
                             $('.team_red')
                                 .append(
                                     "<div class='col-3 playerRow'>" +
-                                    "<input class='playerId' type='hidden' value='"+ value.id_player +"'>" +
+                                    "<input class='playerId' type='hidden' value='" + value.id_player + "'>" +
                                     avatar +
                                     value.pseudo +
                                     "</div>"
@@ -64,11 +64,11 @@
                     }
                 });
             }
-            if(JSON.parse(e.data).topic === '/hub/prive/start/' + {{ idGame }}){
+            if (JSON.parse(e.data).topic === '/hub/prive/start/' + {{ idGame }}) {
                 window.location = '{{ path('otsum.multiPrivateGame', {idGame: idGame}) }}';
             }
-            if(JSON.parse(e.data).topic === '/updateVersusType/' + {{ idGame }}){
-                if($('#versusType').length){
+            if (JSON.parse(e.data).topic === '/updateVersusType/' + {{ idGame }}) {
+                if ($('#versusType').length) {
                     $('#versusType h2').html(JSON.parse(e.data).versusType);
                 } else {
                     $('.modal').after('<div id="versusType" class="col-12"><h2>' + JSON.parse(e.data).versusType + '</h2></div>');
@@ -77,7 +77,7 @@
         }
         //-- Désinscription aux topics mercure
         window.addEventListener('beforeunload', function () {
-            if(eventSource != null){
+            if (eventSource != null) {
                 eventSource.close()
             }
         })

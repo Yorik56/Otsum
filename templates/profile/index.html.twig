@@ -12,7 +12,8 @@
                         <div class="avatar_container">
                             <a href="{{ path('majAvatar') }}">
                                 {% if avatar %}
-                                    <img src="{{ ('images/avatars/'~avatar.avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                    <img src="{{ ('images/avatars/'~avatar.avatar) | imagine_filter('my_thumb_filter') }}"
+                                         alt="avatar">
                                 {% else %}
                                     <div class="defaultAvatar">
                                         {{ utilisateur.pseudo|first|upper }}

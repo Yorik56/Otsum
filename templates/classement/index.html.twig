@@ -6,10 +6,10 @@
     <style>
         img {
             background: #F1F1FA;
-            width: 400px;
+            width: 100%;
             height: 300px;
             display: block;
-            margin: 10px auto;
+            margin: auto;
             border: 0;
         }
     </style>
@@ -20,44 +20,58 @@
                 <div class="row">
                     <h2>Classement en ligne</h2>
                 </div>
+                <div class="row g-0">
+                    <div class="col-sm-6 col-md-8">.col-sm-6 .col-md-8</div>
+                    <div class="col-6 col-md-4">.col-6 .col-md-4</div>
+                </div>
             </div>
-            <div class="block_classement col-12 mb-5">
+            <div class="block_classement mb-5">
                 <div class="row">
-                    <!-- Simple image -->
-                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox">
-                        <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
-                    </a>
-
-                    <!-- Video -->
-                    <a href="{{ asset('pexels-video-1550080.mp4') }}" class="glightbox">
-                        <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
-                    </a>
-
-                    <!-- Gallery -->
-                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox" data-gallery="gallery1">
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
-                    </a>
-                    <a href="{{ asset('pexels-video-1550080.mp4') }}" class="glightbox" data-gallery="gallery1">
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
-                    </a>
-
-                    <!-- Simple Description -->
-                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox" data-glightbox="title: My title; description: this is the slide description">
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
-                    </a>
-
-                    <!-- Advanced Description -->
-                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox" data-glightbox="title: My title; description: .custom-desc1">
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
-                    </a>
-
-                    <div class="glightbox-desc custom-desc1">
-                        <p>The content of this div will be used as the slide description</p>
-                        <p>You can add links and any HTML you want</p>
+                    <div class="col-6">
+                        <!-- Simple image -->
+                        <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox">
+                            <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image"/>
+                        </a>
                     </div>
-
-
-
+                    <div class="col-6">
+                        <!-- Video -->
+                        <a href="{{ asset('pexels-video-1550080.mp4') }}" class="glightbox">
+                            <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image"/>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox"
+                           data-gallery="gallery">
+                            <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image"/>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ asset('pexels-video-1550080.mp4') }}" class="glightbox" data-gallery="gallery">
+                            <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image"/>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <!-- Simple Description -->
+                        <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox"
+                           data-glightbox="title: My title; description: this is the slide description">
+                            <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300"
+                                 alt="image"/>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <!-- Advanced Description -->
+                        <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox"
+                           data-glightbox="title: My title; description: .custom-desc1">
+                            <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300"
+                                 alt="image"/>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <div class="glightbox-desc custom-desc1">
+                            <p>The content of this div will be used as the slide description</p>
+                            <p>You can add links and any HTML you want</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="block_classement col-12 mb-5">
@@ -70,127 +84,137 @@
             <div class="block_classement col-12 mb-5">
                 <div class="row">
                     <div class="col lazyLoading">
-                        <img src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" />
-                        <img src="https://ik.imagekit.io/demo/img/image2.jpeg?tr=w-400,h-300" />
-                        <img src="https://ik.imagekit.io/demo/img/image3.jpg?tr=w-400,h-300" />
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image4.jpeg?tr=w-400,h-300" />
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image5.jpeg?tr=w-400,h-300" />
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image6.jpeg?tr=w-400,h-300" />
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image7.jpeg?tr=w-400,h-300" />
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image8.jpeg?tr=w-400,h-300" />
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image9.jpeg?tr=w-400,h-300" />
-                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image10.jpeg?tr=w-400,h-300" />
+                        <img src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300"/>
+                        <img src="https://ik.imagekit.io/demo/img/image2.jpeg?tr=w-400,h-300"/>
+                        <img src="https://ik.imagekit.io/demo/img/image3.jpg?tr=w-400,h-300"/>
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image4.jpeg?tr=w-400,h-300"/>
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image5.jpeg?tr=w-400,h-300"/>
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image6.jpeg?tr=w-400,h-300"/>
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image7.jpeg?tr=w-400,h-300"/>
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image8.jpeg?tr=w-400,h-300"/>
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image9.jpeg?tr=w-400,h-300"/>
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image10.jpeg?tr=w-400,h-300"/>
 
                     </div>
                 </div>
             </div>
-{#            <div class="block_classement col-12 mb-5">#}
-{#                <div class="row">#}
-{#                    <div class="col">#}
-{#                        <div class="pswp-gallery pswp-gallery--single-column" id="my-gallery">#}
-{#                            <a href="{{ asset('pexels-video-1550080.mp4') }}"#}
-{#                               data-pswp-width="1669"#}
-{#                               data-pswp-height="2500"#}
-{#                               target="_blank">#}
-{#                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-200.jpg" alt="" />#}
-{#                            </a>#}
-{#                            <!-- cropped thumbnail: -->#}
-{#                            <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-2500.jpg"#}
-{#                               data-pswp-width="1875"#}
-{#                               data-pswp-height="2500"#}
-{#                               data-cropped="true"#}
-{#                               target="_blank">#}
-{#                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-200.jpg" alt="" />#}
-{#                                Cropped#}
-{#                            </a>#}
-{#                            <!-- data-pswp-src with custom URL in href -->#}
-{#                            <a href="https://unsplash.com"#}
-{#                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"#}
-{#                               data-pswp-width="2500"#}
-{#                               data-pswp-height="1666"#}
-{#                               target="_blank">#}
-{#                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-200.jpg" alt="" />#}
-{#                            </a>#}
-{#                            <!-- Without thumbnail: -->#}
-{#                            <a href="http://example.com"#}
-{#                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/5/img-2500.jpg"#}
-{#                               data-pswp-width="2500"#}
-{#                               data-pswp-height="1668"#}
-{#                               target="_blank">#}
-{#                                No thumbnail#}
-{#                            </a>#}
-{#                            <!-- wrapped with any element: -->#}
-{#                            <div>#}
-{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"#}
-{#                                   data-pswp-width="2500"#}
-{#                                   data-pswp-height="1667"#}
-{#                                   target="_blank">#}
-{#                                    <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
-{#                                </a>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#            <div class="block_classement col-12">#}
-{#                <div class="row">#}
-{#                    <div class="col">#}
-{#                        <div class="your-class" id="my-gallery">#}
-{#                            <div>#}
-{#                                <a href="{{ asset('pexels-video-1550080.mp4') }}"#}
-{#                                   data-pswp-width="2500"#}
-{#                                   data-pswp-height="1667"#}
-{#                                   target="_blank">#}
-{#                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
-{#                                </a>#}
-{#                            </div>#}
-{#                            <div>#}
-{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"#}
-{#                                   data-pswp-width="2500"#}
-{#                                   data-pswp-height="1667"#}
-{#                                   target="_blank">#}
-{#                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
-{#                                </a>#}
-{#                            </div>#}
-{#                            <div>#}
-{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"#}
-{#                                   data-pswp-width="2500"#}
-{#                                   data-pswp-height="1667"#}
-{#                                   target="_blank">#}
-{#                                    <img class="m-auto w-50" data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg" alt="" />#}
-{#                                </a>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
+            <div class="block_classement col-12 mb-5">
+                <div class="row">
+                    <div class="col">
+                        <div class="pswp-gallery pswp-gallery--single-column" id="my-gallery">
+                            <a href="{{ asset('pexels-video-1550080.mp4') }}"
+                               data-pswp-width="1669"
+                               data-pswp-height="2500"
+                               target="_blank">
+                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-200.jpg"
+                                     alt=""/>
+                            </a>
+                            <!-- cropped thumbnail: -->
+                            <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-2500.jpg"
+                               data-pswp-width="1875"
+                               data-pswp-height="2500"
+                               data-cropped="true"
+                               target="_blank">
+                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/7/img-200.jpg"
+                                     alt=""/>
+                                Cropped
+                            </a>
+                            <!-- data-pswp-src with custom URL in href -->
+                            <a href="https://unsplash.com"
+                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"
+                               data-pswp-width="2500"
+                               data-pswp-height="1666"
+                               target="_blank">
+                                <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-200.jpg"
+                                     alt=""/>
+                            </a>
+                            <!-- Without thumbnail: -->
+                            <a href="http://example.com"
+                               data-pswp-src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/5/img-2500.jpg"
+                               data-pswp-width="2500"
+                               data-pswp-height="1668"
+                               target="_blank">
+                                No thumbnail
+                            </a>
+                            <!-- wrapped with any element: -->
+                            <div>
+                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"
+                                   data-pswp-width="2500"
+                                   data-pswp-height="1667"
+                                   target="_blank">
+                                    <img src="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"
+                                         alt=""/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="block_classement col-12">
+                <div class="row">
+                    <div class="col">
+                        <div class="your-class" id="my-gallery">
+                            <div>
+                                <a href="{{ asset('pexels-video-1550080.mp4') }}"
+                                   data-pswp-width="2500"
+                                   data-pswp-height="1667"
+                                   target="_blank">
+                                    <img class="m-auto w-50"
+                                         data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"
+                                         alt=""/>
+                                </a>
+                            </div>
+                            <div>
+                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"
+                                   data-pswp-width="2500"
+                                   data-pswp-height="1667"
+                                   target="_blank">
+                                    <img class="m-auto w-50"
+                                         data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"
+                                         alt=""/>
+                                </a>
+                            </div>
+                            <div>
+                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"
+                                   data-pswp-width="2500"
+                                   data-pswp-height="1667"
+                                   target="_blank">
+                                    <img class="m-auto w-50"
+                                         data-lazy="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-200.jpg"
+                                         alt=""/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
     <script>
-        $(document).ready(function(){
-            $("button").click(function(){
+        $(document).ready(function () {
+            $("button").click(function () {
                 var pageURL = $(location).attr("href");
                 alert(pageURL);
             });
         });
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             var lazyloadImages = document.querySelectorAll("img.lazy");
             var lazyloadThrottleTimeout;
 
-            function lazyload () {
-                if(lazyloadThrottleTimeout) {
+            function lazyload() {
+                if (lazyloadThrottleTimeout) {
                     clearTimeout(lazyloadThrottleTimeout);
                 }
 
-                lazyloadThrottleTimeout = setTimeout(function() {
+                lazyloadThrottleTimeout = setTimeout(function () {
                     var scrollTop = window.pageYOffset;
-                    lazyloadImages.forEach(function(img) {
-                        if(img.offsetTop < (window.innerHeight + scrollTop)) {
+                    lazyloadImages.forEach(function (img) {
+                        if (img.offsetTop < (window.innerHeight + scrollTop)) {
                             img.src = img.dataset.src;
                             img.classList.remove('lazy');
                         }
                     });
-                    if(lazyloadImages.length === 0) {
+                    if (lazyloadImages.length === 0) {
                         document.removeEventListener("scroll", lazyload);
                         window.removeEventListener("resize", lazyload);
                         window.removeEventListener("orientationChange", lazyload);

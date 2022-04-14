@@ -93,4 +93,36 @@ class MultiPrivateGameController extends GameController
             'idPlayer' => $idPlayer
         ]);
     }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Route('/checkPresenceOfAllPlayers', name: 'checkPresenceOfAllPlayers')]
+    public function checkPresenceOfAllPlayers(Request $request): JsonResponse
+    {
+        $idGame   = $request->request->get('idGame');
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        $inGamePlayerStatuses = $game->getInGamePlayerStatuses();
+        $gameReady = true;
+        foreach ($inGamePlayerStatuses as $inGamePlayerStatus){
+            if($inGamePlayerStatus->getFlagPresenceInGame() != InGamePlayerStatus::FLAG_PRESENCE_TRUE){
+                $gameReady = false;
+            }
+        }
+        if($gameReady){
+            // Mercure notification joiningPrivateGame
+            $update = new Update(
+                '/checkPresenceOfAllPlayers/'.$idGame,
+                json_encode([
+                    'topic' =>'/checkPresenceOfAllPlayers/'.$idGame,
+                    'idGame' => $idGame
+                ])
+            );
+            $this->hub->publish($update);
+        }
+        return new JsonResponse([
+            'gameReady' => $gameReady
+        ]);
+    }
 }

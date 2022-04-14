@@ -1,166 +1,173 @@
 <script>
-    $(document).ready(function() {
     {# //---* JOININGPRIVATEGAME *---// #}
-        $.ajax({
-            method: "POST",
-            url: "{{ path('joiningPrivateGame') }}",
-            data: {
-                idGame  : {{ idGame }},
-                idPlayer: {{ app.user.id }}
-            }
-        });
-    {# //---*   GESTION DU JEU   *---// #}
-        // Variables de la grille de jeu
-        let idGame = {{ idGame }};
-        let difficulty = {{ difficulty }};
-        let currentLineNumber = 0;
-        const firstLetter = "{{ firstLetter }}";
-        let numberOfLines = 6;
-        let cellNumber = 1;
-        // Création du clavier
-        $('#keyboard').jkeyboard({
-            input: $('#search_field'),
-            layout: 'azerty',
-        });
+    $.ajax({
+        method: "POST",
+        url: "{{ path('joiningPrivateGame') }}",
+        data: {
+            idGame: {{ idGame }},
+            idPlayer: {{ app.user.id }}
+        }
+    });
+    {# //---* CHECKPRESENCEOFALLPLAYERS *---// #}
+    $.ajax({
+        method: "POST",
+        url: "{{ path('checkPresenceOfAllPlayers') }}",
+        data: {
+            idGame: {{ idGame }}
+        }
+    });
+    {# //---*   GAME MANAGMENT   *---// #}
+    // Variables de la grille de jeu
+    let idGame = {{ idGame }};
+    let difficulty = {{ difficulty }};
+    let currentLineNumber = 0;
+    const firstLetter = "{{ firstLetter }}";
+    let numberOfLines = 6;
+    let cellNumber = 1;
+    // Création du clavier
+    $('#keyboard').jkeyboard({
+        input: $('#search_field'),
+        layout: 'azerty',
+    });
 
-        creationDeLaGrille(firstLetter, difficulty);
+    // creationDeLaGrille(firstLetter, difficulty);
 
-        // Affichage de la partie
-        function creationDeLaGrille(mot, difficulty) {
-            let box = $('.table');
-            let box_line;
-            $('.wordToFind').append(mot);
-            for (let i = 0; i < numberOfLines; i++) {
-                box.append('<tr></tr>')
-                box_line = $('div tr:last-child');
-                for (let j = 0; j < difficulty; j++) {
-                    if (i < 1 && j < 1) {
-                        box_line.append('<td class="td line_' + i + ' first_cell valide_cell cell cell_' + cellNumber + '"><div>' + mot.split('')[j] + '</div></td>')
+    // Affichage de la partie
+    var creationDeLaGrille = function (mot, difficulty) {
+        let box = $('.table');
+        let box_line;
+        $('.wordToFind').append(mot);
+        for (let i = 0; i < numberOfLines; i++) {
+            box.append('<tr></tr>')
+            box_line = $('div tr:last-child');
+            for (let j = 0; j < difficulty; j++) {
+                if (i < 1 && j < 1) {
+                    box_line.append('<td class="td line_' + i + ' first_cell valide_cell cell cell_' + cellNumber + '"><div>' + mot.split('')[j] + '</div></td>')
+                } else {
+                    if (i < 1 && j === 1) {
+                        box_line.append('<td class="td line_' + i + ' current_cell cell cell_' + cellNumber + '"><div>_</div></td>')
+                    } else if (i < 1 && j === (difficulty - 1)) {
+                        box_line.append('<td class="td line_' + i + ' cell cell_' + cellNumber + ' last_cell" ><div>.</div></td>')
+                    } else if (i < 1 && j <= difficulty) {
+                        box_line.append('<td class="td line_' + i + ' cell cell_' + cellNumber + '"><div>.</div></td>')
                     } else {
-                        if (i < 1 && j === 1) {
-                            box_line.append('<td class="td line_' + i + ' current_cell cell cell_' + cellNumber + '"><div>_</div></td>')
-                        } else if (i < 1 && j === (difficulty - 1)) {
-                            box_line.append('<td class="td line_' + i + ' cell cell_' + cellNumber + ' last_cell" ><div>.</div></td>')
-                        } else if (i < 1 && j <= difficulty) {
-                            box_line.append('<td class="td line_' + i + ' cell cell_' + cellNumber + '"><div>.</div></td>')
-                        } else {
-                            box_line.append('<td class="td line_' + i + ' cell cell_' + cellNumber + '"><div></div></td>')
-                        }
+                        box_line.append('<td class="td line_' + i + ' cell cell_' + cellNumber + '"><div></div></td>')
                     }
-                    cellNumber++;
                 }
+                cellNumber++;
             }
         }
+    }
 
-    {#    // Validation de l'essai / MAJ de la ligne#}
-    {#    $('.return').on("click", function () {#}
-    {#        let mot_valide = true;#}
-    {#        let mot = "";#}
-    {#        $(".line_" + currentLineNumber).each(function (index) {#}
-    {#            mot += $(this).text();#}
-    {#            if ($(this).text() === "." || $(this).text() === "_") {#}
-    {#                mot_valide = false;#}
-    {#                return false;#}
-    {#            }#}
-    {#            if (index === difficulty - 1) {#}
-    {#                return false;#}
-    {#            }#}
-    {#        });#}
-    {#        if (!mot_valide) {#}
-    {#            alert('mot trop court !');#}
-    {#        } else {#}
-    {#            $('.last_cell').toggleClass('last_cell');#}
-    {#            $.ajax({#}
-    {#                method: "POST",#}
-    {#                url: "{{ path('updateLine') }}",#}
-    {#                data: {#}
-    {#                    currentLineNumber: currentLineNumber,#}
-    {#                    mot: mot,#}
-    {#                    idGame: idGame#}
-    {#                },#}
-    {#                success: function (data) {#}
-    {#                    console.log(data)#}
-    {#                    currentLineNumber = data.numberOfLines;#}
-    {#                    let numero_cellule = 1;#}
-    {#                    // MAJ de la ligne précédente#}
-    {#                    data.ligne_precedente.forEach(function (lettre, index) {#}
-    {#                        let cellule;#}
-    {#                        if (currentLineNumber - 1 === 0) {#}
-    {#                            cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (index + 1));#}
-    {#                        } else {#}
-    {#                            cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (((currentLineNumber - 1) * difficulty) + numero_cellule));#}
-    {#                        }#}
-    {#                        setTimeout(function () {#}
-    {#                            if (lettre.placement === true && lettre.presence === true) {#}
-    {#                                if (!cellule.hasClass("valide_cell")) {#}
-    {#                                    cellule.addClass("valide_cell")#}
-    {#                                }#}
-    {#                            } else if (lettre.presence === true) {#}
-    {#                                if (!cellule.hasClass("is_in_cell")) {#}
-    {#                                    cellule.html("<div><p>" + lettre.valeur + "</p></div>")#}
-    {#                                    cellule.addClass("is_in_cell")#}
-    {#                                }#}
-    {#                            }#}
-    {#                        }, 300);#}
-    {#                        numero_cellule++;#}
-    {#                    })#}
-    {#                    //-- Préparation de la nouvelle ligne#}
-    {#                    if (data.victoire === true) {#}
-    {#                        alert('gagné !!');#}
-    {#                        $('.return').remove();#}
+    {#    // Validation de l'essai / MAJ de la ligne #}
+    {#    $('.return').on("click", function () { #}
+    {#        let mot_valide = true; #}
+    {#        let mot = ""; #}
+    {#        $(".line_" + currentLineNumber).each(function (index) { #}
+    {#            mot += $(this).text(); #}
+    {#            if ($(this).text() === "." || $(this).text() === "_") { #}
+    {#                mot_valide = false; #}
+    {#                return false; #}
+    {#            } #}
+    {#            if (index === difficulty - 1) { #}
+    {#                return false; #}
+    {#            } #}
+    {#        }); #}
+    {#        if (!mot_valide) { #}
+    {#            alert('mot trop court !'); #}
+    {#        } else { #}
+    {#            $('.last_cell').toggleClass('last_cell'); #}
+    {#            $.ajax({ #}
+    {#                method: "POST", #}
+    {#                url: "{{ path('updateLine') }}", #}
+    {#                data: { #}
+    {#                    currentLineNumber: currentLineNumber, #}
+    {#                    mot: mot, #}
+    {#                    idGame: idGame #}
+    {#                }, #}
+    {#                success: function (data) { #}
+    {#                    console.log(data) #}
+    {#                    currentLineNumber = data.numberOfLines; #}
+    {#                    let numero_cellule = 1; #}
+    {#                    // MAJ de la ligne précédente #}
+    {#                    data.ligne_precedente.forEach(function (lettre, index) { #}
+    {#                        let cellule; #}
+    {#                        if (currentLineNumber - 1 === 0) { #}
+    {#                            cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (index + 1)); #}
+    {#                        } else { #}
+    {#                            cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (((currentLineNumber - 1) * difficulty) + numero_cellule)); #}
+    {#                        } #}
+    {#                        setTimeout(function () { #}
+    {#                            if (lettre.placement === true && lettre.presence === true) { #}
+    {#                                if (!cellule.hasClass("valide_cell")) { #}
+    {#                                    cellule.addClass("valide_cell") #}
+    {#                                } #}
+    {#                            } else if (lettre.presence === true) { #}
+    {#                                if (!cellule.hasClass("is_in_cell")) { #}
+    {#                                    cellule.html("<div><p>" + lettre.valeur + "</p></div>") #}
+    {#                                    cellule.addClass("is_in_cell") #}
+    {#                                } #}
+    {#                            } #}
+    {#                        }, 300); #}
+    {#                        numero_cellule++; #}
+    {#                    }) #}
+    {#                    //-- Préparation de la nouvelle ligne #}
+    {#                    if (data.victoire === true) { #}
+    {#                        alert('gagné !!'); #}
+    {#                        $('.return').remove(); #}
 
-    {#                    } else {#}
-    {#                        $('.line_' + currentLineNumber).each(function (index) {#}
-    {#                            let numero = (index + 1) + (difficulty * currentLineNumber);#}
-    {#                            if (index === 0) {#}
-    {#                                // Affichage de la première lettre#}
-    {#                                $('.line_' + currentLineNumber + ".cell_" + numero)#}
-    {#                                    .addClass('valide_cell first_cell')#}
-    {#                                    .html("<div>" + data.ligne_precedente[0].valeur + "</div>");#}
-    {#                            } else if (index === 1) {#}
-    {#                                // Placement du curseur#}
-    {#                                $('.line_' + currentLineNumber + ".cell_" + numero)#}
-    {#                                    .addClass('current_cell')#}
-    {#                                    .html("<div>_</div>");#}
-    {#                            } else {#}
-    {#                                $('.line_' + currentLineNumber + ".cell_" + numero).html("<div>.</div>");#}
-    {#                            }#}
-    {#                        })#}
-    {#                        //-- Repérage de la dernière lettre#}
-    {#                        $('.line_' + currentLineNumber + ".cell_" + ((difficulty * currentLineNumber) + difficulty))#}
-    {#                            .addClass('last_cell')#}
-    {#                    }#}
+    {#                    } else { #}
+    {#                        $('.line_' + currentLineNumber).each(function (index) { #}
+    {#                            let numero = (index + 1) + (difficulty * currentLineNumber); #}
+    {#                            if (index === 0) { #}
+    {#                                // Affichage de la première lettre #}
+    {#                                $('.line_' + currentLineNumber + ".cell_" + numero) #}
+    {#                                    .addClass('valide_cell first_cell') #}
+    {#                                    .html("<div>" + data.ligne_precedente[0].valeur + "</div>"); #}
+    {#                            } else if (index === 1) { #}
+    {#                                // Placement du curseur #}
+    {#                                $('.line_' + currentLineNumber + ".cell_" + numero) #}
+    {#                                    .addClass('current_cell') #}
+    {#                                    .html("<div>_</div>"); #}
+    {#                            } else { #}
+    {#                                $('.line_' + currentLineNumber + ".cell_" + numero).html("<div>.</div>"); #}
+    {#                            } #}
+    {#                        }) #}
+    {#                        //-- Repérage de la dernière lettre #}
+    {#                        $('.line_' + currentLineNumber + ".cell_" + ((difficulty * currentLineNumber) + difficulty)) #}
+    {#                            .addClass('last_cell') #}
+    {#                    } #}
 
-    {#                    //-- Mise à jour du clavier#}
-    {#                    // parcours des lettres du clavier#}
-    {#                    $('.jkey.letter').each(function (index, element) {#}
-    {#                        let letter = element.childNodes[0].data;#}
-    {#                        let array_maj_keyboard = Object.entries(data.arrayMajKeyboard);#}
-    {#                        // parcours des lettres mises à jour#}
-    {#                        array_maj_keyboard.forEach(([key, value]) => {#}
-    {#                            if (letter === key) {#}
-    {#                                //Raz des classes#}
-    {#                                element.classList.remove('placee')#}
-    {#                                element.classList.remove('presente')#}
-    {#                                element.classList.remove('absente')#}
-    {#                                if (value.presence) {#}
-    {#                                    if (value.placement) {#}
-    {#                                        // position trouvée#}
-    {#                                        element.classList.add('placee')#}
-    {#                                    } else {#}
-    {#                                        // position non trouvée#}
-    {#                                        element.classList.add('presente')#}
-    {#                                    }#}
-    {#                                } else {#}
-    {#                                    // lettre absente#}
-    {#                                    element.classList.add('absente')#}
-    {#                                }#}
-    {#                            }#}
-    {#                        })#}
-    {#                    })#}
-    {#                }#}
-    {#            });#}
-    {#        }#}
-    {#    });#}
-    });
+    {#                    //-- Mise à jour du clavier #}
+    {#                    // parcours des lettres du clavier #}
+    {#                    $('.jkey.letter').each(function (index, element) { #}
+    {#                        let letter = element.childNodes[0].data; #}
+    {#                        let array_maj_keyboard = Object.entries(data.arrayMajKeyboard); #}
+    {#                        // parcours des lettres mises à jour #}
+    {#                        array_maj_keyboard.forEach(([key, value]) => { #}
+    {#                            if (letter === key) { #}
+    {#                                //Raz des classes #}
+    {#                                element.classList.remove('placee') #}
+    {#                                element.classList.remove('presente') #}
+    {#                                element.classList.remove('absente') #}
+    {#                                if (value.presence) { #}
+    {#                                    if (value.placement) { #}
+    {#                                        // position trouvée #}
+    {#                                        element.classList.add('placee') #}
+    {#                                    } else { #}
+    {#                                        // position non trouvée #}
+    {#                                        element.classList.add('presente') #}
+    {#                                    } #}
+    {#                                } else { #}
+    {#                                    // lettre absente #}
+    {#                                    element.classList.add('absente') #}
+    {#                                } #}
+    {#                            } #}
+    {#                        }) #}
+    {#                    }) #}
+    {#                } #}
+    {#            }); #}
+    {#        } #}
+    {#    }); #}
+
 </script>

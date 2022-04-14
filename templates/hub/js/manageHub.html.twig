@@ -1,9 +1,9 @@
 <script>
-    $(document).ready(function(){
+    $(document).ready(function () {
         // Si l'utilisateur est connecté
         {% if app.user %}
         //-- Invitation to play
-        $('#invitationModal').on('click','li.inviteUser',function() {
+        $('#invitationModal').on('click', 'li.inviteUser', function () {
             $.ajax({
                 method: "POST",
                 url: "{{ path('inviteUser') }}",
@@ -11,7 +11,7 @@
                     id_user: $(this).attr("data-userId"),
                     idGame: {{ idGame }}
                 },
-                success: function(data){
+                success: function (data) {
                     $("li.inviteUser[data-userId='" + data + "']").remove();
                     $('#invitationModal .modal-body ul').prepend(
                         '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
@@ -26,7 +26,7 @@
         });
         //-- Maj versus Type
         $('.versusType').on("change", function () {
-            if($(this).val() !== 0){
+            if ($(this).val() !== 0) {
                 let obj = $('.versusTypeChoice');
                 // obj.attr(url)
                 obj.submit()

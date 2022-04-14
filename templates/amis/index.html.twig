@@ -40,7 +40,9 @@
                                 <div data-row_utilisateur="{{ demande.source.id }}" class="row">
                                     <div class="utilisateur col-12 col-md-6">
                                         {% if demande.source.getAvatar() %}
-                                            <img class="avatar" src="{{ ('images/avatars/'~demande.source.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                            <img class="avatar"
+                                                 src="{{ ('images/avatars/'~demande.source.getAvatar().avatar) | imagine_filter('my_thumb_filter') }}"
+                                                 alt="avatar">
                                         {% else %}
                                             <div class="defaultAvatar">
                                                 {{ demande.source.pseudo|first|upper }}
@@ -49,8 +51,12 @@
                                         {{ demande.source.pseudo }}
                                     </div>
                                     <div class="action col-12 col-md-6">
-                                        <button class="btn friend_request accept btn-success" data-action="accepte" data-id="{{ demande.source.id }}">Accepter</button>
-                                        <button class="btn friend_request decline btn-danger" data-action="refuse" data-id="{{ demande.source.id }}">Refuser</button>
+                                        <button class="btn friend_request accept btn-success" data-action="accepte"
+                                                data-id="{{ demande.source.id }}">Accepter
+                                        </button>
+                                        <button class="btn friend_request decline btn-danger" data-action="refuse"
+                                                data-id="{{ demande.source.id }}">Refuser
+                                        </button>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -68,7 +74,9 @@
                             {% for contact in userContacts %}
                                 <div class="utilisateur col-3 col-md-6">
                                     {% if contact.getAvatar() %}
-                                        <img class="avatar " src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                        <img class="avatar "
+                                             src="{{ ('images/avatars/'~contact.getAvatar().avatar) | imagine_filter('my_thumb_filter') }}"
+                                             alt="avatar">
                                     {% else %}
                                         <div class="defaultAvatar">
                                             {{ contact.pseudo|first|upper }}
@@ -82,19 +90,19 @@
                 </div>
             </div>
         </section>
-    </div>    
+    </div>
     <script>
-        $(document).ready(function(){
-            $('.btn.friend_request').on('click',function () {
+        $(document).ready(function () {
+            $('.btn.friend_request').on('click', function () {
                 let utilisateur = $(this).data('id');
-                let action      = $(this).data('action');
+                let action = $(this).data('action');
                 //-- Répondre à une demande d'amis
                 $.ajax({
                     // Adresse à laquelle la requête est envoyée
                     method: "GET",
                     url: "{{ path("replyFriendRequest") }}",
                     data: {
-                        idUser : utilisateur,
+                        idUser: utilisateur,
                         response: action
                     },
                     // Le délai maximum en millisecondes de traitement de la demande
@@ -104,7 +112,7 @@
                         $("[data-row_utilisateur=" + data + "]").remove()
                     },
                     // La fonction à appeler si la requête n'a pas abouti
-                    error: function() {
+                    error: function () {
 
                     }
                 });

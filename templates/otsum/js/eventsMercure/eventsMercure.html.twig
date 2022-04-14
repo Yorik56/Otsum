@@ -1,87 +1,87 @@
 <script>
-    $(document).ready(function(){
+    $(document).ready(function () {
         //--- EVENTS MERCURE ---//
         // Si l'utilisateur est connecté
         {% if app.user %}
-            //--- TOPICS INSCRIPTIONS ---//
-            // Url mercure server
-            const url = new URL('http://localhost:3000/.well-known/mercure')
-            // Topic friend request
-            url.searchParams.append('topic','/accueil/notifications/demande_ajout/' + {{ app.user.id }})
-            // Topics notify login/logout
-            url.searchParams.append('topic','/imLogged/' + {{ app.user.id }})
-            url.searchParams.append('topic','/iLeave/' + {{ app.user.id }})
-            // Topic invitation private game
-            url.searchParams.append('topic','/invitationPrivateGame/' + {{ app.user.id }})
+        //--- TOPICS INSCRIPTIONS ---//
+        // Url mercure server
+        const url = new URL('http://localhost:3000/.well-known/mercure')
+        // Topic friend request
+        url.searchParams.append('topic', '/accueil/notifications/demande_ajout/' + {{ app.user.id }})
+        // Topics notify login/logout
+        url.searchParams.append('topic', '/imLogged/' + {{ app.user.id }})
+        url.searchParams.append('topic', '/iLeave/' + {{ app.user.id }})
+        // Topic invitation private game
+        url.searchParams.append('topic', '/invitationPrivateGame/' + {{ app.user.id }})
 
-            //--- LISTENING FOR MERCURE EVENTS ---//
-            const eventSource = new EventSource(url)
-            eventSource.onmessage = (e) => {
-                // friend request
-                if(JSON.parse(e.data).topic === '/accueil/notifications/demande_ajout/' + {{ app.user.id }}){
-                    let toast = $('.toast');
-                    $('.toast-body').html(JSON.parse(e.data).notification)
-                    toast.toast({ autohide: false })
-                    toast.toast('show')
-                    $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display','flex')
-                    $('.sidenav .sidenav_content ul li .notification-amis').css('display','inline-block')
+        //--- LISTENING FOR MERCURE EVENTS ---//
+        const eventSource = new EventSource(url)
+        eventSource.onmessage = (e) => {
+            // friend request
+            if (JSON.parse(e.data).topic === '/accueil/notifications/demande_ajout/' + {{ app.user.id }}) {
+                let toast = $('.toast');
+                $('.toast-body').html(JSON.parse(e.data).notification)
+                toast.toast({autohide: false})
+                toast.toast('show')
+                $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display', 'flex')
+                $('.sidenav .sidenav_content ul li .notification-amis').css('display', 'inline-block')
+            }
+            // login
+            if (JSON.parse(e.data).topic === '/imLogged/' + {{ app.user.id }}) {
+                let idUser = JSON.parse(e.data).idUser;
+                let userAvatarImg = $(`[data-id='${idUser}']`).find('img');
+                let userAvatarDefault = $(`[data-id='${idUser}']`).find('.defaultAvatar');
+                if (!userAvatarImg.hasClass('connecte')) {
+                    userAvatarImg.addClass('connecte');
                 }
-                // login
-                if(JSON.parse(e.data).topic === '/imLogged/' + {{ app.user.id }}) {
-                    let idUser  = JSON.parse(e.data).idUser;
-                    let userAvatarImg     = $(`[data-id='${idUser}']`).find('img');
-                    let userAvatarDefault = $(`[data-id='${idUser}']`).find('.defaultAvatar');
-                    if(!userAvatarImg.hasClass('connecte')){
-                        userAvatarImg.addClass('connecte');
-                    }
-                    if(!userAvatarDefault.hasClass('connecte')){
-                        userAvatarDefault.addClass('connecte');
-                    }
-                }
-                // logout
-                if(JSON.parse(e.data).topic === '/iLeave/' + {{ app.user.id }}) {
-                    let idUser  = JSON.parse(e.data).idUser;
-                    let userAvatarImg     = $(`[data-id='${idUser}']`).find('img');
-                    let userAvatarDefault = $(`[data-id='${idUser}']`).find('.defaultAvatar');
-                    if(userAvatarImg.hasClass('connecte')){
-                        userAvatarImg.removeClass('connecte');
-                    }
-                    if(userAvatarDefault.hasClass('connecte')){
-                        userAvatarDefault.removeClass('connecte');
-                    }
-                }
-                // invitation private game
-                if(JSON.parse(e.data).topic === '/invitationPrivateGame/' + {{ app.user.id }}) {
-                    let toast = $('.toast');
-                    $('.toast-body').html(JSON.parse(e.data).idPartie)
-                    toast.toast({ autohide: false })
-                    toast.toast('show')
-                    $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display','flex')
-                    $('.sidenav .sidenav_content ul li .notification-notifications').css('display','inline-block')
+                if (!userAvatarDefault.hasClass('connecte')) {
+                    userAvatarDefault.addClass('connecte');
                 }
             }
-
-            //--- DOM EVENTS ---//
-            //-- On load: display user notifications
-            $.ajax({
-                // Adresse à laquelle la requête est envoyée
-                url: '{{ path('myNotifications') }}',
-                // Le délai maximum en millisecondes de traitement de la demande
-                timeout: 4000,
-                // Affichage de l'icône de notification dans la side barre
-                success: function (data) {
-                    if(data){
-                        $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display','flex')
-                        $('.sidenav .sidenav_content ul li .notification-amis').css('display','inline-block')
-                    }
-                },
-            });
-            //-- Before unload:  Unsubscribe mercure topics
-            window.addEventListener('beforeunload', function () {
-                if(eventSource != null){
-                    eventSource.close()
+            // logout
+            if (JSON.parse(e.data).topic === '/iLeave/' + {{ app.user.id }}) {
+                let idUser = JSON.parse(e.data).idUser;
+                let userAvatarImg = $(`[data-id='${idUser}']`).find('img');
+                let userAvatarDefault = $(`[data-id='${idUser}']`).find('.defaultAvatar');
+                if (userAvatarImg.hasClass('connecte')) {
+                    userAvatarImg.removeClass('connecte');
                 }
-            })
+                if (userAvatarDefault.hasClass('connecte')) {
+                    userAvatarDefault.removeClass('connecte');
+                }
+            }
+            // invitation private game
+            if (JSON.parse(e.data).topic === '/invitationPrivateGame/' + {{ app.user.id }}) {
+                let toast = $('.toast');
+                $('.toast-body').html(JSON.parse(e.data).idPartie)
+                toast.toast({autohide: false})
+                toast.toast('show')
+                $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display', 'flex')
+                $('.sidenav .sidenav_content ul li .notification-notifications').css('display', 'inline-block')
+            }
+        }
+
+        //--- DOM EVENTS ---//
+        //-- On load: display user notifications
+        $.ajax({
+            // Adresse à laquelle la requête est envoyée
+            url: '{{ path('myNotifications') }}',
+            // Le délai maximum en millisecondes de traitement de la demande
+            timeout: 4000,
+            // Affichage de l'icône de notification dans la side barre
+            success: function (data) {
+                if (data) {
+                    $('.hamburger_checkbox:not(:checked) ~ .hamburger .notification').css('display', 'flex')
+                    $('.sidenav .sidenav_content ul li .notification-amis').css('display', 'inline-block')
+                }
+            },
+        });
+        //-- Before unload:  Unsubscribe mercure topics
+        window.addEventListener('beforeunload', function () {
+            if (eventSource != null) {
+                eventSource.close()
+            }
+        })
         {% endif %}
     });
 </script>

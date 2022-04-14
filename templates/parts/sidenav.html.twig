@@ -66,9 +66,11 @@
                         <div class="item" data-id="{{ amis.getId() }}">
                             <input class="amisId" type="hidden" value="{{ amis.getId() }}">
                             {% if amis.getAvatar() %}
-                                <img class="avatar {% if amis.getConnected() == true %}connecte{% endif %}" src="{{ ('images/avatars/'~amis.getAvatar().avatar) | imagine_filter('my_thumb_filter')  }}" alt="avatar">
+                                <img class="avatar {% if amis.getConnected() == true %}connecte{% endif %}"
+                                     src="{{ ('images/avatars/'~amis.getAvatar().avatar) | imagine_filter('my_thumb_filter') }}"
+                                     alt="avatar">
                             {% else %}
-                                <div class="defaultAvatar {% if amis.getConnected()  == true  %}connecte{% endif %}">
+                                <div class="defaultAvatar {% if amis.getConnected()  == true %}connecte{% endif %}">
                                     {{ amis.pseudo|first|upper }}
                                 </div>
                             {% endif %}

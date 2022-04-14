@@ -77,12 +77,16 @@ class Game
     #[ORM\Column(type: 'smallint', nullable: true)]
     private $versusType;
 
+    #[ORM\OneToMany(mappedBy: 'relatedGame', targetEntity: InGamePlayerStatus::class)]
+    private $inGamePlayerStatuses;
+
     #[Pure] public function __construct()
     {
         $this->players = new ArrayCollection();
         $this->lines = new ArrayCollection();
         $this->teams = new ArrayCollection();
         $this->invitationToPlay = new ArrayCollection();
+        $this->inGamePlayerStatuses = new ArrayCollection();
     }
 
     /**
@@ -355,6 +359,36 @@ class Game
     public function setVersusType(?int $versusType): self
     {
         $this->versusType = $versusType;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|InGamePlayerStatus[]
+     */
+    public function getInGamePlayerStatuses(): Collection
+    {
+        return $this->inGamePlayerStatuses;
+    }
+
+    public function addInGamePlayerStatus(InGamePlayerStatus $inGamePlayerStatus): self
+    {
+        if (!$this->inGamePlayerStatuses->contains($inGamePlayerStatus)) {
+            $this->inGamePlayerStatuses[] = $inGamePlayerStatus;
+            $inGamePlayerStatus->setRelatedGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInGamePlayerStatus(InGamePlayerStatus $inGamePlayerStatus): self
+    {
+        if ($this->inGamePlayerStatuses->removeElement($inGamePlayerStatus)) {
+            // set the owning side to null (unless already changed)
+            if ($inGamePlayerStatus->getRelatedGame() === $this) {
+                $inGamePlayerStatus->setRelatedGame(null);
+            }
+        }
 
         return $this;
     }

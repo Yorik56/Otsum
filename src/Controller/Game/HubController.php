@@ -59,7 +59,7 @@ class HubController extends AbstractController
         $redTeam->setColor('red');
         $this->entityManager->persist($redTeam);
         $this->entityManager->flush();
-        // Subscribe a topic
+        // Redirection to the Hub
         return $this->redirectToRoute('hubPrive', ['idGame' => $idGame], 301);
     }
 
@@ -73,22 +73,24 @@ class HubController extends AbstractController
     {
         //--- Retrieve the game
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
-        //--- Form Team
+        // Form Team
         $teamForm = $this->createForm(TeamType::class);
         $teamForm->get('partie')->setData($idGame);
         $teamForm->handleRequest($request);
-        //--- Form LaunchGame
+        // Form LaunchGame
         $launchGameForm = $this->createForm(LaunchGameType::class);
         $launchGameForm->get('idGame')->setData($idGame);
         $launchGameForm->handleRequest($request);
-        //--- Form VersusType Choice
+        // Form VersusType Choice
         $versusTypeForm = $this->createForm(VersusType::class, null, [
             'action' => $this->generateUrl('versusTypeChoice')
         ]);
         $versusTypeForm->get('idGame')->setData($idGame);
 
         //--- Recovery of the teams
+        //TODO Group By Team Color
         $tableTeam = $this->entityManager->getRepository(Team::class)->findBy(['game'=>$idGame]);
+        // Launch Game if all is Ready
         if ($launchGameForm->isSubmitted() && $launchGameForm->isValid()) {
             $validTeams = true;
             // Checking the type of game
@@ -182,6 +184,7 @@ class HubController extends AbstractController
             }
             // Set position in team and presence,
             // also warns that the player is not playing
+            $playerStatus->setRelatedGame($game);
             $playerStatus->setFlagPresenceInGame(InGamePlayerStatus::FLAG_PRESENCE_FALSE);
             $playerStatus->setPositionInTeam($teamOfTheCurrentUser->getNumberOfPlayer()+1);
             $playerStatus->setFlagActualPlayer(InGamePlayerStatus::FLAG_ACTUAL_PLAYER_FALSE);

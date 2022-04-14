@@ -31,6 +31,10 @@ class InGamePlayerStatus
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user;
 
+    #[ORM\ManyToOne(targetEntity: Game::class, inversedBy: 'inGamePlayerStatuses')]
+    #[ORM\JoinColumn(nullable: false)]
+    private $relatedGame;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -80,6 +84,18 @@ class InGamePlayerStatus
     public function setUser(User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getRelatedGame(): ?Game
+    {
+        return $this->relatedGame;
+    }
+
+    public function setRelatedGame(?Game $relatedGame): self
+    {
+        $this->relatedGame = $relatedGame;
 
         return $this;
     }
