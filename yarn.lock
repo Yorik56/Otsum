@@ -3660,6 +3660,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"glightbox@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "glightbox@npm:3.2.0"
+  checksum: 051067290ab05cbdd5844ada638290e8abc95e3bff497dee28667fb7db4878f5d151a90f52f862bdafdcf39a65b8731f840022f471b65d77e0df7cf2a0f503e2
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:^5.1.2, glob-parent@npm:~5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -5965,6 +5972,7 @@ __metadata:
     autoprefixer: ^10.4.2
     core-js: ^3.0.0
     file-loader: ^6.0.0
+    glightbox: ^3.2.0
     jquery: ^3.6.0
     photoswipe: ^5.2.4
     popper.js: ^1.16.1

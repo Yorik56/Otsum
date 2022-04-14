@@ -18,12 +18,14 @@ import './styles/hub.scss';
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import 'photoswipe/style.css';
+import 'glightbox/dist/css/glightbox.css'
 // JS
 let $ = require('jquery')
 import './jkeyboard';
 import './partie';
 import './photoSwipe'
 import './slickCarousel'
+import './glightbox'
 // LIBS
 
 

@@ -23,6 +23,45 @@
             </div>
             <div class="block_classement col-12 mb-5">
                 <div class="row">
+                    <!-- Simple image -->
+                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox">
+                        <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
+                    </a>
+
+                    <!-- Video -->
+                    <a href="{{ asset('pexels-video-1550080.mp4') }}" class="glightbox">
+                        <img class="" src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
+                    </a>
+
+                    <!-- Gallery -->
+                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox" data-gallery="gallery1">
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
+                    </a>
+                    <a href="{{ asset('pexels-video-1550080.mp4') }}" class="glightbox" data-gallery="gallery1">
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
+                    </a>
+
+                    <!-- Simple Description -->
+                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox" data-glightbox="title: My title; description: this is the slide description">
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
+                    </a>
+
+                    <!-- Advanced Description -->
+                    <a href="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" class="glightbox" data-glightbox="title: My title; description: .custom-desc1">
+                        <img class="lazy" data-src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" alt="image" />
+                    </a>
+
+                    <div class="glightbox-desc custom-desc1">
+                        <p>The content of this div will be used as the slide description</p>
+                        <p>You can add links and any HTML you want</p>
+                    </div>
+
+
+
+                </div>
+            </div>
+            <div class="block_classement col-12 mb-5">
+                <div class="row">
                     <div class="col">
                         <button type="button">Get URL</button>
                     </div>
@@ -30,7 +69,7 @@
             </div>
             <div class="block_classement col-12 mb-5">
                 <div class="row">
-                    <div class="col">
+                    <div class="col lazyLoading">
                         <img src="https://ik.imagekit.io/demo/img/image1.jpeg?tr=w-400,h-300" />
                         <img src="https://ik.imagekit.io/demo/img/image2.jpeg?tr=w-400,h-300" />
                         <img src="https://ik.imagekit.io/demo/img/image3.jpg?tr=w-400,h-300" />
@@ -49,7 +88,7 @@
 {#                <div class="row">#}
 {#                    <div class="col">#}
 {#                        <div class="pswp-gallery pswp-gallery--single-column" id="my-gallery">#}
-{#                            <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg"#}
+{#                            <a href="{{ asset('pexels-video-1550080.mp4') }}"#}
 {#                               data-pswp-width="1669"#}
 {#                               data-pswp-height="2500"#}
 {#                               target="_blank">#}
@@ -98,7 +137,7 @@
 {#                    <div class="col">#}
 {#                        <div class="your-class" id="my-gallery">#}
 {#                            <div>#}
-{#                                <a href="https://cdn.photoswipe.com/photoswipe-demo-images/photos/6/img-2500.jpg"#}
+{#                                <a href="{{ asset('pexels-video-1550080.mp4') }}"#}
 {#                                   data-pswp-width="2500"#}
 {#                                   data-pswp-height="1667"#}
 {#                                   target="_blank">#}
