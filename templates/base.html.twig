@@ -15,22 +15,23 @@
         {{ encore_entry_script_tags('app') }}
     </head>
     <body>
-    <div class="changeLocale">
-        {% for locale in locales %}
-            {% if locale != app.request.locale %}
-                {% set routeParams = [] %}
-                {% set routeParams = routeParams|merge({
-                    '_locale': locale
-                }) %}
-                {% if additionalParams is defined %}
-                    {% set routeParams = routeParams|merge(additionalParams) %}
-                {% endif %}
-                <a href="{{ path(app.request.get('_route'), routeParams) }}">{{ locale }}</a>
-            {% endif %}
-        {% endfor %}
-    </div>
+{#    <div class="changeLocale">#}
+{#        {% for locale in locales %}#}
+{#            {% if locale != app.request.locale %}#}
+{#                {% set routeParams = [] %}#}
+{#                {% set routeParams = routeParams|merge({#}
+{#                    '_locale': locale#}
+{#                }) %}#}
+{#                {% if additionalParams is defined %}#}
+{#                    {% set routeParams = routeParams|merge(additionalParams) %}#}
+{#                {% endif %}#}
+{#                <a href="{{ path(app.request.get('_route'), routeParams) }}">{{ locale }}</a>#}
+{#            {% endif %}#}
+{#        {% endfor %}#}
+{#    </div>#}
     {% block body %}{% endblock %}
     {% block javascripts %}
+        {{ encore_entry_script_tags('nodeModules') }}
         {{ include('parts/toast.html.twig') }}
         {{ include('parts/sidenav.html.twig') }}
         {{ include('otsum/js/eventsMercure/eventsMercure.html.twig') }}
