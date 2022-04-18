@@ -21,3 +21,4 @@ yarn-error.log
 /public/media/cache/
 ###< liip/imagine-bundle ###
 /public/images/avatars/
+/.yarn/cache/*
