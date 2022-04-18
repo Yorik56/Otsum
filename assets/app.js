@@ -18,15 +18,12 @@ import './styles/amis.scss';
 import './styles/hub.scss';
 import 'glightbox/dist/css/glightbox.css'
 // JS
-// import 'jquery'
-// create global $ and jQuery variables
 const $ = require('jquery');
 global.$ = global.jQuery = $;
 import './jkeyboard';
 require('bootstrap')
-
 import './partie';
-// LIBS
+
 
 
 
