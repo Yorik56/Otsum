@@ -14,6 +14,11 @@
         url: "{{ path('checkPresenceOfAllPlayers') }}",
         data: {
             idGame: {{ idGame }}
+        }        
+    })
+    .done(function (data) {
+        if(data.status == 'gameAlreadyStarted'){
+            displayActualGrid();
         }
     });
     {# //---*   GAME MANAGMENT   *---// #}
@@ -31,9 +36,49 @@
     });
 
     // creationDeLaGrille(firstLetter, difficulty);
+    
+    // Displaying actual grid 
+    const displayActualGrid = function (idGame) {
+        console.log("displayActualGrid called successfully !");
+        $.ajax({
+            method: "POST",
+            url: "{{ path('displayActualGrid') }}",
+            data: {
+                idGame: {{ idGame }}
+            }
+        })
+        .done(function (data) {
+            let box = $('.table');
+            let box_line;
+            box.empty();
+            $.each(data.arrayGrid, function(indexLine, valueLine) {
+                box.append('<tr></tr>')
+                box_line = $('div tr:last-child');
+                $.each(valueLine,function (indexCell, valueCell) {
+                    if (indexLine < 1 && indexCell < 1) {
+                        box_line.append('<td class="td line_' + indexLine + ' first_cell valide_cell cell cell_' + indexCell + '"><div>' + valueCell + '</div></td>')
+                    } else {
+                        if (indexLine < 1 && indexCell === 1) {
+                            box_line.append('<td class="td line_' + indexLine + ' current_cell cell cell_' + indexCell + '"><div>_</div></td>')
+                        } else if (
+                            indexCell === (valueLine.length - 1) && (indexLine === data.numberOfRoundPlayed)
+                        ){
+                            box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + ' last_cell" ><div>' + valueCell + '</div></td>')
+                        } else if (
+                            indexCell <= valueLine.length && (indexLine <= data.numberOfRoundPlayed)
+                        ) {
+                            box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div>' + valueCell + '</div></td>')
+                        } else {
+                            box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div></div></td>')
+                        }
+                    }
+                })
+            })
+        });
+    }
 
     // Affichage de la partie
-    var creationDeLaGrille = function (mot, difficulty) {
+    const creationDeLaGrille = function (mot, difficulty) {
         let box = $('.table');
         let box_line;
         $('.wordToFind').append(mot);

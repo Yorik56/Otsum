@@ -4,7 +4,7 @@ namespace App\Controller\Game;
 
 use App\Form\LaunchGameType;
 use App\Form\VersusType;
-use App\Entity\{Game, InGamePlayerStatus, InvitationToPlay, Team, User};
+use App\Entity\{Cell, Game, InGamePlayerStatus, InvitationToPlay, Line, Team, User};
 use App\Form\TeamType;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,13 +36,16 @@ class HubController extends AbstractController
     public function createHub(): Response
     {
         // Create a game
+        $numberOfRounds = 6;
         $wordLength = rand(7,10);
         $game = new Game();
         $game->addPlayer($this->getUser());
-        $game->setNumberOfRounds(6);
+        $game->setNumberOfRounds($numberOfRounds);
+        $game->setNumberOfRoundsPlayed(0);
         $game->setWordToFind($this->utils->getRandomWord($wordLength));
         $game->setLineSessionTime(50);
         $game->setLineLength($wordLength);
+        $game = $this->fillGridWithInitialValues($game);
         $game->setFlagTypeOfGame(Game::PRIVATE_MULTPLAYER_GAME);
         $game->setHost($this->getUser());
         $this->entityManager->persist($game);
@@ -61,6 +64,41 @@ class HubController extends AbstractController
         $this->entityManager->flush();
         // Redirection to the Hub
         return $this->redirectToRoute('hubPrive', ['idGame' => $idGame], 301);
+    }
+
+    /*
+     * This function creates initial lines and cells of the grid
+     * and fill them with initial values
+     */
+    public function fillGridWithInitialValues($game)
+    {
+        for($line = 0; $line < $game->getNumberOfRounds(); $line ++){
+            $currentLine = new Line($game);
+            for($column = 0; $column < $game->getLineLength(); $column++){
+                $currentCell = new Cell();
+                $currentCell->setFlagTestee(Cell::FLAG_TEST_FALSE);
+                $currentCell->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
+                $currentCell->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
+                $currentCell->setPosition($column);
+                $currentCell->setLigne($currentLine);
+                if($line == 0 && $column == 0){
+                    $currentCell->setValeur(
+                        substr($game->getWordToFind(), 0, 1)
+                    );
+                }else{
+                    $currentCell->setValeur(".");
+                }
+                // Add new cell to the current line
+                $this->entityManager->persist($currentCell);
+                $currentLine->addCell($currentCell);
+            }
+            // Add new line to the game
+            $this->entityManager->persist($currentLine);
+            $game->addLine($currentLine);
+        }
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
+        return $game;
     }
 
     /**

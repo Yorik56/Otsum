@@ -21,9 +21,9 @@
                 userAvatarBox.find('.absent').remove();
             }
         }
-        // joining private game
+        // checking the presence of all the players
         if (JSON.parse(e.data).topic === '/checkPresenceOfAllPlayers/' + {{ idGame }}) {
-            creationDeLaGrille("{{ firstLetter }}", 6);
+            creationDeLaGrille("{{ firstLetter }}", {{ difficulty }});
         }
     }
 

@@ -110,19 +110,50 @@ class MultiPrivateGameController extends GameController
                 $gameReady = false;
             }
         }
+        $response = 404;
         if($gameReady){
-            // Mercure notification joiningPrivateGame
-            $update = new Update(
-                '/checkPresenceOfAllPlayers/'.$idGame,
-                json_encode([
-                    'topic' =>'/checkPresenceOfAllPlayers/'.$idGame,
-                    'idGame' => $idGame
-                ])
-            );
-            $this->hub->publish($update);
+            if(!$game->getStartDate()){
+                // Mercure notification joiningPrivateGame
+                $update = new Update(
+                    '/checkPresenceOfAllPlayers/'.$idGame,
+                    json_encode([
+                        'topic' =>'/checkPresenceOfAllPlayers/'.$idGame,
+                        'idGame' => $idGame
+                    ])
+                );
+                $game->setStartDate(new \DateTimeImmutable());
+                $this->entityManager->persist($game);
+                $this->entityManager->flush($game);
+                $this->hub->publish($update);
+                $response = "gameJustStarted";
+            } else {
+                $response = "gameAlreadyStarted";
+            }
         }
         return new JsonResponse([
-            'gameReady' => $gameReady
+            'status' => $response
+        ]);
+    }
+
+    /*
+     * Display the actual game grid
+     */
+    #[Route('/displayActualGrid', name: 'displayActualGrid')]
+    public function displayActualGrid(Request $request): JsonResponse
+    {
+        $idGame   = $request->request->get('idGame');
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        $arrayGrid = [];
+
+        foreach ($game->getLines() as $indexLine => $line){
+            foreach ($line->getCells() as $indexCell => $cell){
+                $arrayGrid[$indexLine][$indexCell] = $cell->getValeur();
+            }
+        }
+
+        return new JsonResponse([
+            'arrayGrid' => $arrayGrid,
+            'numberOfRoundPlayed' => $game->getNumberOfRoundsPlayed()
         ]);
     }
 }

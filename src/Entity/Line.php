@@ -20,7 +20,7 @@ class Line
     private $flag_state;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private $player;
 
     #[ORM\OneToMany(mappedBy: 'ligne', targetEntity: Cell::class, orphanRemoval: true)]
@@ -33,10 +33,9 @@ class Line
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Game $game;
 
-    #[Pure] public function __construct(User $player, Game $game)
+    #[Pure] public function __construct(Game $game)
     {
         $this->cells = new ArrayCollection();
-        $this->player = $player;
         $this->game = $game;
     }
 
@@ -70,7 +69,7 @@ class Line
     }
 
     /**
-     * @return Collection|Cell[]
+     * @return Collection
      */
     public function getCells(): Collection
     {
