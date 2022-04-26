@@ -8,6 +8,7 @@
             idPlayer: {{ app.user.id }}
         }
     });
+
     {# //---* CHECKPRESENCEOFALLPLAYERS *---// #}
     $.ajax({
         method: "POST",
@@ -17,10 +18,12 @@
         }        
     })
     .done(function (data) {
+        console.log(data.actualPlayer);
         if(data.status == 'gameAlreadyStarted'){
             displayActualGrid();
         }
     });
+
     {# //---*   GAME MANAGMENT   *---// #}
     // Variables de la grille de jeu
     let idGame = {{ idGame }};
@@ -35,9 +38,7 @@
         layout: 'azerty',
     });
 
-    // creationDeLaGrille(firstLetter, difficulty);
-    
-    // Displaying actual grid 
+    {# //---*   FUNCTIONS DECLARATIONS   *---// #}
     const displayActualGrid = function (idGame) {
         console.log("displayActualGrid called successfully !");
         $.ajax({

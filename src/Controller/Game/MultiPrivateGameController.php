@@ -5,6 +5,7 @@ namespace App\Controller\Game;
 use App\Entity\Game;
 use App\Entity\InGamePlayerStatus;
 use App\Entity\Team;
+use App\Entity\User;
 use App\Form\DropOutFormType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,6 +55,7 @@ class MultiPrivateGameController extends GameController
             ]);
 
         $playerStatus->setFlagPresenceInGame(InGamePlayerStatus::FLAG_PRESENCE_TRUE);
+        $playerStatus->setFlagActualPlayer(InGamePlayerStatus::FLAG_ACTUAL_PLAYER_FALSE);
         $this->entityManager->persist($playerStatus);
         $this->entityManager->flush();
 
@@ -113,17 +115,28 @@ class MultiPrivateGameController extends GameController
         $response = 404;
         if($gameReady){
             if(!$game->getStartDate()){
+                // Setting actual player
+                $this->setActualPlayer($inGamePlayerStatuses);
+                $currentPlayer = $this->getActualPlayer($inGamePlayerStatuses);
+                if($currentPlayer){
+                    $game->setCurrentPlayer($currentPlayer);
+                }
+                $game->setStartDate(new \DateTimeImmutable());
+                $this->entityManager->persist($game);
+                $this->entityManager->flush();
+                $this->getActualPlayer($inGamePlayerStatuses);
+
                 // Mercure notification joiningPrivateGame
                 $update = new Update(
                     '/checkPresenceOfAllPlayers/'.$idGame,
                     json_encode([
                         'topic' =>'/checkPresenceOfAllPlayers/'.$idGame,
+                        'actualPlayer' => $game->getCurrentPlayer()?->getId(),
                         'idGame' => $idGame
                     ])
                 );
-                $game->setStartDate(new \DateTimeImmutable());
-                $this->entityManager->persist($game);
-                $this->entityManager->flush($game);
+
+
                 $this->hub->publish($update);
                 $response = "gameJustStarted";
             } else {
@@ -131,6 +144,7 @@ class MultiPrivateGameController extends GameController
             }
         }
         return new JsonResponse([
+            'actualPlayer' => $game->getCurrentPlayer()?->getId(),
             'status' => $response
         ]);
     }
@@ -155,5 +169,41 @@ class MultiPrivateGameController extends GameController
             'arrayGrid' => $arrayGrid,
             'numberOfRoundPlayed' => $game->getNumberOfRoundsPlayed()
         ]);
+    }
+
+    /**
+     * Set randomly the actual gamer in the game
+     *
+     * @param $inGamePlayerStatuses
+     * @return void
+     */
+    public function setActualPlayer($inGamePlayerStatuses): void
+    {
+        $actualPlayer = rand(1, count($inGamePlayerStatuses));
+        foreach ($inGamePlayerStatuses as $index => $inGamePlayerStatus){
+            if ($actualPlayer == $index + 1 ){
+                $inGamePlayerStatus->setFlagActualPlayer(InGamePlayerStatus::FLAG_ACTUAL_PLAYER_TRUE);
+                $this->entityManager->persist($inGamePlayerStatus);
+                $this->entityManager->flush();
+            }
+        }
+    }
+
+    /**
+     * Get actual player
+     *
+     * @param $inGamePlayerStatuses
+     * @return User|null
+     */
+    public function getActualPlayer($inGamePlayerStatuses): ?User
+    {
+        $currentPlayer = null;
+        foreach ($inGamePlayerStatuses as $inGamePlayerStatus){
+            if ($inGamePlayerStatus->getFlagActualPlayer() == InGamePlayerStatus::FLAG_ACTUAL_PLAYER_TRUE)
+            {
+                $currentPlayer = $inGamePlayerStatus->getUser();
+            }
+        }
+        return $currentPlayer;
     }
 }

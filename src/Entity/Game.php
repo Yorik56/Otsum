@@ -38,8 +38,7 @@ class Game
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'games')]
     private $players;
 
-    #[ORM\OneToOne(targetEntity: User::class, cascade: ['persist', 'remove'])]
-    private ?User $currentPlayer;
+
 
     #[ORM\OneToOne(targetEntity: User::class, cascade: ['persist', 'remove'])]
     private ?User $playerWinning;
@@ -79,6 +78,9 @@ class Game
 
     #[ORM\OneToMany(mappedBy: 'relatedGame', targetEntity: InGamePlayerStatus::class)]
     private $inGamePlayerStatuses;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    private $currentPlayer;
 
     #[Pure] public function __construct()
     {
@@ -153,17 +155,7 @@ class Game
         return $this;
     }
 
-    public function getCurrentPlayer(): ?User
-    {
-        return $this->currentPlayer;
-    }
 
-    public function setCurrentPlayer(?User $currentPlayer): self
-    {
-        $this->currentPlayer = $currentPlayer;
-
-        return $this;
-    }
 
     public function getPlayerWinning(): ?User
     {
@@ -389,6 +381,18 @@ class Game
                 $inGamePlayerStatus->setRelatedGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCurrentPlayer(): ?User
+    {
+        return $this->currentPlayer;
+    }
+
+    public function setCurrentPlayer(?User $currentPlayer): self
+    {
+        $this->currentPlayer = $currentPlayer;
 
         return $this;
     }

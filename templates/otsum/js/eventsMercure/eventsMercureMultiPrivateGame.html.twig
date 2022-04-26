@@ -25,6 +25,7 @@
         if (JSON.parse(e.data).topic === '/checkPresenceOfAllPlayers/' + {{ idGame }}) {
             creationDeLaGrille("{{ firstLetter }}", {{ difficulty }});
         }
+        console.log("Mercure" + JSON.parse(e.data).actualPlayer);
     }
 
     //-- Before unload:  Unsubscribe mercure topics
