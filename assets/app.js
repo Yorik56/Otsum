@@ -21,6 +21,8 @@ import 'glightbox/dist/css/glightbox.css'
 const $ = require('jquery');
 global.$ = global.jQuery = $;
 import './jkeyboard';
+import './easytimer';
+import './simplyCountdown';
 require('bootstrap')
 import './partie';
 
