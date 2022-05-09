@@ -215,7 +215,7 @@ class SoloGameController extends GameController
      */
     public function persistNewLineInDatabase($actualLine, $game){
         // Registration of the new line
-        $ligne = new Line($this->getUser(), $game);
+        $ligne = new Line($game);
         $this->entityManager->persist($ligne);
         // Update of letters
         foreach ($actualLine as $index => $letter){
