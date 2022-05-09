@@ -33,6 +33,9 @@ class Line
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Game $game;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private $endDate;
+
     #[Pure] public function __construct(Game $game)
     {
         $this->cells = new ArrayCollection();
@@ -118,6 +121,18 @@ class Line
     public function setGame(?Game $game): self
     {
         $this->game = $game;
+
+        return $this;
+    }
+
+    public function getEndDate(): ?\DateTimeInterface
+    {
+        return $this->endDate;
+    }
+
+    public function setEndDate(\DateTimeInterface $endDate): self
+    {
+        $this->endDate = $endDate;
 
         return $this;
     }
