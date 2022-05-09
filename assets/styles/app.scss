@@ -281,4 +281,18 @@ h1 {
         height: 40px;
         border-radius: 50%;
     }
+    .currentTeam.red,
+    .currentTeam.blue
+    {
+        border: 1px solid #fff;
+    }
+}
+
+#countdownExample {
+    .simply-days-section,
+    .simply-hours-section,
+    .simply-minutes-section
+    {
+        display: none;
+    }
 }
