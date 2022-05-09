@@ -116,7 +116,7 @@ class MultiPrivateGameController extends GameController
         if($gameReady){
             if(!$game->getStartDate()){
                 // Setting actual player
-                $this->setActualPlayer($inGamePlayerStatuses);
+                $this->setFirstPlayer($inGamePlayerStatuses);
                 $currentPlayer = $this->getActualPlayer($inGamePlayerStatuses);
                 if($currentPlayer){
                     $game->setCurrentPlayer($currentPlayer);
@@ -144,8 +144,9 @@ class MultiPrivateGameController extends GameController
             }
         }
         return new JsonResponse([
+            'actualTeam'   => $this->getPlayerTeam($game)->getColor(),
             'actualPlayer' => $game->getCurrentPlayer()?->getId(),
-            'status' => $response
+            'status'       => $response
         ]);
     }
 
@@ -172,12 +173,12 @@ class MultiPrivateGameController extends GameController
     }
 
     /**
-     * Set randomly the actual gamer in the game
+     * Set randomly the first gamer in the game
      *
      * @param $inGamePlayerStatuses
      * @return void
      */
-    public function setActualPlayer($inGamePlayerStatuses): void
+    public function setFirstPlayer($inGamePlayerStatuses): void
     {
         $actualPlayer = rand(1, count($inGamePlayerStatuses));
         foreach ($inGamePlayerStatuses as $index => $inGamePlayerStatus){
@@ -187,6 +188,36 @@ class MultiPrivateGameController extends GameController
                 $this->entityManager->flush();
             }
         }
+    }
+
+    /**
+     * Set randomly the first gamer in the game
+     *
+     * @param InGamePlayerStatus $inGamePlayerStatus
+     * @param $game
+     * @return array
+     */
+    public function majCurrentPlayer(InGamePlayerStatus $inGamePlayerStatus, $game): array
+    {
+        $response = true;
+        if($inGamePlayerStatus->getFlagActualPlayer() == InGamePlayerStatus::FLAG_ACTUAL_PLAYER_FALSE){
+            $inGamePlayerStatus->setFlagActualPlayer(InGamePlayerStatus::FLAG_ACTUAL_PLAYER_TRUE);
+            $this->entityManager->persist($inGamePlayerStatus);
+            $game->setCurrentPlayer($inGamePlayerStatus->getUser());
+            $this->entityManager->persist($game);
+        } elseif ($inGamePlayerStatus->getFlagActualPlayer() == InGamePlayerStatus::FLAG_ACTUAL_PLAYER_TRUE){
+            $inGamePlayerStatus->setFlagActualPlayer(InGamePlayerStatus::FLAG_ACTUAL_PLAYER_FALSE);
+            $this->entityManager->persist($inGamePlayerStatus);
+        } else {
+            $response = false;
+        }
+        $this->entityManager->flush();
+
+        return [
+            'color' => $inGamePlayerStatus->getUser()->getId(),
+            'flagActualPlayer' => $inGamePlayerStatus->getFlagActualPlayer(),
+            'response' => $response
+        ];
     }
 
     /**
@@ -205,5 +236,140 @@ class MultiPrivateGameController extends GameController
             }
         }
         return $currentPlayer;
+    }
+
+    /**
+     * Get player team
+     *
+     * @param $game
+     * @return Team|null
+     */
+    public function getPlayerTeam($game): ?Team
+    {
+        $response = null;
+        $teams =  $this->entityManager->getRepository(Team::class)->findBy([
+            "game" => $game
+        ]);
+        if($teams){
+            foreach ($teams as $team){
+                if ($team->playerExists($game->getCurrentPlayer())){
+                    $response = $team;
+                }
+            }
+        }
+        return $response;
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Route('/startChrono', name: 'startChrono')]
+    public function startChrono(Request $request): JsonResponse
+    {
+        $idGame   = $request->request->get('idGame');
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        $lastLine = $game->getLines()->get($game->getNumberOfRoundsPlayed());
+        if(!$lastLine->getEndDate() || $request->request->get('restart')){
+            $dateNow = new \DateTime();
+            $endDate = $dateNow->modify("+11 seconds");
+            $lastLine->setEndDate($endDate);
+            $this->entityManager->persist($lastLine);
+            $this->entityManager->flush();
+        } else {
+            $endDate = $lastLine->getEndDate();
+        }
+
+        // Mercure notification joiningPrivateGame
+        $update = new Update(
+            '/startChrono/'.$idGame,
+            json_encode([
+                'topic'         =>'/startChrono/'.$idGame,
+                'currentPlayer' =>$game->getCurrentPlayer()->getId(),
+                'arrayChrono'   => [
+                    'year'     => $endDate->format("Y"),
+                    'month'    => $endDate->format("n"),
+                    'day'      => $endDate->format("j"),
+                    'hours'    => $endDate->format("G"),
+                    'minutes'  => $endDate->format("i"),
+                    'seconds'  => $endDate->format("s"),
+                ]
+            ])
+        );
+        $this->hub->publish($update);
+
+        return new JsonResponse(200);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Route('/retrieveChrono', name: 'retrieveChrono')]
+    public function retrieveChrono(Request $request): JsonResponse
+    {
+        $idGame   = $request->request->get('idGame');
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        $lastLine = $game->getLines()->get($game->getNumberOfRoundsPlayed());
+        $arrayChrono = null;
+        if($lastLine){
+            $endDate = $lastLine->getEndDate();
+            $arrayChrono   = [
+                'year'     => $endDate->format("Y"),
+                'month'    => $endDate->format("n"),
+                'day'      => $endDate->format("j"),
+                'hours'    => $endDate->format("G"),
+                'minutes'  => $endDate->format("i"),
+                'seconds'  => $endDate->format("s"),
+            ];
+        }
+
+
+        // Mercure notification joiningPrivateGame
+        $update = new Update(
+            '/retrieveChrono/'.$idGame,
+            json_encode([
+                'topic'         =>'/retrieveChrono/'.$idGame,
+                'currentPlayer' =>$game->getCurrentPlayer()->getId(),
+                'arrayChrono'   => $arrayChrono
+
+            ])
+        );
+        $this->hub->publish($update);
+
+        return new JsonResponse(200);
+    }
+
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Route('/endOfCountDown', name: 'endOfCountDown')]
+    public function endOfCountDown(Request $request): JsonResponse
+    {
+        $idGame   = $request->request->get('idGame');
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        $inGamePlayerStatuses = $game->getinGamePlayerStatuses();
+
+        foreach ($inGamePlayerStatuses as $inGamePlayerStatus){
+            $this->majCurrentPlayer($inGamePlayerStatus, $game);
+        }
+
+        // Mercure notification restartRound
+        $update = new Update(
+            '/restartRound/'.$idGame,
+            json_encode([
+                'topic'        =>'/restartRound/'.$idGame,
+                'actualPlayer' => $game->getCurrentPlayer()->getId(),
+                'actualTeam'   => $this->getPlayerTeam($game)->getColor(),
+            ])
+        );
+
+        $this->hub->publish($update);
+
+        return new JsonResponse([
+            200
+        ]);
     }
 }

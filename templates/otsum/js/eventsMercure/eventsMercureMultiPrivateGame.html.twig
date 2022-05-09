@@ -8,6 +8,9 @@
     // Topic joining private game
     url.searchParams.append('topic', '/joiningPrivateGame/' + {{ idGame }})
     url.searchParams.append('topic', '/checkPresenceOfAllPlayers/' + {{ idGame }})
+    url.searchParams.append('topic', '/startChrono/' + {{ idGame }})
+    url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }})
+    url.searchParams.append('topic', '/restartRound/' + {{ idGame }})
 
     //--- LISTENING FOR MERCURE EVENTS ---//
     const eventSource = new EventSource(url)
@@ -25,7 +28,51 @@
         if (JSON.parse(e.data).topic === '/checkPresenceOfAllPlayers/' + {{ idGame }}) {
             creationDeLaGrille("{{ firstLetter }}", {{ difficulty }});
         }
-        console.log("Mercure" + JSON.parse(e.data).actualPlayer);
+        // start chrono
+        if (JSON.parse(e.data).topic === '/startChrono/' + {{ idGame }}) {
+            simplyCountDownStart(
+                JSON.parse(e.data).arrayChrono,
+                JSON.parse(e.data).currentPlayer
+            );
+        }
+        // retrieve chrono
+        if (JSON.parse(e.data).topic === '/retrieveChrono/' + {{ idGame }}) {
+            simplyCountDownStart(
+                JSON.parse(e.data).arrayChrono,
+                JSON.parse(e.data).currentPlayer
+            );
+        }
+        // restart round
+        if (JSON.parse(e.data).topic === '/restartRound/' + {{ idGame }}) {
+            displayActualGrid();
+            if(JSON.parse(e.data).actualTeam){
+                $('.currentTeam').removeClass('currentTeam');
+                $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
+            }
+            if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
+                console.log("startChrono");
+                // Start chrono
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('startChrono') }}",
+                    data: {
+                        idGame: {{ idGame }},
+                        restart: true
+                    }
+                })
+                .done(function () {
+                    // Création du clavier
+                    $('#div_keyboard #keyboard').jkeyboard({
+                        input: $('#search_field'),
+                        layout: 'azerty',
+                    });
+                    console.log("newKeyboard 2nd");
+                });
+            } else {
+                $('#div_keyboard').empty();
+                $('#div_keyboard').append("<div id='keyboard'></div");
+            }
+        }
     }
 
     //-- Before unload:  Unsubscribe mercure topics

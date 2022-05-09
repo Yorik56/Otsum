@@ -1,4 +1,14 @@
 <script>
+    {# //---*   GAME MANAGMENT   *---// #}
+    // Variables de la grille de jeu
+    let idGame = {{ idGame }};
+    let difficulty = {{ difficulty }};
+    let currentLineNumber = 0;
+    const firstLetter = "{{ firstLetter }}";
+    let numberOfLines = 6;
+    let cellNumber = 1;
+
+
     {# //---* JOININGPRIVATEGAME *---// #}
     $.ajax({
         method: "POST",
@@ -18,24 +28,34 @@
         }        
     })
     .done(function (data) {
-        console.log(data.actualPlayer);
-        if(data.status == 'gameAlreadyStarted'){
+        console.log([
+            "checkPresenceOfAllPlayers",
+            "status: " + data.status,
+            "actualTeam: " + data.actualTeam,
+            "actualPlayer: " + data.actualPlayer
+        ]);
+        if(data.status === 'gameAlreadyStarted'){
             displayActualGrid();
         }
-    });
-
-    {# //---*   GAME MANAGMENT   *---// #}
-    // Variables de la grille de jeu
-    let idGame = {{ idGame }};
-    let difficulty = {{ difficulty }};
-    let currentLineNumber = 0;
-    const firstLetter = "{{ firstLetter }}";
-    let numberOfLines = 6;
-    let cellNumber = 1;
-    // Création du clavier
-    $('#keyboard').jkeyboard({
-        input: $('#search_field'),
-        layout: 'azerty',
+        if(data.actualTeam){
+            $('.multiPrivateGame .' + data.actualTeam).addClass('currentTeam');
+        }
+        if(data.actualPlayer === {{ app.user.id }}){
+            // Start chrono
+            $.ajax({
+                method: "POST",
+                url: "{{ path('startChrono') }}",
+                data: {
+                    idGame: {{ idGame }}
+                }
+            })
+            // Création du clavier
+            $('#div_keyboard #keyboard').jkeyboard({
+                input: $('#search_field'),
+                layout: 'azerty',
+            });
+            console.log("newKeyboard 1st");
+        }
     });
 
     {# //---*   FUNCTIONS DECLARATIONS   *---// #}
@@ -75,6 +95,45 @@
                     }
                 })
             })
+        });
+    }
+
+    // Affichage de la partie
+    const simplyCountDownStart = function (data, currentPlayer) {
+        $('#countdownExample').empty();
+        simplyCountdown('#countdownExample', {
+            year: data.year, // required
+            month: data.month, // required
+            day: data.day, // required
+            hours: data.hours, // Default is 0 [0-23] integer
+            minutes: data.minutes, // Default is 0 [0-59] integer
+            seconds: data.seconds, // Default is 0 [0-59] integer
+            words: { //words displayed into the countdown
+                minutes: { singular: 'minute', plural: 'minutes' },
+                seconds: { singular: 'second', plural: 'seconds' }
+            },
+            plural: true, //use plurals
+            inline: false, //set to true to get an inline basic countdown like : 24 days, 4 hours, 2 minutes, 5 seconds
+            inlineClass: 'simply-countdown-inline', //inline css span class in case of inline = true
+            // in case of inline set to false
+            enableUtc: false,
+            refresh: 1000, //default refresh every 1s
+            sectionClass: 'simply-section', //section css class
+            amountClass: 'simply-amount', // amount css class
+            wordClass: 'simply-word', // word css class
+            zeroPad: false,
+            countUp: false, // enable count up if set to true
+            onEnd: function () {
+                if(currentPlayer === {{ app.user.id }}){
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('endOfCountDown') }}",
+                        data: {
+                            idGame: {{ idGame }}
+                        }
+                    });
+                }
+            }
         });
     }
 
