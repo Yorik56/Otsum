@@ -8,6 +8,30 @@
             layout: 'azerty',
         });
 
+        let numberOfKeysPressed = 0;
+
+        // User keyboard events
+        $('body').on("keydown", function(e){
+            numberOfKeysPressed++;
+            if(numberOfKeysPressed < 2 || e.key.toLowerCase() === "backspace"){
+                if(e.key.toLowerCase() === "backspace"){
+                    $(".backspace").trigger("click");
+                } else if (e.key.toLowerCase() === "enter"){
+                    $(".return").trigger("click");
+                } else {
+                    $('#keyboard .jkey').each(function (index, element) {
+                        if($(element).text() === e.key.toLowerCase()){
+                            $(element).trigger("click");
+                        }
+                    })
+                }
+            }
+        });
+        $('body').on("keyup", function(e){
+            $('.current_cell').removeClass("notReady");
+            numberOfKeysPressed = 0;
+        });
+
         // Variables de la grille de jeu
         let idGame;
         let difficulty;
@@ -72,7 +96,7 @@
                 }
             });
             if (!mot_valide) {
-                alert('mot trop court !');
+                $('.current_cell').addClass("notReady");
             } else {
                 $('.last_cell').toggleClass('last_cell');
                 $.ajax({

@@ -68,6 +68,30 @@
             }
         });
 
+    {# //---*   EVENTS   *---// #}
+
+    // User keyboard events
+    $('body').on("keydown", function(e){
+        numberOfKeysPressed++;
+        if(numberOfKeysPressed < 2 || e.key.toLowerCase() === "backspace"){
+            if(e.key.toLowerCase() === "backspace"){
+                $(".backspace").trigger("click");
+            } else if (e.key.toLowerCase() === "enter"){
+                $(".return").trigger("click");
+            } else {
+                $('#keyboard .jkey').each(function (index, element) {
+                    if($(element).text() === e.key.toLowerCase()){
+                        $(element).trigger("click");
+                    }
+                })
+            }
+        }
+    });
+    $('body').on("keyup", function(e){
+        $('.current_cell').removeClass("notReady");
+        numberOfKeysPressed = 0;
+    });
+
     {# //---*   FUNCTIONS DECLARATIONS   *---// #}
     const displayActualGrid = function (idGame) {
         console.log("displayActualGrid called successfully !");
