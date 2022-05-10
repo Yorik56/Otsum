@@ -5,6 +5,10 @@
     align-items: center;
 }
 
+.actionHubMulti {
+    height: 38px;
+}
+
 .teams .playerRow {
     display: flex;
     justify-content: center;
@@ -13,6 +17,52 @@
     .avatar {
         width: 50px;
         border-radius: 50%;
+    }
+}
+
+.chrono {
+
+    position: relative;
+    width: 30px;
+    height: 100%;
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .chronoTypeChoice {
+        #chrono_chronoType {
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        img.ban {
+            visibility: hidden;
+            position: absolute;
+            top: 0;
+            right: -3px;
+            width: 15px;
+            height: 15px;
+            z-index: 1;
+        }
+        img.clock {
+            z-index: 0;
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 100%;
+            visibility: visible;
+            height: 30px;
+            filter: brightness(0) saturate(100%) invert(32%) sepia(0%) saturate(0%) hue-rotate(100deg) brightness(99%) contrast(85%);
+        }
+        #chrono_chronoType:not(:checked) + img.ban {
+            visibility: visible;
+            filter: brightness(0) saturate(100%) invert(32%) sepia(20%) saturate(1232%) hue-rotate(308deg) brightness(90%) contrast(88%);
+        }
     }
 }
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Game;
 
+use App\Form\ChronoType;
 use App\Form\LaunchGameType;
 use App\Form\VersusType;
 use App\Entity\{Cell, Game, InGamePlayerStatus, InvitationToPlay, Line, Team, User};
@@ -124,6 +125,14 @@ class HubController extends AbstractController
             'action' => $this->generateUrl('versusTypeChoice')
         ]);
         $versusTypeForm->get('idGame')->setData($idGame);
+        // Form ChronoType Choice
+        $chronoTypeForm = $this->createForm(ChronoType::class, null, [
+            'action' => $this->generateUrl('chronoTypeChoice')
+        ]);
+        $chronoTypeForm->get('idGame')->setData($idGame);
+        if ($game->getChronoType()){
+            $chronoTypeForm->get('chronoType')->setData($game->getChronoType());
+        }
 
         //--- Recovery of the teams
         //TODO Group By Team Color
@@ -249,6 +258,7 @@ class HubController extends AbstractController
             'teamForm'         => $teamForm->createView(),
             'launchGameForm'   => $launchGameForm->createView(),
             'versusTypeForm'   => $versusTypeForm->createView(),
+            'chronoTypeForm'   => $chronoTypeForm->createView(),
             'idGame'           => $idGame,
             'host'             => $game->getHost(),
             'tablePlayer'      => $tableTeam,
@@ -288,6 +298,37 @@ class HubController extends AbstractController
         return $this->redirectToRoute(
             'hubPrive', [
             'idGame' => $versusTypeForm->get('idGame')->getData()]
+        );
+    }
+
+    #[Route('/chronoTypeChoice', name: 'chronoTypeChoice')]
+    function chronoTypeChoice(HubInterface $hub, Request $request)
+    {
+        //--- Form LaunchGame
+        $chronoTypeForm = $this->createForm(ChronoType::class);
+        $chronoTypeForm->handleRequest($request);
+
+        if ($chronoTypeForm->isSubmitted() && $chronoTypeForm->isValid()) {
+            //--- Retrieve the game
+            $game = $this->entityManager->getRepository(Game::class)
+                ->find($chronoTypeForm->get('idGame')->getData());
+            $game->setChronoType($chronoTypeForm->get('chronoType')->getData());
+            $this->entityManager->persist($game);
+            $this->entityManager->flush();
+
+            // Send Update Mercure
+            $update = new Update(
+                '/updateChronoType/'.$chronoTypeForm->get('idGame')->getData(),
+                json_encode([
+                    'topic' => '/updateChronoType/'.$chronoTypeForm->get('idGame')->getData(),
+                    'chronoType'  => $game->getChronoType()
+                ])
+            );
+            $hub->publish($update);
+        }
+        return $this->redirectToRoute(
+            'hubPrive', [
+                'idGame' => $chronoTypeForm->get('idGame')->getData()]
         );
     }
 

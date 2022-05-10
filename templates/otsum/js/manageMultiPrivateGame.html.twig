@@ -27,26 +27,27 @@
             idGame: {{ idGame }}
         }
     })
-        .done(function (data) {
-            console.log([
-                "checkPresenceOfAllPlayers",
-                "status: " + data.status,
-                "actualTeam: " + data.actualTeam,
-                "actualPlayer: " + data.actualPlayer
-            ]);
-            if(data.actualTeam){
-                $('.multiPrivateGame .' + data.actualTeam).addClass('currentTeam');
-            }
-            if(data.actualPlayer === {{ app.user.id }}){
-                // Création du clavier
-                $('#div_keyboard #keyboard').jkeyboard({
-                    input: $('#search_field'),
-                    layout: 'azerty',
-                });
-                console.log("newKeyboard 1st");
-            }
-            if(data.status === "gameJustStarted"){
-                // Retrieve chrono
+    .done(function (data) {
+        console.log([
+            "checkPresenceOfAllPlayers",
+            "status: " + data.status,
+            "actualTeam: " + data.actualTeam,
+            "actualPlayer: " + data.actualPlayer
+        ]);
+        if(data.actualTeam){
+            $('.multiPrivateGame .' + data.actualTeam).addClass('currentTeam');
+        }
+        if(data.actualPlayer === {{ app.user.id }}){
+            // Création du clavier
+            $('#div_keyboard #keyboard').jkeyboard({
+                input: $('#search_field'),
+                layout: 'azerty',
+            });
+            console.log("newKeyboard 1st");
+        }
+        if(data.status === "gameJustStarted"){
+            // Retrieve chrono
+            {% if chronoType == true  %}
                 $.ajax({
                     method: "POST",
                     url: "{{ path('startChrono') }}",
@@ -54,9 +55,11 @@
                         idGame: {{ idGame }}
                     }
                 })
-            } else if(data.status === "gameAlreadyStarted"){
-                // Start chrono
-                displayActualGrid({{ idGame }})
+            {% endif %}
+        } else if(data.status === "gameAlreadyStarted"){
+            // Start chrono
+            displayActualGrid({{ idGame }})
+            {% if chronoType == true  %}
                 $.ajax({
                     method: "POST",
                     url: "{{ path('retrieveChrono') }}",
@@ -65,8 +68,9 @@
                         idUser: {{ app.user.id }}
                     }
                 })
-            }
-        });
+            {% endif %}
+        }
+    });
 
     {# //---*   EVENTS   *---// #}
 

@@ -29,8 +29,15 @@
             if ($(this).val() !== 0) {
                 let obj = $('.versusTypeChoice');
                 // obj.attr(url)
-                obj.submit()
+                obj.trigger("submit")
             }
+        });
+        //-- Maj versus Type
+        $('.chronoType').on("change", function () {
+            console.log('ok');
+            let obj = $('.chronoTypeChoice');
+            // obj.attr(url)
+            obj.trigger("submit")
         })
 
         {% endif %}

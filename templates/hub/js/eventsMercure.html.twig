@@ -9,6 +9,7 @@
         url.searchParams.append('topic', '/hub/prive/' + {{ idGame }})
         url.searchParams.append('topic', '/hub/prive/start/' + {{ idGame }})
         url.searchParams.append('topic', '/updateVersusType/' + {{ idGame }})
+        url.searchParams.append('topic', '/updateChronoType/' + {{ idGame }})
         //-- On écoute les évènements provenant de mercure
         const eventSource = new EventSource(url)
         eventSource.onmessage = (e) => {
@@ -64,15 +65,21 @@
                     }
                 });
             }
+            // start multi private game
             if (JSON.parse(e.data).topic === '/hub/prive/start/' + {{ idGame }}) {
                 window.location = '{{ path('otsum.multiPrivateGame', {idGame: idGame}) }}';
             }
+            // updateVersusType
             if (JSON.parse(e.data).topic === '/updateVersusType/' + {{ idGame }}) {
                 if ($('#versusType').length) {
                     $('#versusType h2').html(JSON.parse(e.data).versusType);
                 } else {
                     $('.modal').after('<div id="versusType" class="col-12"><h2>' + JSON.parse(e.data).versusType + '</h2></div>');
                 }
+            }
+            // updateChronoType
+            if (JSON.parse(e.data).topic === '/updateChronoType/' + {{ idGame }}) {
+                console.log(JSON.parse(e.data));
             }
         }
         //-- Désinscription aux topics mercure

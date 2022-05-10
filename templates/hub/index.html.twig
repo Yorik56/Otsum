@@ -15,18 +15,29 @@
             <div class="col-12 col-md-10 p-0">
                 {% if (app.user is defined) and (app.user.id is same as (host.getId())) %}
                     <div
-                        class="d-flex flex-column align-items-start flex-md-row justify-content-start justify-content-md-end"
+                        class="actionHubMulti d-flex flex-column align-items-start flex-md-row justify-content-start justify-content-md-end"
                     >
-                        {{ form_start(versusTypeForm, {'attr': {'class': 'versusTypeChoice'}}) }}
-                        {{ form_row(versusTypeForm.idGame) }}
-                        {{ form_widget(versusTypeForm.versusType, {'attr': {'class': 'btn versusType'}}) }}
-                        {{ form_end(versusTypeForm) }}
-                        {{ form_start(launchGameForm, {'attr': {'class': 'formLaunchGame'}}) }}
-                        {{ form_row(launchGameForm.idGame) }}
-                        <div class="d-flex justify-content-end w-100">
-                            {{ form_row(launchGameForm.submit, {'attr': {'class': 'btn launchGame'}}) }}
+                        {# chronoType #}
+                        <div class="chrono">
+                            {{ form_start(chronoTypeForm, {'attr': {'class': 'chronoTypeChoice'}}) }}
+                                {{ form_row(chronoTypeForm.idGame) }}
+                                {{ form_widget(chronoTypeForm.chronoType, {'attr': {'class': 'chronoType'}}) }}
+                                <img class="ban" src="{{ asset('build/ban-solid.svg') }}"   alt="clock svg">
+                                <img class="clock" src="{{ asset('build/clock-solid.svg') }}" alt="clock svg">
+                            {{ form_end(chronoTypeForm) }}
                         </div>
-                        {{ form_errors(launchGameForm) }}
+                        {# versusType #}
+                        {{ form_start(versusTypeForm, {'attr': {'class': 'versusTypeChoice'}}) }}
+                            {{ form_row(versusTypeForm.idGame) }}
+                            {{ form_widget(versusTypeForm.versusType, {'attr': {'class': 'btn versusType'}}) }}
+                        {{ form_end(versusTypeForm) }}
+                        {# launchType #}
+                        {{ form_start(launchGameForm, {'attr': {'class': 'formLaunchGame'}}) }}
+                            {{ form_row(launchGameForm.idGame) }}
+                            <div class="d-flex justify-content-end w-100">
+                                {{ form_row(launchGameForm.submit, {'attr': {'class': 'btn launchGame'}}) }}
+                            </div>
+                            {{ form_errors(launchGameForm) }}
                         {{ form_end(launchGameForm) }}
                     </div>
                 {% endif %}

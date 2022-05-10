@@ -82,6 +82,9 @@ class Game
     #[ORM\ManyToOne(targetEntity: User::class)]
     private $currentPlayer;
 
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private $chronoType;
+
     #[Pure] public function __construct()
     {
         $this->players = new ArrayCollection();
@@ -393,6 +396,18 @@ class Game
     public function setCurrentPlayer(?User $currentPlayer): self
     {
         $this->currentPlayer = $currentPlayer;
+
+        return $this;
+    }
+
+    public function getChronoType(): ?bool
+    {
+        return $this->chronoType;
+    }
+
+    public function setChronoType(?bool $chronoType): self
+    {
+        $this->chronoType = $chronoType;
 
         return $this;
     }
