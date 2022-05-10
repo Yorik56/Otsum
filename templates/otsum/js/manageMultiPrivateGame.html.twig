@@ -25,38 +25,48 @@
         url: "{{ path('checkPresenceOfAllPlayers') }}",
         data: {
             idGame: {{ idGame }}
-        }        
+        }
     })
-    .done(function (data) {
-        console.log([
-            "checkPresenceOfAllPlayers",
-            "status: " + data.status,
-            "actualTeam: " + data.actualTeam,
-            "actualPlayer: " + data.actualPlayer
-        ]);
-        if(data.status === 'gameAlreadyStarted'){
-            displayActualGrid();
-        }
-        if(data.actualTeam){
-            $('.multiPrivateGame .' + data.actualTeam).addClass('currentTeam');
-        }
-        if(data.actualPlayer === {{ app.user.id }}){
-            // Start chrono
-            $.ajax({
-                method: "POST",
-                url: "{{ path('startChrono') }}",
-                data: {
-                    idGame: {{ idGame }}
-                }
-            })
-            // Création du clavier
-            $('#div_keyboard #keyboard').jkeyboard({
-                input: $('#search_field'),
-                layout: 'azerty',
-            });
-            console.log("newKeyboard 1st");
-        }
-    });
+        .done(function (data) {
+            console.log([
+                "checkPresenceOfAllPlayers",
+                "status: " + data.status,
+                "actualTeam: " + data.actualTeam,
+                "actualPlayer: " + data.actualPlayer
+            ]);
+            if(data.actualTeam){
+                $('.multiPrivateGame .' + data.actualTeam).addClass('currentTeam');
+            }
+            if(data.actualPlayer === {{ app.user.id }}){
+                // Création du clavier
+                $('#div_keyboard #keyboard').jkeyboard({
+                    input: $('#search_field'),
+                    layout: 'azerty',
+                });
+                console.log("newKeyboard 1st");
+            }
+            if(data.status === "gameJustStarted"){
+                // Retrieve chrono
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('startChrono') }}",
+                    data: {
+                        idGame: {{ idGame }}
+                    }
+                })
+            } else if(data.status === "gameAlreadyStarted"){
+                // Start chrono
+                displayActualGrid({{ idGame }})
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('retrieveChrono') }}",
+                    data: {
+                        idGame: {{ idGame }},
+                        idUser: {{ app.user.id }}
+                    }
+                })
+            }
+        });
 
     {# //---*   FUNCTIONS DECLARATIONS   *---// #}
     const displayActualGrid = function (idGame) {
@@ -68,34 +78,34 @@
                 idGame: {{ idGame }}
             }
         })
-        .done(function (data) {
-            let box = $('.table');
-            let box_line;
-            box.empty();
-            $.each(data.arrayGrid, function(indexLine, valueLine) {
-                box.append('<tr></tr>')
-                box_line = $('div tr:last-child');
-                $.each(valueLine,function (indexCell, valueCell) {
-                    if (indexLine < 1 && indexCell < 1) {
-                        box_line.append('<td class="td line_' + indexLine + ' first_cell valide_cell cell cell_' + indexCell + '"><div>' + valueCell + '</div></td>')
-                    } else {
-                        if (indexLine < 1 && indexCell === 1) {
-                            box_line.append('<td class="td line_' + indexLine + ' current_cell cell cell_' + indexCell + '"><div>_</div></td>')
-                        } else if (
-                            indexCell === (valueLine.length - 1) && (indexLine === data.numberOfRoundPlayed)
-                        ){
-                            box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + ' last_cell" ><div>' + valueCell + '</div></td>')
-                        } else if (
-                            indexCell <= valueLine.length && (indexLine <= data.numberOfRoundPlayed)
-                        ) {
-                            box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div>' + valueCell + '</div></td>')
+            .done(function (data) {
+                let box = $('.table');
+                let box_line;
+                box.empty();
+                $.each(data.arrayGrid, function(indexLine, valueLine) {
+                    box.append('<tr></tr>')
+                    box_line = $('div tr:last-child');
+                    $.each(valueLine,function (indexCell, valueCell) {
+                        if (indexLine < 1 && indexCell < 1) {
+                            box_line.append('<td class="td line_' + indexLine + ' first_cell valide_cell cell cell_' + indexCell + '"><div>' + valueCell + '</div></td>')
                         } else {
-                            box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div></div></td>')
+                            if (indexLine < 1 && indexCell === 1) {
+                                box_line.append('<td class="td line_' + indexLine + ' current_cell cell cell_' + indexCell + '"><div>_</div></td>')
+                            } else if (
+                                indexCell === (valueLine.length - 1) && (indexLine === data.numberOfRoundPlayed)
+                            ){
+                                box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + ' last_cell" ><div>' + valueCell + '</div></td>')
+                            } else if (
+                                indexCell <= valueLine.length && (indexLine <= data.numberOfRoundPlayed)
+                            ) {
+                                box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div>' + valueCell + '</div></td>')
+                            } else {
+                                box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div></div></td>')
+                            }
                         }
-                    }
+                    })
                 })
-            })
-        });
+            });
     }
 
     // Affichage de la partie
@@ -124,6 +134,8 @@
             zeroPad: false,
             countUp: false, // enable count up if set to true
             onEnd: function () {
+                console.log('currentPlayer' + currentPlayer);
+                console.log('userID' + {{ app.user.id }});
                 if(currentPlayer === {{ app.user.id }}){
                     $.ajax({
                         method: "POST",

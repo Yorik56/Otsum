@@ -9,7 +9,7 @@
     url.searchParams.append('topic', '/joiningPrivateGame/' + {{ idGame }})
     url.searchParams.append('topic', '/checkPresenceOfAllPlayers/' + {{ idGame }})
     url.searchParams.append('topic', '/startChrono/' + {{ idGame }})
-    url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }})
+    url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }} + '/' + {{ app.user.id }})
     url.searchParams.append('topic', '/restartRound/' + {{ idGame }})
 
     //--- LISTENING FOR MERCURE EVENTS ---//
@@ -36,7 +36,7 @@
             );
         }
         // retrieve chrono
-        if (JSON.parse(e.data).topic === '/retrieveChrono/' + {{ idGame }}) {
+        if (JSON.parse(e.data).topic === '/retrieveChrono/'+ {{ idGame }} + '/' + {{ app.user.id }}) {
             simplyCountDownStart(
                 JSON.parse(e.data).arrayChrono,
                 JSON.parse(e.data).currentPlayer

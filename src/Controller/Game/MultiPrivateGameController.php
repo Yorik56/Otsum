@@ -146,7 +146,8 @@ class MultiPrivateGameController extends GameController
         return new JsonResponse([
             'actualTeam'   => $this->getPlayerTeam($game)->getColor(),
             'actualPlayer' => $game->getCurrentPlayer()?->getId(),
-            'status'       => $response
+            'status'       => $response,
+            'gameReady'       => $gameReady,
         ]);
     }
 
@@ -309,6 +310,7 @@ class MultiPrivateGameController extends GameController
     public function retrieveChrono(Request $request): JsonResponse
     {
         $idGame   = $request->request->get('idGame');
+        $idUser   = $request->request->get('idUser');
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
         $lastLine = $game->getLines()->get($game->getNumberOfRoundsPlayed());
         $arrayChrono = null;
@@ -327,9 +329,9 @@ class MultiPrivateGameController extends GameController
 
         // Mercure notification joiningPrivateGame
         $update = new Update(
-            '/retrieveChrono/'.$idGame,
+            '/retrieveChrono/'.$idGame.'/'.$idUser,
             json_encode([
-                'topic'         =>'/retrieveChrono/'.$idGame,
+                'topic'         =>'/retrieveChrono/'.$idGame.'/'.$idUser,
                 'currentPlayer' =>$game->getCurrentPlayer()->getId(),
                 'arrayChrono'   => $arrayChrono
 
