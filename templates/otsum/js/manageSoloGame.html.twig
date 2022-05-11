@@ -112,7 +112,7 @@
                         currentLineNumber = data.numberOfLines;
                         let numero_cellule = 1;
                         // MAJ de la ligne précédente
-                        data.ligne_precedente.forEach(function (lettre, index) {
+                        data.previous_line.forEach(function (lettre, index) {
                             let cellule;
                             if (currentLineNumber - 1 === 0) {
                                 cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (index + 1));
@@ -134,7 +134,7 @@
                             numero_cellule++;
                         })
                         //-- Préparation de la nouvelle ligne
-                        if (data.victoire === true) {
+                        if (data.victory === true) {
                             alert('gagné !!');
                             $('.return').remove();
 
@@ -145,7 +145,7 @@
                                     // Affichage de la première lettre
                                     $('.line_' + currentLineNumber + ".cell_" + numero)
                                         .addClass('valide_cell first_cell')
-                                        .html("<div>" + data.ligne_precedente[0].valeur + "</div>");
+                                        .html("<div>" + data.previous_line[0].valeur + "</div>");
                                 } else if (index === 1) {
                                     // Placement du curseur
                                     $('.line_' + currentLineNumber + ".cell_" + numero)
