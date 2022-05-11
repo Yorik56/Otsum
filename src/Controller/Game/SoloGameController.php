@@ -2,13 +2,9 @@
 
 namespace App\Controller\Game;
 
-use App\Service\GameManagerService;
-use App\Entity\{Cell, Game, Line, User};
+use App\Entity\{Game, User};
 use App\Form\DropOutFormType;
-use App\Repository\CellRepository;
 use App\Service\Utils;
-use Doctrine\Persistence\ObjectRepository;
-use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\{JsonResponse, RedirectResponse, Request, Response};
 use Symfony\Component\Routing\Annotation\Route;
 
