@@ -11,6 +11,7 @@
     url.searchParams.append('topic', '/startChrono/' + {{ idGame }})
     url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }} + '/' + {{ app.user.id }})
     url.searchParams.append('topic', '/restartRound/' + {{ idGame }})
+    url.searchParams.append('topic', '/displayNewLine/' + {{ idGame }})
 
     //--- LISTENING FOR MERCURE EVENTS ---//
     const eventSource = new EventSource(url)
@@ -73,6 +74,38 @@
                 $('#div_keyboard').append("<div id='keyboard'></div");
             }
         }
+
+        // display new line
+        if (JSON.parse(e.data).topic === '/displayNewLine/' + {{ idGame }}) {
+            if(JSON.parse(e.data).actualTeam){
+                $('.currentTeam').removeClass('currentTeam');
+                $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
+            }
+            if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
+                if(JSON.parse(e.data).chronoType === true){
+                    // Start chrono
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('startChrono') }}",
+                        data: {
+                            idGame: {{ idGame }},
+                            restart: true
+                        }
+                    })
+                }
+                // Création du clavier
+                $('#div_keyboard #keyboard').jkeyboard({
+                    input: $('#search_field'),
+                    layout: 'azerty',
+                });
+            } else {
+                $('#div_keyboard').empty();
+                $('#div_keyboard').append("<div id='keyboard'></div");
+            }
+            // displayActualGrid();
+            displayActualGrid();
+        }
+
     }
 
     //-- Before unload:  Unsubscribe mercure topics
