@@ -94,6 +94,7 @@ class HubController extends AbstractController
                 $currentLine->addCell($currentCell);
             }
             // Add new line to the game
+            $currentLine->setPosition($line);
             $this->entityManager->persist($currentLine);
             $game->addLine($currentLine);
         }
