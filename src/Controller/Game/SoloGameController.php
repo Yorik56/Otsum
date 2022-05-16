@@ -103,7 +103,7 @@ class SoloGameController extends GameController
             $lineUpdated['victory'] == false
         )
         {
-            $response['wordToFind'] = $game->getWordToFind();
+            $lineUpdated['wordToFind'] = $game->getWordToFind();
         }
         return new JsonResponse($lineUpdated);
     }
