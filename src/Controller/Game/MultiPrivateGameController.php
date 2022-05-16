@@ -4,6 +4,7 @@ namespace App\Controller\Game;
 
 use App\Entity\Game;
 use App\Entity\InGamePlayerStatus;
+use App\Entity\Line;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\DropOutFormType;
@@ -164,13 +165,20 @@ class MultiPrivateGameController extends GameController
 
         foreach ($game->getLines() as $indexLine => $line){
             foreach ($line->getCells() as $indexCell => $cell){
-                $arrayGrid[$indexLine][$indexCell] = $cell->getValeur();
+                $arrayGrid[$indexLine][$indexCell] = [
+                    "value" => $cell->getValeur(),
+                    "test" => $cell->getFlagTestee(),
+                    "presence" => $cell->getFlagPresente(),
+                    "placement" => $cell->getFlagPlacee(),
+                ];
             }
         }
-
         return new JsonResponse([
             'arrayGrid' => $arrayGrid,
-            'numberOfRoundPlayed' => $game->getNumberOfRoundsPlayed()
+            'numberOfRoundPlayed' => $game->getNumberOfRoundsPlayed(),
+            'arrayMajKeyboard'    => $this->gameManagerService->updateKeyboardKeys($idGame),
+            'difficulty'          => $game->getLineLength(),
+            'wordToFind'          => trim($game->getWordToFind())
         ]);
     }
 
@@ -371,6 +379,56 @@ class MultiPrivateGameController extends GameController
 
         $this->hub->publish($update);
 
+        return new JsonResponse([
+            200
+        ]);
+    }
+
+    /**
+     * Get the state of last played line ine game,
+     * then we update it and return it with other information about the game
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    #[Route('/updateLineMultiplayer', name: 'updateLineMultiplayer')]
+    function updateLineMultiplayer(Request $request): JsonResponse
+    {
+        $idGame = $request->request->get('idGame');
+        $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+        $numberOfTry = $request->request->get('currentLineNumber') + 1;
+        $lineUpdated = $this->gameManagerService->updateLine(
+            $idGame,
+            $numberOfTry,
+            $request->request->get('mot')
+        );
+        // If you made it to the last round and the word was not found
+        if(
+            $game->getNumberOfRounds() == $game->getNumberOfRoundsPlayed() &&
+            $lineUpdated['victory'] == false
+        )
+        {
+            $lineUpdated['wordToFind'] = $game->getWordToFind();
+        }
+
+        $inGamePlayerStatuses = $game->getinGamePlayerStatuses();
+        foreach ($inGamePlayerStatuses as $inGamePlayerStatus){
+            $this->majCurrentPlayer($inGamePlayerStatus, $game);
+        }
+
+        // Mercure notification restartRound
+        $update = new Update(
+            '/displayNewLine/'.$idGame,
+            json_encode([
+                'topic'        => '/displayNewLine/'.$idGame,
+                'lineUpdated'  => $lineUpdated,
+                'actualPlayer' => $game->getCurrentPlayer()->getId(),
+                'chronoType'   => $game->getChronoType(),
+                'actualTeam'   => $this->getPlayerTeam($game)->getColor(),
+                'difficulty'   => $game->getLineLength()
+            ])
+        );
+        $this->hub->publish($update);
         return new JsonResponse([
             200
         ]);
