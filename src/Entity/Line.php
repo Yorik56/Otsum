@@ -36,6 +36,9 @@ class Line
     #[ORM\Column(type: 'datetime', nullable: true)]
     private $endDate;
 
+    #[ORM\Column(type: 'integer')]
+    private $position;
+
     #[Pure] public function __construct(Game $game)
     {
         $this->cells = new ArrayCollection();
@@ -133,6 +136,18 @@ class Line
     public function setEndDate(\DateTimeInterface $endDate): self
     {
         $this->endDate = $endDate;
+
+        return $this;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): self
+    {
+        $this->position = $position;
 
         return $this;
     }
