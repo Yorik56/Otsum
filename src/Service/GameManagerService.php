@@ -23,26 +23,26 @@ class GameManagerService
     /**
      * Updating the keyboard keys
      *
-     * @param CellRepository $celluleRepository
+     * @param CellRepository $cellRepository
      * @param int $idGame
      * @param array $arrayMajKeyboard
      * @param Cell[] $majKeyboardArrayCell
      * @return array
      */
     public function arrayMajKeyboard(
-        ObjectRepository $celluleRepository,
+        ObjectRepository $cellRepository,
         int $idGame,
         array $arrayMajKeyboard,
         array $majKeyboardArrayCell
     ): array
     {
-        foreach ($majKeyboardArrayCell as $cellule) {
+        foreach ($majKeyboardArrayCell as $cell) {
             // Check if the letter has already been placed
-            if (!$celluleRepository->getPlacedOrFalse($idGame, $cellule->getValeur())) {
+            if (!$cellRepository->getPlacedOrFalse($idGame, $cell->getValeur())) {
                 // Update the status of the letter
-                $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
-                $arrayMajKeyboard[$cellule->getValeur()]['presence'] = $cellule->getFlagPresente();
-                $arrayMajKeyboard[$cellule->getValeur()]['test'] = $cellule->getFlagTestee();
+                $arrayMajKeyboard[$cell->getValeur()]['placement'] = $cell->getFlagPlacee();
+                $arrayMajKeyboard[$cell->getValeur()]['presence'] = $cell->getFlagPresente();
+                $arrayMajKeyboard[$cell->getValeur()]['test'] = $cell->getFlagTestee();
             }
         }
         return $arrayMajKeyboard;
@@ -91,31 +91,35 @@ class GameManagerService
      * @return void
      */
     public function persistNewLineInDatabase($actualLine, $game){
-        // Registration of the new line
-        $ligne = new Line($game);
-        $this->entityManager->persist($ligne);
+        // Retrieve the current line
+        $line = $this->entityManager->getRepository(Line::class)->findOneBy([
+            'game'     => $game->getId(),
+            'position' => $game->getNumberOfRoundsPlayed()
+        ]);
         // Update of letters
         foreach ($actualLine as $index => $letter){
-            $cellule = new Cell();
-            $cellule->setLigne($ligne);
-            $cellule->setValeur($letter['valeur']);
-            $cellule->setPosition($index);
+            $cell = $this->entityManager->getRepository(Cell::class)->findOneBy([
+                'ligne' => $line->getId(),
+                'position' => $index
+            ]);
+            $cell->setValeur($letter['valeur']);
+            $cell->setPosition($index);
             if($letter['placement']){
-                $cellule->setFlagPlacee(Cell::FLAG_PLACEMENT_TRUE);
+                $cell->setFlagPlacee(Cell::FLAG_PLACEMENT_TRUE);
             } else {
-                $cellule->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
+                $cell->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
             }
             if($letter['presence']){
-                $cellule->setFlagPresente(Cell::FLAG_PRESENCE_TRUE);
+                $cell->setFlagPresente(Cell::FLAG_PRESENCE_TRUE);
             } else {
-                $cellule->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
+                $cell->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
             }
             if($letter['test']){
-                $cellule->setFlagTestee(Cell::FLAG_TEST_TRUE);
+                $cell->setFlagTestee(Cell::FLAG_TEST_TRUE);
             } else {
-                $cellule->setFlagTestee(Cell::FLAG_TEST_FALSE);
+                $cell->setFlagTestee(Cell::FLAG_TEST_FALSE);
             }
-            $this->entityManager->persist($cellule);
+            $this->entityManager->persist($cell);
         }
         $this->entityManager->flush();
     }
@@ -141,14 +145,13 @@ class GameManagerService
     {
         //Game in progress
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
-        $this->persistCurrentLineNumber($game, $numberOfTry);
-        $wordToFind = $game->getWordToFind();
+        $wordToFind = trim($game->getWordToFind());
         // Counting in the word to be found,
         // the number of existing occurrences of each letter
         $wordSearchArray = str_split($wordToFind);
         $countsOccurrencesPlaced = $this->countOccurrencesPlaced($wordSearchArray, $wordToFind);
         //-- Update of the current line
-        $tableOfTheLastTry = str_split($lastTry);
+        $tableOfTheLastTry = str_split(trim($lastTry));
         $actualLine = $this->updateNewLineState(
             $wordSearchArray, $countsOccurrencesPlaced,
             $tableOfTheLastTry, $wordToFind
@@ -156,6 +159,7 @@ class GameManagerService
         $validLetters = $actualLine['valid_letters'];
         // Save the new line in database
         $this->persistNewLineInDatabase($actualLine['actual_line'], $game);
+        $this->persistCurrentLineNumber($game, $numberOfTry);
         // Update keyboard keys
         $arrayMajKeyboard = $this->updateKeyboardKeys($idGame);
         // Set victory variable
@@ -244,32 +248,32 @@ class GameManagerService
     public function updateKeyboardKeys($idGame): array
     {
         //-- Update of the keyboard keys
-        $celluleRepository = $this->entityManager->getRepository(Cell::class);
+        $cellRepository = $this->entityManager->getRepository(Cell::class);
         // Update letters placed
         $majKeyboardPlaced = null;
-        if($celluleRepository instanceof CellRepository){
-            $majKeyboardPlaced = $celluleRepository->getPlaced($idGame);
+        if($cellRepository instanceof CellRepository){
+            $majKeyboardPlaced = $cellRepository->getPlaced($idGame);
         }
         $arrayMajKeyboard = [];
         if(is_array($majKeyboardPlaced)){
-            foreach ($majKeyboardPlaced as $cellule){
-                $arrayMajKeyboard[$cellule->getValeur()]['placement'] = $cellule->getFlagPlacee();
-                $arrayMajKeyboard[$cellule->getValeur()]['presence']  = $cellule->getFlagPresente();
-                $arrayMajKeyboard[$cellule->getValeur()]['test']      = $cellule->getFlagTestee();
+            foreach ($majKeyboardPlaced as $cell){
+                $arrayMajKeyboard[$cell->getValeur()]['placement'] = $cell->getFlagPlacee();
+                $arrayMajKeyboard[$cell->getValeur()]['presence']  = $cell->getFlagPresente();
+                $arrayMajKeyboard[$cell->getValeur()]['test']      = $cell->getFlagTestee();
             }
         }
         // Update of missing letters
-        $majKeyboardNotPresent = $celluleRepository->getNotPresent($idGame);
+        $majKeyboardNotPresent = $cellRepository->getNotPresent($idGame);
         $arrayMajKeyboard = $this->arrayMajKeyboard(
-            $celluleRepository,
+            $cellRepository,
             $idGame,
             $arrayMajKeyboard,
             $majKeyboardNotPresent
         );
         // Update letters present and not placed
-        $majKeyboardPresentAndNotPlaced = $celluleRepository->getPresentAndNotPlaced($idGame);
+        $majKeyboardPresentAndNotPlaced = $cellRepository->getPresentAndNotPlaced($idGame);
         return $this->arrayMajKeyboard(
-            $celluleRepository,
+            $cellRepository,
             $idGame,
             $arrayMajKeyboard,
             $majKeyboardPresentAndNotPlaced
