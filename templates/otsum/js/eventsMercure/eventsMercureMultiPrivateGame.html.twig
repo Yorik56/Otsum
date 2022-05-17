@@ -12,6 +12,7 @@
     url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }} + '/' + {{ app.user.id }})
     url.searchParams.append('topic', '/restartRound/' + {{ idGame }})
     url.searchParams.append('topic', '/displayNewLine/' + {{ idGame }})
+    url.searchParams.append('topic', '/currentKey/' + {{ idGame }})
 
     //--- LISTENING FOR MERCURE EVENTS ---//
     const eventSource = new EventSource(url)
@@ -104,6 +105,35 @@
             }
             // displayActualGrid();
             displayActualGrid();
+        }
+        // display currentKey
+        if (JSON.parse(e.data).topic === '/currentKey/' + {{ idGame }}) {
+            if(
+                JSON.parse(e.data).actualPlayer !== {{ app.user.id }} &&
+                JSON.parse(e.data).currentKey &&
+                JSON.parse(e.data).currentKey !== "enter"
+            ){
+                let current_cell = $('.current_cell').first();
+                let last_cell = $('.last_cell').first();
+                if(JSON.parse(e.data).currentKey === "backspace"){
+                    // console.log(current_cell.closest(".table"));
+                    if(current_cell.closest(".table").length > 0){
+                        if(!current_cell.prev().hasClass('first_cell')){
+                            current_cell.prev().addClass('current_cell').html("<div>_</div>");
+                            current_cell.removeClass('current_cell').html("<div>.</div>");
+                        }
+                    } else {
+                        last_cell.prev().addClass('current_cell').html("<div>_</div>");
+                        last_cell.html("<div>.</div>");
+                    }
+                } else {
+                    current_cell.html("<div>" + JSON.parse(e.data).currentKey + "</div>")
+                    if(!current_cell.hasClass('last_cell')){
+                        current_cell.next().addClass('current_cell').html("<div>_</div>");
+                    }
+                    current_cell.toggleClass('current_cell');
+                }
+            }
         }
 
     }

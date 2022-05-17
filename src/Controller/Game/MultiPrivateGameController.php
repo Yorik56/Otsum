@@ -416,7 +416,7 @@ class MultiPrivateGameController extends GameController
             $this->majCurrentPlayer($inGamePlayerStatus, $game);
         }
 
-        // Mercure notification restartRound
+        // Mercure notification displayNewLine
         $update = new Update(
             '/displayNewLine/'.$idGame,
             json_encode([
@@ -429,6 +429,28 @@ class MultiPrivateGameController extends GameController
             ])
         );
         $this->hub->publish($update);
+        return new JsonResponse([
+            200
+        ]);
+    }
+
+    #[Route('/sendCurrentKey', name: 'sendCurrentKey')]
+    public function sendCurrentKey(Request $request): JsonResponse
+    {
+        $idGame     = $request->request->get('idGame');
+        $currentKey = $request->request->get('currentKey');
+
+        // Mercure notification displayNewLine
+        $update = new Update(
+            '/currentKey/'.$idGame,
+            json_encode([
+                'topic'        => '/currentKey/'.$idGame,
+                'actualPlayer' => $this->getUser()->getId(),
+                'currentKey'   => $currentKey
+            ])
+        );
+        $this->hub->publish($update);
+
         return new JsonResponse([
             200
         ]);

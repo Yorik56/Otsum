@@ -70,17 +70,33 @@
     // User keyboard events
     $('body').on("keydown", function(e){
         numberOfKeysPressed++;
-        if(numberOfKeysPressed < 2 || e.key.toLowerCase() === "backspace"){
+        let sendKey = false;
+        let sendKeyValue = null;
+        if(numberOfKeysPressed < 2){
             if(e.key.toLowerCase() === "backspace"){
+                sendKey = true;
+                sendKeyValue = e.key.toLowerCase();
                 $(".backspace").trigger("click");
             } else if (e.key.toLowerCase() === "enter"){
                 sendActualLine();
             } else {
+                sendKey = true;
                 $('#keyboard .jkey').each(function (index, element) {
                     if($(element).text() === e.key.toLowerCase()){
+                        sendKeyValue = ($(element).text());
                         $(element).trigger("click");
                     }
                 })
+            }
+            if(sendKey === true){
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('sendCurrentKey') }}",
+                    data: {
+                        idGame: {{ idGame }},
+                        currentKey: sendKeyValue
+                    }
+                });
             }
         }
     });
