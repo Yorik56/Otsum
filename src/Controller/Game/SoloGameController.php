@@ -2,8 +2,6 @@
 
 namespace App\Controller\Game;
 
-use App\Service\GameManagerService;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\{Game, User};
 use App\Form\DropOutFormType;
 use App\Service\Utils;
