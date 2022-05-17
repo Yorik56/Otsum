@@ -401,7 +401,9 @@ class MultiPrivateGameController extends GameController
             $request->request->get('mot')
         );
         // If you made it to the last round and the word was not found
-        if(
+        if(trim($request->request->get('mot')) === $game->getWordToFind() ){
+            $lineUpdated['victory'] = true;
+        } else if(
             $game->getNumberOfRounds() == $game->getNumberOfRoundsPlayed() &&
             $lineUpdated['victory'] == false
         )
