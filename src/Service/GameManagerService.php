@@ -11,7 +11,7 @@ use JetBrains\PhpStorm\ArrayShape;
 class GameManagerService
 {
     private EntityManagerInterface     $entityManager;
-    private GameManagerKeyboardService $gameManagerKeyboardService;
+    public GameManagerKeyboardService $gameManagerKeyboardService;
     private GameManagerLineService     $gameManagerLineService;
 
     public function __construct(

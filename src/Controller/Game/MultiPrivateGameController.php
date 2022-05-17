@@ -6,6 +6,7 @@ use App\Entity\Game;
 use App\Entity\InGamePlayerStatus;
 use App\Entity\Team;
 use App\Entity\User;
+use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -151,8 +152,11 @@ class MultiPrivateGameController extends GameController
         ]);
     }
 
-    /*
+    /**
      * Display the actual game grid
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
     #[Route('/displayActualGrid', name: 'displayActualGrid')]
     public function displayActualGrid(Request $request): JsonResponse
@@ -174,7 +178,7 @@ class MultiPrivateGameController extends GameController
         return new JsonResponse([
             'arrayGrid' => $arrayGrid,
             'numberOfRoundPlayed' => $game->getNumberOfRoundsPlayed(),
-            'arrayMajKeyboard'    => $this->gameManagerService->updateKeyboardKeys($idGame),
+            'arrayMajKeyboard'    => $this->gameManagerService->gameManagerKeyboardService->updateKeyboardKeys($idGame),
             'difficulty'          => $game->getLineLength(),
             'wordToFind'          => trim($game->getWordToFind())
         ]);
@@ -205,6 +209,11 @@ class MultiPrivateGameController extends GameController
      * @param $game
      * @return array
      */
+    #[ArrayShape([
+        'color' => "int|null",
+        'flagActualPlayer' => "int|null",
+        'response' => "bool"
+    ])]
     public function majCurrentPlayer(InGamePlayerStatus $inGamePlayerStatus, $game): array
     {
         $response = true;
