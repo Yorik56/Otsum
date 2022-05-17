@@ -70,6 +70,10 @@ class GameManagerLineService
      * @param array $countsOccurrencesPlaced
      * @return array
      */
+    #[ArrayShape([
+        "valid_letters" => "int",
+        "actual_line" => "array"
+    ])]
     public function updateCellsState(
         array  $wordSearchArray, array $tableOfTheLastTry,
         string $wordToFind, array $testOccurrenceCounter,
@@ -105,9 +109,10 @@ class GameManagerLineService
                 $actualLine[$indexWordToFind]['placement'] = false;
             }
         }
+
         return [
-            $validLetters,
-            $actualLine
+            "valid_letters" => $validLetters,
+            "actual_line"   => $actualLine
         ];
     }
 
@@ -135,10 +140,11 @@ class GameManagerLineService
             $wordToFind, $testOccurrenceCounter,
             $countsOccurrencesPlaced
         );
-        $actualLine = $this->cleanPresenceFlag($actualLine, $countsOccurrencesPlaced);
+        $valid_letters = $actualLine['valid_letters'];
+        $actualLine = $this->cleanPresenceFlag($actualLine["actual_line"], $countsOccurrencesPlaced);
         return [
-            'actual_line' => $actualLine['actual_line'],
-            'valid_letters' => $actualLine['valid_letters']
+            'actual_line' => $actualLine,
+            'valid_letters' => $valid_letters
         ];
     }
 
