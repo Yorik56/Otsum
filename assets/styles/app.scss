@@ -83,7 +83,7 @@ h1 {
 
 .cell:not(.current_cell) div {
     transform: rotateY(-90deg);
-    animation: rotateAnimation .3s linear forwards;
+    animation: rotateAnimation .1s forwards;
 }
 
 @keyframes rotateAnimation {
@@ -93,6 +93,19 @@ h1 {
     to {
         transform: rotateY(0deg);
         animation: unset;
+    }
+}
+
+.currentTeam.end {
+    animation: endingShine 3s ease-in-out infinite;
+}
+
+@keyframes endingShine {
+    from {
+        box-shadow: 0 0 0 yellow;
+    }
+    to {
+        box-shadow: 0 2px 20px yellow;
     }
 }
 
