@@ -28,16 +28,11 @@ class GameManagerService
     /**
      * Get the state of last played line ine game,
      * then we update it and return it with other information about the game
-     * @param int $idGame
-     * @param int $numberOfTry
-     * @param string $lastTry
-     *
-     * @return array
      */
     #[ArrayShape([
         "wordToFind" => "array",
         "lastTry" => "array",
-        "previous_line" => "array|mixed",
+        "previous_line" => "mixed",
         "arrayMajKeyboard" => "array",
         "numberOfLines" => "int",
         "victory" => "bool"
@@ -54,8 +49,10 @@ class GameManagerService
         //-- Update of the current line
         $tableOfTheLastTry = str_split(trim($lastTry));
         $actualLine = $this->gameManagerLineService->updateNewLineState(
-            $wordSearchArray, $countsOccurrencesPlaced,
-            $tableOfTheLastTry, $wordToFind
+            $wordSearchArray,
+            $countsOccurrencesPlaced,
+            $tableOfTheLastTry,
+            $wordToFind
         );
         $validLetters = $actualLine['valid_letters'];
         // Save the new line in database

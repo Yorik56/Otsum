@@ -4,10 +4,18 @@ namespace App\Service;
 
 use App\Entity\Cell;
 use App\Repository\CellRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
 
 class GameManagerKeyboardService
 {
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     /**
      * Updating the keyboard keys
      *

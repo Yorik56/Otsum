@@ -10,7 +10,7 @@ use JetBrains\PhpStorm\ArrayShape;
 
 class GameManagerLineService
 {
-    private EntityManagerInterface     $entityManager;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager)
     {
@@ -40,26 +40,44 @@ class GameManagerLineService
     }
 
     /**
-     * Update states of the last played line
+     * We remove the presence flag from the misplaced letters whose placement counter is at zero
      *
-     * @param array $wordSearchArray
-     * @param $countsOccurrencesPlaced
-     * @param $tableOfTheLastTry
-     * @param $wordToFind
+     * @param array $actualLine
+     * @param array $countsOccurrencesPlaced
      * @return array
      */
-    #[ArrayShape(['actual_line' => "array", 'valid_letters' => "int"])]
-    public function updateNewLineState(
-        array $wordSearchArray,
-              $countsOccurrencesPlaced,
-              $tableOfTheLastTry,
-              $wordToFind
+    public function cleanPresenceFlag(array $actualLine, array $countsOccurrencesPlaced):array
+    {
+        foreach($actualLine as $index => $letter){
+            if(
+                ($letter['placement'] == false && $letter['presence'] == true) &&
+                $countsOccurrencesPlaced[$letter['valeur']] < 1
+            )
+            {
+                $actualLine[$index]['presence']  = false;
+            }
+        }
+        return $actualLine;
+    }
+
+    /**
+     * Update of the state of the cells line
+     *
+     * @param string $wordToFind
+     * @param array $wordSearchArray
+     * @param array $tableOfTheLastTry
+     * @param array $testOccurrenceCounter
+     * @param array $countsOccurrencesPlaced
+     * @return array
+     */
+    public function updateCellsState(
+        array  $wordSearchArray, array $tableOfTheLastTry,
+        string $wordToFind, array $testOccurrenceCounter,
+        array  $countsOccurrencesPlaced
     ): array
     {
         $validLetters = 0;
         $actualLine = [];
-        //-- It is also necessary to count the occurrences of all the letters tested
-        $testOccurrenceCounter = $countsOccurrencesPlaced;
         // For each letter of the word to find
         foreach ($wordSearchArray as $indexWordToFind => $letter){
             $actualLine[$indexWordToFind]['valeur'] = $tableOfTheLastTry[$indexWordToFind];
@@ -87,19 +105,40 @@ class GameManagerLineService
                 $actualLine[$indexWordToFind]['placement'] = false;
             }
         }
-        // We remove the presence flag from the misplaced letters whose placement counter is at zero
-        foreach($actualLine as $index => $letter){
-            if(
-                ($letter['placement'] == false && $letter['presence'] == true) &&
-                $countsOccurrencesPlaced[$letter['valeur']] < 1
-            )
-            {
-                $actualLine[$index]['presence']  = false;
-            }
-        }
         return [
-            'actual_line' => $actualLine,
-            'valid_letters' => $validLetters
+            $validLetters,
+            $actualLine
+        ];
+    }
+
+    /**
+     * Update states of the last played line
+     *
+     * @param array $wordSearchArray
+     * @param array $countsOccurrencesPlaced
+     * @param array $tableOfTheLastTry
+     * @param string $wordToFind
+     * @return array
+     */
+    #[ArrayShape(['actual_line' => "array", 'valid_letters' => "int"])]
+    public function updateNewLineState(
+        array  $wordSearchArray,
+        array  $countsOccurrencesPlaced,
+        array  $tableOfTheLastTry,
+        string $wordToFind
+    ): array
+    {
+        //-- It is also necessary to count the occurrences of all the letters tested
+        $testOccurrenceCounter = $countsOccurrencesPlaced;
+        $actualLine = $this->updateCellsState(
+            $wordSearchArray, $tableOfTheLastTry,
+            $wordToFind, $testOccurrenceCounter,
+            $countsOccurrencesPlaced
+        );
+        $actualLine = $this->cleanPresenceFlag($actualLine, $countsOccurrencesPlaced);
+        return [
+            'actual_line' => $actualLine['actual_line'],
+            'valid_letters' => $actualLine['valid_letters']
         ];
     }
 
