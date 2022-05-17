@@ -6,7 +6,7 @@ use App\Form\ChronoType;
 use App\Form\LaunchGameType;
 use App\Form\VersusType;
 use App\Service\GameManagerService;
-use App\Entity\{Cell, Game, InGamePlayerStatus, InvitationToPlay, Line, Team, User};
+use App\Entity\{ Game, InGamePlayerStatus, InvitationToPlay, Team, User};
 use App\Form\TeamType;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;

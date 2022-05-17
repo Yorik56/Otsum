@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Entity\ContactRequest;
 use App\Entity\User;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
