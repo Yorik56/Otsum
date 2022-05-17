@@ -4,10 +4,8 @@ namespace App\Controller\Game;
 
 use App\Entity\Game;
 use App\Entity\InGamePlayerStatus;
-use App\Entity\Line;
 use App\Entity\Team;
 use App\Entity\User;
-use App\Form\DropOutFormType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -373,7 +371,7 @@ class MultiPrivateGameController extends GameController
             json_encode([
                 'topic'        =>'/restartRound/'.$idGame,
                 'actualPlayer' => $game->getCurrentPlayer()->getId(),
-                'actualTeam'   => $this->getPlayerTeam($game)->getColor(),
+                'actualTeam'   => $this->getPlayerTeam($game)->getColor()
             ])
         );
 
