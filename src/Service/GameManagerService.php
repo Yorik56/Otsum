@@ -21,34 +21,6 @@ class GameManagerService
     }
 
     /**
-     * Updating the keyboard keys
-     *
-     * @param CellRepository $cellRepository
-     * @param int $idGame
-     * @param array $arrayMajKeyboard
-     * @param Cell[] $majKeyboardArrayCell
-     * @return array
-     */
-    public function arrayMajKeyboard(
-        ObjectRepository $cellRepository,
-        int $idGame,
-        array $arrayMajKeyboard,
-        array $majKeyboardArrayCell
-    ): array
-    {
-        foreach ($majKeyboardArrayCell as $cell) {
-            // Check if the letter has already been placed
-            if (!$cellRepository->getPlacedOrFalse($idGame, $cell->getValeur())) {
-                // Update the status of the letter
-                $arrayMajKeyboard[$cell->getValeur()]['placement'] = $cell->getFlagPlacee();
-                $arrayMajKeyboard[$cell->getValeur()]['presence'] = $cell->getFlagPresente();
-                $arrayMajKeyboard[$cell->getValeur()]['test'] = $cell->getFlagTestee();
-            }
-        }
-        return $arrayMajKeyboard;
-    }
-
-    /**
      * Count occurrences for each letters
      *
      * @param array $wordSearchArray
@@ -70,53 +42,68 @@ class GameManagerService
         return $countsOccurrencesPlaced;
     }
 
-    /*
-     * This function creates initial lines and cells of the grid
-     * and fill them with initial values
-     */
-    public function fillGridWithInitialValues($game)
-    {
-        for($line = 0; $line < $game->getNumberOfRounds(); $line ++){
-            $currentLine = new Line($game);
-            for($column = 0; $column < $game->getLineLength(); $column++){
-                $currentCell = new Cell();
-                $currentCell->setFlagTestee(Cell::FLAG_TEST_FALSE);
-                $currentCell->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
-                $currentCell->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
-                $currentCell->setPosition($column);
-                $currentCell->setLigne($currentLine);
-                if($line == 0 && $column == 0){
-                    $currentCell->setValeur(
-                        substr($game->getWordToFind(), 0, 1)
-                    );
-                }else{
-                    $currentCell->setValeur(".");
-                }
-                // Add new cell to the current line
-                $this->entityManager->persist($currentCell);
-                $currentLine->addCell($currentCell);
-            }
-            // Add new line to the game
-            $currentLine->setPosition($line);
-            $this->entityManager->persist($currentLine);
-            $game->addLine($currentLine);
-        }
-        $this->entityManager->persist($game);
-        $this->entityManager->flush();
-        return $game;
-    }
-
     /**
-     * Persist the new number of lines played in this game
+     * Update states of the last played line
      *
-     * @param Game $game
-     * @param int $current_number_line
-     * @return void
+     * @param array $wordSearchArray
+     * @param $countsOccurrencesPlaced
+     * @param $tableOfTheLastTry
+     * @param $wordToFind
+     * @return array
      */
-    public function persistCurrentLineNumber(Game $game,int $current_number_line){
-        $game->setNumberOfRoundsPlayed($current_number_line);
-        $this->entityManager->persist($game);
-        $this->entityManager->flush();
+    #[ArrayShape(['actual_line' => "array", 'valid_letters' => "int"])]
+    public function updateNewLineState(
+        array $wordSearchArray,
+              $countsOccurrencesPlaced,
+              $tableOfTheLastTry,
+              $wordToFind
+    ): array
+    {
+        $validLetters = 0;
+        $actualLine = [];
+        //-- It is also necessary to count the occurrences of all the letters tested
+        $testOccurrenceCounter = $countsOccurrencesPlaced;
+        // For each letter of the word to find
+        foreach ($wordSearchArray as $indexWordToFind => $letter){
+            $actualLine[$indexWordToFind]['valeur'] = $tableOfTheLastTry[$indexWordToFind];
+            $actualLine[$indexWordToFind]['test']   = true;
+            $actualLine[$indexWordToFind]['comparaison']   = $tableOfTheLastTry[$indexWordToFind] . " -> " . $letter;
+            // If the letter is in the word
+            if(preg_match('/'.$tableOfTheLastTry[$indexWordToFind].'/', $wordToFind)){
+                $actualLine[$indexWordToFind]['presence'] = true;
+                // If the letter is well-placed
+                if($tableOfTheLastTry[$indexWordToFind] === $letter) {
+                    $countsOccurrencesPlaced[$tableOfTheLastTry[$indexWordToFind]]--;
+                    $actualLine[$indexWordToFind]['placement'] = true;
+                    $validLetters++;
+                } else {
+                    $actualLine[$indexWordToFind]['placement'] = false;
+                    // If the total number of this occurrence have been played in the last attempt
+                    // then this occurrence is not considered to be present in the line
+                    if($testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]] < 1){
+                        $actualLine[$indexWordToFind]['presence']  = false;
+                    }
+                    $testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]]--;
+                }
+            } else {
+                $actualLine[$indexWordToFind]['presence']  = false;
+                $actualLine[$indexWordToFind]['placement'] = false;
+            }
+        }
+        // We remove the presence flag from the misplaced letters whose placement counter is at zero
+        foreach($actualLine as $index => $letter){
+            if(
+                ($letter['placement'] == false && $letter['presence'] == true) &&
+                $countsOccurrencesPlaced[$letter['valeur']] < 1
+            )
+            {
+                $actualLine[$index]['presence']  = false;
+            }
+        }
+        return [
+            'actual_line' => $actualLine,
+            'valid_letters' => $validLetters
+        ];
     }
 
     /**
@@ -159,6 +146,85 @@ class GameManagerService
             $this->entityManager->persist($cell);
         }
         $this->entityManager->flush();
+    }
+
+    /**
+     * Persist the new number of lines played in this game
+     *
+     * @param Game $game
+     * @param int $current_number_line
+     * @return void
+     */
+    public function persistCurrentLineNumber(Game $game,int $current_number_line){
+        $game->setNumberOfRoundsPlayed($current_number_line);
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * Updating the keyboard keys
+     *
+     * @param CellRepository $cellRepository
+     * @param int $idGame
+     * @param array $arrayMajKeyboard
+     * @param Cell[] $majKeyboardArrayCell
+     * @return array
+     */
+    public function arrayMajKeyboard(
+        ObjectRepository $cellRepository, int $idGame, array $arrayMajKeyboard, array $majKeyboardArrayCell
+    ): array
+    {
+        foreach ($majKeyboardArrayCell as $cell) {
+            // Check if the letter has already been placed
+            if (!$cellRepository->getPlacedOrFalse($idGame, $cell->getValeur())) {
+                // Update the status of the letter
+                $arrayMajKeyboard[$cell->getValeur()]['placement'] = $cell->getFlagPlacee();
+                $arrayMajKeyboard[$cell->getValeur()]['presence'] = $cell->getFlagPresente();
+                $arrayMajKeyboard[$cell->getValeur()]['test'] = $cell->getFlagTestee();
+            }
+        }
+        return $arrayMajKeyboard;
+    }
+
+    /**
+     * Update the keyboard displayed in game
+     *
+     * @param $idGame
+     * @return array
+     */
+    public function updateKeyboardKeys($idGame): array
+    {
+        //-- Update of the keyboard keys
+        $cellRepository = $this->entityManager->getRepository(Cell::class);
+        // Update letters placed
+        $majKeyboardPlaced = null;
+        if($cellRepository instanceof CellRepository){
+            $majKeyboardPlaced = $cellRepository->getPlaced($idGame);
+        }
+        $arrayMajKeyboard = [];
+        if(is_array($majKeyboardPlaced)){
+            foreach ($majKeyboardPlaced as $cell){
+                $arrayMajKeyboard[$cell->getValeur()]['placement'] = $cell->getFlagPlacee();
+                $arrayMajKeyboard[$cell->getValeur()]['presence']  = $cell->getFlagPresente();
+                $arrayMajKeyboard[$cell->getValeur()]['test']      = $cell->getFlagTestee();
+            }
+        }
+        // Update of missing letters
+        $majKeyboardNotPresent = $cellRepository->getNotPresent($idGame);
+        $arrayMajKeyboard = $this->arrayMajKeyboard(
+            $cellRepository,
+            $idGame,
+            $arrayMajKeyboard,
+            $majKeyboardNotPresent
+        );
+        // Update letters present and not placed
+        $majKeyboardPresentAndNotPlaced = $cellRepository->getPresentAndNotPlaced($idGame);
+        return $this->arrayMajKeyboard(
+            $cellRepository,
+            $idGame,
+            $arrayMajKeyboard,
+            $majKeyboardPresentAndNotPlaced
+        );
     }
 
     /**
@@ -212,109 +278,39 @@ class GameManagerService
         ];
     }
 
-    /**
-     * Update states of the last played line
-     *
-     * @param array $wordSearchArray
-     * @param $countsOccurrencesPlaced
-     * @param $tableOfTheLastTry
-     * @param $wordToFind
-     * @return array
+    /*
+     * This function creates initial lines and cells of the grid
+     * and fill them with initial values
      */
-    #[ArrayShape(['actual_line' => "array", 'valid_letters' => "int"])]
-    public function updateNewLineState(
-        array $wordSearchArray,
-        $countsOccurrencesPlaced,
-        $tableOfTheLastTry,
-        $wordToFind
-    ): array
+    public function fillGridWithInitialValues($game)
     {
-        $validLetters = 0;
-        $actualLine = [];
-        //-- It is also necessary to count the occurrences of all the letters tested
-        $testOccurrenceCounter = $countsOccurrencesPlaced;
-        // For each letter of the word to find
-        foreach ($wordSearchArray as $indexWordToFind => $letter){
-            $actualLine[$indexWordToFind]['valeur'] = $tableOfTheLastTry[$indexWordToFind];
-            $actualLine[$indexWordToFind]['test']   = true;
-            $actualLine[$indexWordToFind]['comparaison']   = $tableOfTheLastTry[$indexWordToFind] . " -> " . $letter;
-            // If the letter is in the word
-            if(preg_match('/'.$tableOfTheLastTry[$indexWordToFind].'/', $wordToFind)){
-                $actualLine[$indexWordToFind]['presence'] = true;
-                // If the letter is well-placed
-                if($tableOfTheLastTry[$indexWordToFind] === $letter) {
-                    $countsOccurrencesPlaced[$tableOfTheLastTry[$indexWordToFind]]--;
-                    $actualLine[$indexWordToFind]['placement'] = true;
-                    $validLetters++;
-                } else {
-                    $actualLine[$indexWordToFind]['placement'] = false;
-                    // If the total number of this occurrence have been played in the last attempt
-                    // then this occurrence is not considered to be present in the line
-                    if($testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]] < 1){
-                        $actualLine[$indexWordToFind]['presence']  = false;
-                    }
-                    $testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]]--;
+        for($line = 0; $line < $game->getNumberOfRounds(); $line ++){
+            $currentLine = new Line($game);
+            for($column = 0; $column < $game->getLineLength(); $column++){
+                $currentCell = new Cell();
+                $currentCell->setFlagTestee(Cell::FLAG_TEST_FALSE);
+                $currentCell->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
+                $currentCell->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
+                $currentCell->setPosition($column);
+                $currentCell->setLigne($currentLine);
+                if($line == 0 && $column == 0){
+                    $currentCell->setValeur(
+                        substr($game->getWordToFind(), 0, 1)
+                    );
+                }else{
+                    $currentCell->setValeur(".");
                 }
-            } else {
-                $actualLine[$indexWordToFind]['presence']  = false;
-                $actualLine[$indexWordToFind]['placement'] = false;
+                // Add new cell to the current line
+                $this->entityManager->persist($currentCell);
+                $currentLine->addCell($currentCell);
             }
+            // Add new line to the game
+            $currentLine->setPosition($line);
+            $this->entityManager->persist($currentLine);
+            $game->addLine($currentLine);
         }
-        // We remove the presence flag from the misplaced letters whose placement counter is at zero
-        foreach($actualLine as $index => $letter){
-            if(
-                ($letter['placement'] == false && $letter['presence'] == true) &&
-                $countsOccurrencesPlaced[$letter['valeur']] < 1
-            )
-            {
-                $actualLine[$index]['presence']  = false;
-            }
-        }
-        return [
-            'actual_line' => $actualLine,
-            'valid_letters' => $validLetters
-        ];
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
+        return $game;
     }
-
-    /**
-     * Update the keyboard displayed in game
-     *
-     * @param $idGame
-     * @return array
-     */
-    public function updateKeyboardKeys($idGame): array
-    {
-        //-- Update of the keyboard keys
-        $cellRepository = $this->entityManager->getRepository(Cell::class);
-        // Update letters placed
-        $majKeyboardPlaced = null;
-        if($cellRepository instanceof CellRepository){
-            $majKeyboardPlaced = $cellRepository->getPlaced($idGame);
-        }
-        $arrayMajKeyboard = [];
-        if(is_array($majKeyboardPlaced)){
-            foreach ($majKeyboardPlaced as $cell){
-                $arrayMajKeyboard[$cell->getValeur()]['placement'] = $cell->getFlagPlacee();
-                $arrayMajKeyboard[$cell->getValeur()]['presence']  = $cell->getFlagPresente();
-                $arrayMajKeyboard[$cell->getValeur()]['test']      = $cell->getFlagTestee();
-            }
-        }
-        // Update of missing letters
-        $majKeyboardNotPresent = $cellRepository->getNotPresent($idGame);
-        $arrayMajKeyboard = $this->arrayMajKeyboard(
-            $cellRepository,
-            $idGame,
-            $arrayMajKeyboard,
-            $majKeyboardNotPresent
-        );
-        // Update letters present and not placed
-        $majKeyboardPresentAndNotPlaced = $cellRepository->getPresentAndNotPlaced($idGame);
-        return $this->arrayMajKeyboard(
-            $cellRepository,
-            $idGame,
-            $arrayMajKeyboard,
-            $majKeyboardPresentAndNotPlaced
-        );
-    }
-
 }
