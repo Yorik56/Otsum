@@ -6,7 +6,6 @@ use App\Entity\Cell;
 use App\Entity\Game;
 use App\Entity\Line;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Entity;
 use JetBrains\PhpStorm\ArrayShape;
 
 class GameManagerService
@@ -45,11 +44,9 @@ class GameManagerService
     ])]
     public function updateLine(int $idGame, int $numberOfTry, string $lastTry): array
     {
-        //Game in progress
+        //-- Parameters
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
         $wordToFind = trim($game->getWordToFind());
-        // Counting in the word to be found,
-        // the number of existing occurrences of each letter
         $wordSearchArray = str_split($wordToFind);
         $countsOccurrencesPlaced = $this->gameManagerLineService->countOccurrencesPlaced($wordSearchArray, $wordToFind);
         //-- Update of the current line
@@ -61,10 +58,8 @@ class GameManagerService
             $wordToFind
         );
         $validLetters = $actualLine['valid_letters'];
-        // Save the new line in database
         $this->gameManagerLineService->persistNewLineInDatabase($actualLine['actual_line'], $game);
         $this->gameManagerLineService->persistCurrentLineNumber($game, $numberOfTry);
-        // Update keyboard keys
         $arrayMajKeyboard = $this->gameManagerKeyboardService->updateKeyboardKeys($idGame);
         // Set victory variable
         ($validLetters == count($wordSearchArray))?$victory = true:$victory = false;
