@@ -2,88 +2,57 @@
     //--- EVENTS MERCURE ---//
     // Si l'utilisateur est connecté
     {% if app.user %}
-    //--- TOPICS INSCRIPTIONS ---//
-    // Url mercure server
-    const url = new URL('http://localhost:3000/.well-known/mercure')
-    // Topic joining private game
-    url.searchParams.append('topic', '/joiningPrivateGame/' + {{ idGame }})
-    url.searchParams.append('topic', '/checkPresenceOfAllPlayers/' + {{ idGame }})
-    url.searchParams.append('topic', '/startChrono/' + {{ idGame }})
-    url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }} + '/' + {{ app.user.id }})
-    url.searchParams.append('topic', '/restartRound/' + {{ idGame }})
-    url.searchParams.append('topic', '/displayNewLine/' + {{ idGame }})
-    url.searchParams.append('topic', '/currentKey/' + {{ idGame }})
+        //--- TOPICS INSCRIPTIONS ---//
+        // Url mercure server
+        const url = new URL('http://localhost:3000/.well-known/mercure')
+        // Topic joining private game
+        url.searchParams.append('topic', '/joiningPrivateGame/' + {{ idGame }})
+        url.searchParams.append('topic', '/checkPresenceOfAllPlayers/' + {{ idGame }})
+        url.searchParams.append('topic', '/startChrono/' + {{ idGame }})
+        url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }} + '/' + {{ app.user.id }})
+        url.searchParams.append('topic', '/restartRound/' + {{ idGame }})
+        url.searchParams.append('topic', '/displayNewLine/' + {{ idGame }})
+        url.searchParams.append('topic', '/currentKey/' + {{ idGame }})
 
-    //--- LISTENING FOR MERCURE EVENTS ---//
-    const eventSource = new EventSource(url)
-    eventSource.onmessage = (e) => {
-        // joining private game
-        if (JSON.parse(e.data).topic === '/joiningPrivateGame/' + {{ idGame }}) {
-            let idPlayer = JSON.parse(e.data).idPlayer;
-            let userAvatarBox = $(`[data-idUser='${idPlayer}']`).find('.avatarBox');
-            if (userAvatarBox.hasClass('absent')) {
-                userAvatarBox.removeClass('absent');
-                userAvatarBox.find('.absent').remove();
+        //--- LISTENING FOR MERCURE EVENTS ---//
+        const eventSource = new EventSource(url)
+        eventSource.onmessage = (e) => {
+            // joining private game
+            if (JSON.parse(e.data).topic === '/joiningPrivateGame/' + {{ idGame }}) {
+                let idPlayer = JSON.parse(e.data).idPlayer;
+                let userAvatarBox = $(`[data-idUser='${idPlayer}']`).find('.avatarBox');
+                if (userAvatarBox.hasClass('absent')) {
+                    userAvatarBox.removeClass('absent');
+                    userAvatarBox.find('.absent').remove();
+                }
             }
-        }
-        // checking the presence of all the players
-        if (JSON.parse(e.data).topic === '/checkPresenceOfAllPlayers/' + {{ idGame }}) {
-            creationDeLaGrille("{{ firstLetter }}", {{ difficulty }});
-        }
-        // start chrono
-        if (JSON.parse(e.data).topic === '/startChrono/' + {{ idGame }}) {
-            simplyCountDownStart(
-                JSON.parse(e.data).arrayChrono,
-                JSON.parse(e.data).currentPlayer
-            );
-        }
-        // retrieve chrono
-        if (JSON.parse(e.data).topic === '/retrieveChrono/'+ {{ idGame }} + '/' + {{ app.user.id }}) {
-            simplyCountDownStart(
-                JSON.parse(e.data).arrayChrono,
-                JSON.parse(e.data).currentPlayer
-            );
-        }
-        // restart round
-        if (JSON.parse(e.data).topic === '/restartRound/' + {{ idGame }}) {
-            displayActualGrid();
-            if(JSON.parse(e.data).actualTeam){
-                $('.currentTeam').removeClass('currentTeam');
-                $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
+            // checking the presence of all the players
+            if (JSON.parse(e.data).topic === '/checkPresenceOfAllPlayers/' + {{ idGame }}) {
+                creationDeLaGrille("{{ firstLetter }}", {{ difficulty }});
             }
-            if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
-                console.log("startChrono");
-                // Start chrono
-                $.ajax({
-                    method: "POST",
-                    url: "{{ path('startChrono') }}",
-                    data: {
-                        idGame: {{ idGame }},
-                        restart: true
-                    }
-                })
-                .done(function () {
-                    // Création du clavier
-                    $('#div_keyboard #keyboard').jkeyboard({
-                        input: $('#search_field'),
-                        layout: 'azerty',
-                    });
-                    console.log("newKeyboard 2nd");
-                });
-            } else {
-                $('#div_keyboard').empty();
-                $('#div_keyboard').append("<div id='keyboard'></div");
+            // start chrono
+            if (JSON.parse(e.data).topic === '/startChrono/' + {{ idGame }}) {
+                simplyCountDownStart(
+                    JSON.parse(e.data).arrayChrono,
+                    JSON.parse(e.data).currentPlayer
+                );
             }
-        }
-
-        // display new line
-        if (JSON.parse(e.data).topic === '/displayNewLine/' + {{ idGame }}) {
-            if(JSON.parse(e.data).actualTeam){
-                $('.currentTeam').removeClass('currentTeam');
-                $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
+            // retrieve chrono
+            if (JSON.parse(e.data).topic === '/retrieveChrono/'+ {{ idGame }} + '/' + {{ app.user.id }}) {
+                simplyCountDownStart(
+                    JSON.parse(e.data).arrayChrono,
+                    JSON.parse(e.data).currentPlayer
+                );
             }
-            if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
-                if(JSON.parse(e.data).chronoType === true){
+            // restart round
+            if (JSON.parse(e.data).topic === '/restartRound/' + {{ idGame }}) {
+                displayActualGrid();
+                if(JSON.parse(e.data).actualTeam){
+                    $('.currentTeam').removeClass('currentTeam');
+                    $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
+                }
+                if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
+                    console.log("startChrono");
                     // Start chrono
                     $.ajax({
                         method: "POST",
@@ -93,56 +62,86 @@
                             restart: true
                         }
                     })
+                    .done(function () {
+                        // Création du clavier
+                        $('#div_keyboard #keyboard').jkeyboard({
+                            input: $('#search_field'),
+                            layout: 'azerty',
+                        });
+                        console.log("newKeyboard 2nd");
+                    });
+                } else {
+                    $('#div_keyboard').empty();
+                    $('#div_keyboard').append("<div id='keyboard'></div");
                 }
-                // Création du clavier
-                $('#div_keyboard #keyboard').jkeyboard({
-                    input: $('#search_field'),
-                    layout: 'azerty',
-                });
-            } else {
-                $('#div_keyboard').empty();
-                $('#div_keyboard').append("<div id='keyboard'></div");
             }
-            // displayActualGrid();
-            displayActualGrid();
-        }
-        // display currentKey
-        if (JSON.parse(e.data).topic === '/currentKey/' + {{ idGame }}) {
-            if(
-                JSON.parse(e.data).actualPlayer !== {{ app.user.id }} &&
-                JSON.parse(e.data).currentKey &&
-                JSON.parse(e.data).currentKey !== "enter"
-            ){
-                let current_cell = $('.current_cell').first();
-                let last_cell = $('.last_cell').first();
-                if(JSON.parse(e.data).currentKey === "backspace"){
-                    // console.log(current_cell.closest(".table"));
-                    if(current_cell.closest(".table").length > 0){
-                        if(!current_cell.prev().hasClass('first_cell')){
-                            current_cell.prev().addClass('current_cell').html("<div>_</div>");
-                            current_cell.removeClass('current_cell').html("<div>.</div>");
+
+            // display new line
+            if (JSON.parse(e.data).topic === '/displayNewLine/' + {{ idGame }}) {
+                if(JSON.parse(e.data).actualTeam){
+                    $('.currentTeam').removeClass('currentTeam');
+                    $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
+                }
+                if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
+                    if(JSON.parse(e.data).chronoType === true){
+                        // Start chrono
+                        $.ajax({
+                            method: "POST",
+                            url: "{{ path('startChrono') }}",
+                            data: {
+                                idGame: {{ idGame }},
+                                restart: true
+                            }
+                        })
+                    }
+                    // Création du clavier
+                    $('#div_keyboard #keyboard').jkeyboard({
+                        input: $('#search_field'),
+                        layout: 'azerty',
+                    });
+                } else {
+                    $('#div_keyboard').empty();
+                    $('#div_keyboard').append("<div id='keyboard'></div");
+                }
+                displayActualGrid();
+            }
+            // display currentKey
+            if (JSON.parse(e.data).topic === '/currentKey/' + {{ idGame }}) {
+                if(
+                    JSON.parse(e.data).actualPlayer !== {{ app.user.id }} &&
+                    JSON.parse(e.data).currentKey &&
+                    JSON.parse(e.data).currentKey !== "enter"
+                ){
+                    let current_cell = $('.current_cell').first();
+                    let last_cell = $('.last_cell').first();
+                    if(JSON.parse(e.data).currentKey === "backspace"){
+                        // console.log(current_cell.closest(".table"));
+                        if(current_cell.closest(".table").length > 0){
+                            if(!current_cell.prev().hasClass('first_cell')){
+                                current_cell.prev().addClass('current_cell').html("<div>_</div>");
+                                current_cell.removeClass('current_cell').html("<div>.</div>");
+                            }
+                        } else {
+                            last_cell.prev().addClass('current_cell').html("<div>_</div>");
+                            last_cell.html("<div>.</div>");
                         }
                     } else {
-                        last_cell.prev().addClass('current_cell').html("<div>_</div>");
-                        last_cell.html("<div>.</div>");
+                        current_cell.html("<div>" + JSON.parse(e.data).currentKey + "</div>")
+                        if(!current_cell.hasClass('last_cell')){
+                            current_cell.next().addClass('current_cell').html("<div>_</div>");
+                        }
+                        current_cell.toggleClass('current_cell');
                     }
-                } else {
-                    current_cell.html("<div>" + JSON.parse(e.data).currentKey + "</div>")
-                    if(!current_cell.hasClass('last_cell')){
-                        current_cell.next().addClass('current_cell').html("<div>_</div>");
-                    }
-                    current_cell.toggleClass('current_cell');
                 }
             }
+
         }
 
-    }
-
-    //-- Before unload:  Unsubscribe mercure topics
-    window.addEventListener('beforeunload', function () {
-        if (eventSource != null) {
-            eventSource.close()
-        }
-    })
+        //-- Before unload:  Unsubscribe mercure topics
+        window.addEventListener('beforeunload', function () {
+            if (eventSource != null) {
+                eventSource.close()
+            }
+        })
     {% endif %}
 </script>
