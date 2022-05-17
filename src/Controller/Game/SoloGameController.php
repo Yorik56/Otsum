@@ -2,6 +2,8 @@
 
 namespace App\Controller\Game;
 
+use App\Service\GameManagerService;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\{Game, User};
 use App\Form\DropOutFormType;
 use App\Service\Utils;
@@ -11,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SoloGameController extends GameController
 {
+
     /**
      * - Generate a word
      * - Create a player
@@ -38,6 +41,8 @@ class SoloGameController extends GameController
         $game->setNumberOfRoundsPlayed(1);
         $this->entityManager->persist($game);
         $this->entityManager->flush();
+
+        $game = $this->gameManagerService->fillGridWithInitialValues($game);
 
         // Send the first letter
         return new JsonResponse([
@@ -98,12 +103,13 @@ class SoloGameController extends GameController
             $request->request->get('mot')
         );
         // If you made it to the last round and the word was not found
-        if(
-            $game->getNumberOfRounds() == $game->getNumberOfRoundsPlayed() &&
-            $lineUpdated['victory'] == false
-        )
-        {
+        if(trim($request->request->get('mot')) === $game->getWordToFind() ){
+            $lineUpdated['victory'] = true;
+        } else if ($game->getNumberOfRounds() == $game->getNumberOfRoundsPlayed()) {
+            $lineUpdated['victory'] = false;
             $lineUpdated['wordToFind'] = $game->getWordToFind();
+        }else{
+            $lineUpdated['victory'] = null;
         }
         return new JsonResponse($lineUpdated);
     }
