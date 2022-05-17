@@ -2,7 +2,6 @@
 
 namespace App\Controller\Game;
 
-use App\Service\GameManagerKeyboardService;
 use App\Service\GameManagerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
