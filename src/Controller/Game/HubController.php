@@ -17,7 +17,6 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatableMessage;
 
 class HubController extends AbstractController
 {
@@ -387,7 +386,7 @@ class HubController extends AbstractController
     }
 
     #[Route('/inviteUser', name: 'inviteUser')]
-    function inviteUser(HubInterface $hub, Request $request)
+    function inviteUser(HubInterface $hub, Request $request): JsonResponse
     {
         $idUser = $request->request->get('id_user');
         $idGame = $request->request->get('idGame');
