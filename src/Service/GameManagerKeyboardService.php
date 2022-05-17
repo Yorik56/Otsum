@@ -26,7 +26,9 @@ class GameManagerKeyboardService
      * @return array
      */
     public function arrayMajKeyboard(
-        ObjectRepository $cellRepository, int $idGame, array $arrayMajKeyboard, array $majKeyboardArrayCell
+        ObjectRepository $cellRepository,
+        int $idGame, array $arrayMajKeyboard,
+        array $majKeyboardArrayCell
     ): array
     {
         foreach ($majKeyboardArrayCell as $cell) {

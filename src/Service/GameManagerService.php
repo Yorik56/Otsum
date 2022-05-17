@@ -6,6 +6,7 @@ use App\Entity\Cell;
 use App\Entity\Game;
 use App\Entity\Line;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Entity;
 use JetBrains\PhpStorm\ArrayShape;
 
 class GameManagerService
@@ -28,6 +29,11 @@ class GameManagerService
     /**
      * Get the state of last played line ine game,
      * then we update it and return it with other information about the game
+     *
+     * @param int $idGame
+     * @param int $numberOfTry
+     * @param string $lastTry
+     * @return array
      */
     #[ArrayShape([
         "wordToFind" => "array",
@@ -73,11 +79,14 @@ class GameManagerService
         ];
     }
 
-    /*
+    /**
      * This function creates initial lines and cells of the grid
      * and fill them with initial values
+     *
+     * @param Game $game
+     * @return Game
      */
-    public function fillGridWithInitialValues($game)
+    public function fillGridWithInitialValues(Game $game): Game
     {
         for($line = 0; $line < $game->getNumberOfRounds(); $line ++){
             $currentLine = new Line($game);
@@ -106,6 +115,7 @@ class GameManagerService
         }
         $this->entityManager->persist($game);
         $this->entityManager->flush();
+
         return $game;
     }
 }
