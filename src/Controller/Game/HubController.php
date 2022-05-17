@@ -5,6 +5,7 @@ namespace App\Controller\Game;
 use App\Form\ChronoType;
 use App\Form\LaunchGameType;
 use App\Form\VersusType;
+use App\Service\GameManagerService;
 use App\Entity\{Cell, Game, InGamePlayerStatus, InvitationToPlay, Line, Team, User};
 use App\Form\TeamType;
 use App\Service\Utils;
@@ -22,13 +23,19 @@ class HubController extends AbstractController
 {
     private Utils $utils;
     private EntityManagerInterface $entityManager;
+    private GameManagerService $gameManagerService;
     private HubInterface $hub;
     private CacheManager $cacheManager;
 
-    public function __construct(CacheManager $cacheManager, HubInterface $hub, Utils $utils, EntityManagerInterface $entityManager)
+    public function __construct(
+        CacheManager $cacheManager, HubInterface $hub,
+        Utils $utils, EntityManagerInterface $entityManager,
+        GameManagerService $gameManagerService
+    )
     {
         $this->utils = $utils;
         $this->entityManager = $entityManager;
+        $this->gameManagerService = $gameManagerService;
         $this->hub = $hub;
         $this->cacheManager = $cacheManager;
     }
@@ -46,7 +53,7 @@ class HubController extends AbstractController
         $game->setWordToFind($this->utils->getRandomWord($wordLength));
         $game->setLineSessionTime(50);
         $game->setLineLength($wordLength);
-        $game = $this->fillGridWithInitialValues($game);
+        $game = $this->gameManagerService->fillGridWithInitialValues($game);
         $game->setFlagTypeOfGame(Game::PRIVATE_MULTPLAYER_GAME);
         $game->setHost($this->getUser());
         $this->entityManager->persist($game);
@@ -65,42 +72,6 @@ class HubController extends AbstractController
         $this->entityManager->flush();
         // Redirection to the Hub
         return $this->redirectToRoute('hubPrive', ['idGame' => $idGame], 301);
-    }
-
-    /*
-     * This function creates initial lines and cells of the grid
-     * and fill them with initial values
-     */
-    public function fillGridWithInitialValues($game)
-    {
-        for($line = 0; $line < $game->getNumberOfRounds(); $line ++){
-            $currentLine = new Line($game);
-            for($column = 0; $column < $game->getLineLength(); $column++){
-                $currentCell = new Cell();
-                $currentCell->setFlagTestee(Cell::FLAG_TEST_FALSE);
-                $currentCell->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
-                $currentCell->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
-                $currentCell->setPosition($column);
-                $currentCell->setLigne($currentLine);
-                if($line == 0 && $column == 0){
-                    $currentCell->setValeur(
-                        substr($game->getWordToFind(), 0, 1)
-                    );
-                }else{
-                    $currentCell->setValeur(".");
-                }
-                // Add new cell to the current line
-                $this->entityManager->persist($currentCell);
-                $currentLine->addCell($currentCell);
-            }
-            // Add new line to the game
-            $currentLine->setPosition($line);
-            $this->entityManager->persist($currentLine);
-            $game->addLine($currentLine);
-        }
-        $this->entityManager->persist($game);
-        $this->entityManager->flush();
-        return $game;
     }
 
     /**

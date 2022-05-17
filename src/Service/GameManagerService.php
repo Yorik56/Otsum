@@ -70,6 +70,42 @@ class GameManagerService
         return $countsOccurrencesPlaced;
     }
 
+    /*
+     * This function creates initial lines and cells of the grid
+     * and fill them with initial values
+     */
+    public function fillGridWithInitialValues($game)
+    {
+        for($line = 0; $line < $game->getNumberOfRounds(); $line ++){
+            $currentLine = new Line($game);
+            for($column = 0; $column < $game->getLineLength(); $column++){
+                $currentCell = new Cell();
+                $currentCell->setFlagTestee(Cell::FLAG_TEST_FALSE);
+                $currentCell->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
+                $currentCell->setFlagPlacee(Cell::FLAG_PLACEMENT_FALSE);
+                $currentCell->setPosition($column);
+                $currentCell->setLigne($currentLine);
+                if($line == 0 && $column == 0){
+                    $currentCell->setValeur(
+                        substr($game->getWordToFind(), 0, 1)
+                    );
+                }else{
+                    $currentCell->setValeur(".");
+                }
+                // Add new cell to the current line
+                $this->entityManager->persist($currentCell);
+                $currentLine->addCell($currentCell);
+            }
+            // Add new line to the game
+            $currentLine->setPosition($line);
+            $this->entityManager->persist($currentLine);
+            $game->addLine($currentLine);
+        }
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
+        return $game;
+    }
+
     /**
      * Persist the new number of lines played in this game
      *
@@ -96,6 +132,7 @@ class GameManagerService
             'game'     => $game->getId(),
             'position' => $game->getNumberOfRoundsPlayed()
         ]);
+        $this->entityManager->persist($line);
         // Update of letters
         foreach ($actualLine as $index => $letter){
             $cell = $this->entityManager->getRepository(Cell::class)->findOneBy([
