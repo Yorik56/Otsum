@@ -2,6 +2,7 @@
 
 namespace App\Listener;
 
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -10,7 +11,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 class ActivityListener
 {
     private TokenStorageInterface $tokenStorage;
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager)
     {
@@ -28,11 +29,11 @@ class ActivityListener
         // Get the user object from the tokenStorageInterface
         $token = $this->getTokenStorageInterface();
         $user = $token?->getUser();
-        if($user){
+        if($user instanceof User){
             $user->setLastActivityAt(new \DateTime());
             $this->entityManager->persist($user);
-            $this->entityManager->flush();
         }
+        $this->entityManager->flush();
     }
 
     /**
