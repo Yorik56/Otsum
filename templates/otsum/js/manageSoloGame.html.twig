@@ -8,12 +8,12 @@
             layout: 'azerty',
         });
 
+        {# //---*   EVENTS   *---// #}
         let numberOfKeysPressed = 0;
-
         // User keyboard events
         $('body').on("keydown", function(e){
             numberOfKeysPressed++;
-            if(numberOfKeysPressed < 2 || e.key.toLowerCase() === "backspace"){
+            if(numberOfKeysPressed < 2){
                 if(e.key.toLowerCase() === "backspace"){
                     $(".backspace").trigger("click");
                 } else if (e.key.toLowerCase() === "enter"){
@@ -31,7 +31,6 @@
             $('.current_cell').removeClass("notReady");
             numberOfKeysPressed = 0;
         });
-
         // Variables de la grille de jeu
         let idGame;
         let difficulty;
@@ -158,6 +157,14 @@
                             //-- Repérage de la dernière lettre
                             $('.line_' + currentLineNumber + ".cell_" + ((difficulty * currentLineNumber) + difficulty))
                                 .addClass('last_cell')
+
+                            if (data.victory === false) {
+                                alert('perdu !!');
+                                $('.return').remove();
+                                $('#div_keyboard').empty();
+                                $('#div_keyboard').append("<div id='keyboard'></div");
+
+                            }
                         }
 
                         //-- Mise à jour du clavier
