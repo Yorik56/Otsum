@@ -78,10 +78,8 @@
 
             // display new line
             if (JSON.parse(e.data).topic === '/displayNewLine/' + {{ idGame }}) {
-                if(JSON.parse(e.data).actualTeam){
-                    $('.currentTeam').removeClass('currentTeam');
-                    $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
-                }
+                $('.currentTeam').removeClass('currentTeam');
+                $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
                 if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
                     if(JSON.parse(e.data).chronoType === true){
                         // Start chrono
@@ -94,14 +92,26 @@
                             }
                         })
                     }
-                    // Création du clavier
-                    $('#div_keyboard #keyboard').jkeyboard({
-                        input: $('#search_field'),
-                        layout: 'azerty',
-                    });
+                    if (JSON.parse(e.data).lineUpdated.victory === true) {
+                        alert('perdu !!');
+                        $('#div_keyboard').empty();
+                        $('#div_keyboard').append("<div id='keyboard'></div");
+                        $('.currentTeam').addClass('end');
+
+                    } else {
+                        // Création du clavier
+                        $('#div_keyboard #keyboard').jkeyboard({
+                            input: $('#search_field'),
+                            layout: 'azerty',
+                        });
+                    }
                 } else {
                     $('#div_keyboard').empty();
                     $('#div_keyboard').append("<div id='keyboard'></div");
+                    if (JSON.parse(e.data).lineUpdated.victory === true) {
+                        alert('gagné !!');
+                        $('.currentTeam').addClass('end');
+                    }
                 }
                 displayActualGrid();
             }
