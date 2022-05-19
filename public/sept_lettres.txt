@@ -8908,6 +8908,7 @@ liseron
 liseurs
 liseuse
 lisible
+lisiere
 lisiers
 lisions
 lissage
