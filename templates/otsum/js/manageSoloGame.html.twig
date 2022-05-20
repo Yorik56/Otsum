@@ -1,14 +1,22 @@
 <script>
     $(document).ready(function () {
-        // --- GESTION DU JEU ---//
+        {# //---*   GAME MANAGEMENT   *---// #}
 
-        // Création du clavier
+        // Init keyboard
         $('#keyboard').jkeyboard({
             input: $('#search_field'),
             layout: 'azerty',
         });
+        // Variables de la grille de jeu
+        let idGame;
+        let difficulty;
+        let currentLineNumber = 0;
+        let numberOfLines = 6;
+        let cellNumber = 1;
+        initGame();
 
         {# //---*   EVENTS   *---// #}
+
         let numberOfKeysPressed = 0;
         // User keyboard events
         $('body').on("keydown", function(e){
@@ -27,34 +35,84 @@
                 }
             }
         });
+
         $('body').on("keyup", function(e){
             $('.current_cell').removeClass("notReady");
             numberOfKeysPressed = 0;
         });
-        // Variables de la grille de jeu
-        let idGame;
-        let difficulty;
-        let currentLineNumber = 0;
-        let numberOfLines = 6;
-        let cellNumber = 1;
-        init_partie();
 
-        // Création de la partie
-        function init_partie() {
-            $.ajax({
-                method: "POST",
-                url: "{{ path('createGame') }}",
-                success: function (reponse) {
-                    idGame = reponse["idGame"];
-                    difficulty = reponse["difficulty"];
-                    creationDeLaGrille(reponse["firstLetter"], difficulty);
-                    $('#drop_out_form_gameId').val(idGame);
+        // Validation de l'essai / MAJ de la ligne
+        $('.return').on("click", function () {
+            let mot_valide = true;
+            let mot = ""
+            let currentLineNumber = $('.current_line_number').val();
+            $(".line_" + currentLineNumber).each(function (index) {
+                mot += $(this).text();
+                if ($(this).text() === "." || $(this).text() === "_") {
+                    mot_valide = false;
+                    return false;
                 }
+                if (index === difficulty - 1) {
+                    return false;
+                }
+            });
+            checkWordExistence(mot).then(function(data) {
+                // Run this when your request was successful
+                if(data === false){
+                    mot_valide = false;
+                    $('.line_' + currentLineNumber).each(function (index) {
+                        let numero = (index + 1) + (difficulty * currentLineNumber);
+                        if (index === 0) {
+                            // Affichage de la première lettre
+                            $('.line_' + currentLineNumber + ".cell_" + numero)
+                                .addClass('valide_cell first_cell')
+                                .html("<div>" + mot.split("")[0] + "</div>");
+                        } else if (index === 1) {
+                            // Placement du curseur
+                            $('.line_' + currentLineNumber + ".cell_" + numero)
+                                .addClass('current_cell')
+                                .html("<div>_</div>");
+                        } else {
+                            $('.line_' + currentLineNumber + ".cell_" + numero).html("<div>.</div>");
+                        }
+                    })
+                }
+                if (!mot_valide) {
+                    $('.current_cell').addClass("notReady");
+                } else {
+                    $('.last_cell').toggleClass('last_cell');
+                    updateLine(currentLineNumber, mot, idGame);
+                }
+            }).catch(function(err) {
+                // Run this when promise was rejected via reject()
+                console.log(err)
+            });
+        });
+
+        {# //---*   FUNCTIONS   *---// #}
+
+        // Check word existence
+        function checkWordExistence(mot) {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('checkWordExistence') }}",
+                    data: {
+                        mot: mot
+                    },
+                    success: function(data) {
+                        resolve(data) // Resolve promise and go to then()
+                    },
+                    error: function(err) {
+                        reject(err) // Reject the promise and go to catch()
+                    }
+                });
             });
         }
 
-        // Affichage de la partie
-        function creationDeLaGrille(mot, difficulty) {
+        // Displaying the grid
+        function gridCreation(mot, difficulty) {
+            $('.current_line_number').val(currentLineNumber);
             let box = $('.table');
             let box_line;
             $('.wordToFind').append(mot);
@@ -80,123 +138,122 @@
             }
         }
 
-        // Validation de l'essai / MAJ de la ligne
-        $('.return').on("click", function () {
-            let mot_valide = true;
-            let mot = "";
-            $(".line_" + currentLineNumber).each(function (index) {
-                mot += $(this).text();
-                if ($(this).text() === "." || $(this).text() === "_") {
-                    mot_valide = false;
-                    return false;
-                }
-                if (index === difficulty - 1) {
-                    return false;
+        // init game
+        function initGame() {
+            $.ajax({
+                method: "POST",
+                url: "{{ path('createGame') }}",
+                success: function (reponse) {
+                    idGame = reponse["idGame"];
+                    difficulty = reponse["difficulty"];
+                    gridCreation(reponse["firstLetter"], difficulty);
+                    $('#drop_out_form_gameId').val(idGame);
                 }
             });
-            if (!mot_valide) {
-                $('.current_cell').addClass("notReady");
-            } else {
-                $('.last_cell').toggleClass('last_cell');
-                $.ajax({
-                    method: "POST",
-                    url: "{{ path('updateLine') }}",
-                    data: {
-                        currentLineNumber: currentLineNumber,
-                        mot: mot,
-                        idGame: idGame
-                    },
-                    success: function (data) {
-                        console.log(data)
-                        currentLineNumber = data.numberOfLines;
-                        let numero_cellule = 1;
-                        // MAJ de la ligne précédente
-                        data.previous_line.forEach(function (lettre, index) {
-                            let cellule;
-                            if (currentLineNumber - 1 === 0) {
-                                cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (index + 1));
+        }
+
+        function majKeyboard(array_maj_keyboard){
+            //-- Mise à jour du clavier
+            // parcours des lettres du clavier
+            $('.jkey.letter').each(function (index, element) {
+                let letter = element.childNodes[0].data;
+                // parcours des lettres mises à jour
+                array_maj_keyboard.forEach(([key, value]) => {
+                    if (letter === key) {
+                        //Raz des classes
+                        element.classList.remove('placee')
+                        element.classList.remove('presente')
+                        element.classList.remove('absente')
+                        if (value.presence) {
+                            if (value.placement) {
+                                // position trouvée
+                                element.classList.add('placee')
                             } else {
-                                cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (((currentLineNumber - 1) * difficulty) + numero_cellule));
+                                // position non trouvée
+                                element.classList.add('presente')
                             }
-                            setTimeout(function () {
-                                if (lettre.placement === true && lettre.presence === true) {
-                                    if (!cellule.hasClass("valide_cell")) {
-                                        cellule.addClass("valide_cell")
-                                    }
-                                } else if (lettre.presence === true) {
-                                    if (!cellule.hasClass("is_in_cell")) {
-                                        cellule.html("<div><p>" + lettre.valeur + "</p></div>")
-                                        cellule.addClass("is_in_cell")
-                                    }
-                                }
-                            }, 300);
-                            numero_cellule++;
-                        })
-                        //-- Préparation de la nouvelle ligne
-                        if (data.victory === true) {
-                            alert('gagné !!');
-                            $('.return').remove();
-
                         } else {
-                            $('.line_' + currentLineNumber).each(function (index) {
-                                let numero = (index + 1) + (difficulty * currentLineNumber);
-                                if (index === 0) {
-                                    // Affichage de la première lettre
-                                    $('.line_' + currentLineNumber + ".cell_" + numero)
-                                        .addClass('valide_cell first_cell')
-                                        .html("<div>" + data.previous_line[0].valeur + "</div>");
-                                } else if (index === 1) {
-                                    // Placement du curseur
-                                    $('.line_' + currentLineNumber + ".cell_" + numero)
-                                        .addClass('current_cell')
-                                        .html("<div>_</div>");
-                                } else {
-                                    $('.line_' + currentLineNumber + ".cell_" + numero).html("<div>.</div>");
-                                }
-                            })
-                            //-- Repérage de la dernière lettre
-                            $('.line_' + currentLineNumber + ".cell_" + ((difficulty * currentLineNumber) + difficulty))
-                                .addClass('last_cell')
-
-                            if (data.victory === false) {
-                                alert('perdu !!');
-                                $('.return').remove();
-                                $('#div_keyboard').empty();
-                                $('#div_keyboard').append("<div id='keyboard'></div");
-
-                            }
+                            // lettre absente
+                            element.classList.add('absente')
                         }
-
-                        //-- Mise à jour du clavier
-                        // parcours des lettres du clavier
-                        $('.jkey.letter').each(function (index, element) {
-                            let letter = element.childNodes[0].data;
-                            let array_maj_keyboard = Object.entries(data.arrayMajKeyboard);
-                            // parcours des lettres mises à jour
-                            array_maj_keyboard.forEach(([key, value]) => {
-                                if (letter === key) {
-                                    //Raz des classes
-                                    element.classList.remove('placee')
-                                    element.classList.remove('presente')
-                                    element.classList.remove('absente')
-                                    if (value.presence) {
-                                        if (value.placement) {
-                                            // position trouvée
-                                            element.classList.add('placee')
-                                        } else {
-                                            // position non trouvée
-                                            element.classList.add('presente')
-                                        }
-                                    } else {
-                                        // lettre absente
-                                        element.classList.add('absente')
-                                    }
-                                }
-                            })
-                        })
                     }
-                });
-            }
-        });
+                })
+            })
+        }
+
+        function updateLine(currentLineNumber, mot, idGame){
+            $.ajax({
+                method: "POST",
+                url: "{{ path('updateLine') }}",
+                data: {
+                    currentLineNumber: currentLineNumber,
+                    mot: mot,
+                    idGame: idGame
+                },
+                success: function (data) {
+                    console.log(data)
+                    currentLineNumber = data.numberOfLines;
+                    $('.current_line_number').val(currentLineNumber);
+                    let numero_cellule = 1;
+                    // MAJ de la ligne précédente
+                    data.previous_line.forEach(function (lettre, index) {
+                        let cellule;
+                        if (currentLineNumber - 1 === 0) {
+                            cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (index + 1));
+                        } else {
+                            cellule = $('.line_' + (currentLineNumber - 1) + ".cell_" + (((currentLineNumber - 1) * difficulty) + numero_cellule));
+                        }
+                        setTimeout(function () {
+                            if (lettre.placement === true && lettre.presence === true) {
+                                if (!cellule.hasClass("valide_cell")) {
+                                    cellule.addClass("valide_cell")
+                                }
+                            } else if (lettre.presence === true) {
+                                if (!cellule.hasClass("is_in_cell")) {
+                                    cellule.html("<div><p>" + lettre.valeur + "</p></div>")
+                                    cellule.addClass("is_in_cell")
+                                }
+                            }
+                        }, 300);
+                        numero_cellule++;
+                    })
+                    //-- Préparation de la nouvelle ligne
+                    if (data.victory === true) {
+                        alert('gagné !!');
+                        $('.return').remove();
+
+                    } else {
+                        $('.line_' + currentLineNumber).each(function (index) {
+                            let numero = (index + 1) + (difficulty * currentLineNumber);
+                            if (index === 0) {
+                                // Affichage de la première lettre
+                                $('.line_' + currentLineNumber + ".cell_" + numero)
+                                    .addClass('valide_cell first_cell')
+                                    .html("<div>" + data.previous_line[0].valeur + "</div>");
+                            } else if (index === 1) {
+                                // Placement du curseur
+                                $('.line_' + currentLineNumber + ".cell_" + numero)
+                                    .addClass('current_cell')
+                                    .html("<div>_</div>");
+                            } else {
+                                $('.line_' + currentLineNumber + ".cell_" + numero).html("<div>.</div>");
+                            }
+                        })
+                        //-- Repérage de la dernière lettre
+                        $('.line_' + currentLineNumber + ".cell_" + ((difficulty * currentLineNumber) + difficulty))
+                            .addClass('last_cell')
+
+                        if (data.victory === false) {
+                            alert('perdu !!');
+                            $('.return').remove();
+                            $('#div_keyboard').empty();
+                            $('#div_keyboard').append("<div id='keyboard'></div");
+
+                        }
+                    }
+                    majKeyboard(Object.entries(data.arrayMajKeyboard));
+                }
+            });
+        }
     });
 </script>
