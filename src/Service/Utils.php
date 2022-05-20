@@ -63,6 +63,13 @@ class Utils
 
     }
 
+    /**
+     * Searching for the word in local library,
+     * then if not found searching for the word from an API
+     *
+     * @param string $word
+     * @return bool
+     */
     public function checkWordExistence(string $word): bool
     {
         $wordExists = false;
