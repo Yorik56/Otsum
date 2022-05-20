@@ -13,6 +13,16 @@ class Utils
     private KernelInterface $appKernel;
     private EntityManagerInterface $entityManager;
 
+    private const FILENAMES =  [
+        7  => 'sept_lettres.txt',
+        8  => 'huit_lettres.txt',
+        9  => 'neuf_lettres.txt',
+        10 => 'dix_lettres.txt',
+    ];
+
+    private const VERIFICATION_API_URL = "https://frenchwordsapi.herokuapp.com/api/WordDefinition?idOrName=";
+    private const VERIFICATION_API_VALID_RESPONSE = "WordID";
+
     public function __construct(EntityManagerInterface $entityManager, KernelInterface $appKernel)
     {
         $this->appKernel     = $appKernel;
@@ -25,12 +35,6 @@ class Utils
      * @return void
      */
     function generatesValidList(){
-        $nomsFichiers = [
-            7  => 'sept_lettres.txt',
-            8  => 'huit_lettres.txt',
-            9  => 'neuf_lettres.txt',
-            10 => 'dix_lettres.txt',
-        ];
         $projectDir = $this->appKernel->getProjectDir();
         $file = $projectDir . '/public/liste_francais2.txt';
         $file_arr = file($file);
@@ -46,7 +50,7 @@ class Utils
                 if (preg_match('#^[a-z]*$#',trim( $word, " \n\r\t\v\x00"))){
                     $nombre_de_mots++;
                     /*écriture du mot dans le fichier approprié*/
-                    $random_word = fopen($projectDir.'/public/'.$nomsFichiers[$word_length], "a") or die("Unable to open file!");
+                    $random_word = fopen($projectDir.'/public/'.Utils::FILENAMES[$word_length], "a") or die("Unable to open file!");
                     fwrite($random_word, $word);
                     fclose($random_word);
                 }
@@ -58,6 +62,45 @@ class Utils
         fclose($compteur);
 
     }
+
+    public function checkWordExistence(string $word): bool
+    {
+        $wordExists = false;
+
+        // Count number of letters
+        $numberOfLetters = strlen($word);
+        // Get the words that have this number of letters
+        $fileName = $this->appKernel->getProjectDir() . '\\public\\' .  Utils::FILENAMES[$numberOfLetters];
+
+
+
+        // Is this entry a file or directory?
+        if (is_file($fileName))
+        {
+            // Its a file, yay! Lets get the file's contents
+            $data = file_get_contents($fileName);
+            // Is the str in the local data (case-insensitive search)
+            if(stripos($data, $word)){
+                $wordExists = true;
+            } else {
+                // Is the str in the api
+                $url = Utils::VERIFICATION_API_URL. $word;
+                $curl = curl_init($url);
+                curl_setopt($curl, CURLOPT_URL, $url);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                //for debug only!
+                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                $resp = curl_exec($curl);
+                curl_close($curl);
+                if(isset(json_decode($resp, true)[Utils::VERIFICATION_API_VALID_RESPONSE])){
+                    $wordExists = true;
+                }
+            }
+        }
+        return $wordExists;
+    }
+
 
     /**
      * Return the contact liste of the current user
