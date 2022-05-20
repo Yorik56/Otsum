@@ -64,7 +64,7 @@ class Utils
     }
 
     /**
-     * Searching for the word in local library,
+     * Searching for the word in the local library,
      * then if not found searching for the word from an API
      *
      * @param string $word
