@@ -3,6 +3,7 @@
 namespace App\Controller\Game;
 
 use App\Service\GameManagerService;
+use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Mercure\HubInterface;
@@ -12,15 +13,18 @@ class GameController extends AbstractController
     protected EntityManagerInterface $entityManager;
     protected HubInterface $hub;
     public GameManagerService $gameManagerService;
+    public Utils $utils;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         HubInterface $hub,
-        GameManagerService $gameManagerService
+        GameManagerService $gameManagerService,
+        Utils $utils
     )
     {
         $this->entityManager = $entityManager;
         $this->hub = $hub;
         $this->gameManagerService = $gameManagerService;
+        $this->utils = $utils;
     }
 }
