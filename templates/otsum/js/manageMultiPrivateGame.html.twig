@@ -329,17 +329,11 @@
                 // Run this when your request was successful
                 if (data === false) {
                     mot_valide = false;
-                    $.ajax({
-                        method: "POST",
-                        url: "{{ path('updateLineMultiplayer') }}",
-                        data: {
-                            currentLineNumber    : currentLineNumber,
-                            currentUser          : {{ app.user.id }},
-                            mot                  : mot,
-                            idGame               : {{ idGame }},
-                            lastTriedWordsStatus : {{ constant('App\\Service\\GameManagerLineService::LAST_TRIED_WORDS_STATUS_INVALID') }}
-                        }
-                    });
+                    updateLineMultiplayer(
+                        currentLineNumber, {{ app.user.id }},
+                        mot,{{ idGame }},
+                        {{ constant('App\\Service\\GameManagerLineService::LAST_TRIED_WORDS_STATUS_INVALID') }}
+                    );
                     $('.line_' + currentLineNumber).each(function (index) {
                         let numero = (index + 1) + (difficulty * currentLineNumber);
                         if (index === 0) {
@@ -361,17 +355,11 @@
                     console.log("Mot non valide");
                 } else {
                     $('.last_cell').toggleClass('last_cell');
-                    $.ajax({
-                        method: "POST",
-                        url: "{{ path('updateLineMultiplayer') }}",
-                        data: {
-                            currentLineNumber    : currentLineNumber,
-                            currentUser          : {{ app.user.id }},
-                            mot                  : mot,
-                            idGame               : {{ idGame }},
-                            lastTriedWordsStatus : {{ constant('App\\Service\\GameManagerLineService::LAST_TRIED_WORDS_STATUS_VALID') }}
-                        }
-                    });
+                    updateLineMultiplayer(
+                        currentLineNumber, {{ app.user.id }},
+                        mot,{{ idGame }},
+                        {{ constant('App\\Service\\GameManagerLineService::LAST_TRIED_WORDS_STATUS_VALID') }}
+                    );
                 }
             }).catch(function(err) {
                 // Run this when promise was rejected via reject()
@@ -380,5 +368,22 @@
         } else {
             console.log("Mot trop court");
         }
+    }
+
+    function updateLineMultiplayer(
+        currentLineNumber, currentUser,
+        mot, idGame, lastTriedWordsStatus,
+    ){
+        $.ajax({
+            method: "POST",
+            url: "{{ path('updateLineMultiplayer') }}",
+            data: {
+                currentLineNumber    : currentLineNumber,
+                currentUser          : currentUser,
+                mot                  : mot,
+                idGame               : idGame,
+                lastTriedWordsStatus : lastTriedWordsStatus
+            }
+        });
     }
 </script>
