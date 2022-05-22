@@ -6,6 +6,7 @@ use App\Entity\Game;
 use App\Entity\InGamePlayerStatus;
 use App\Entity\Team;
 use App\Entity\User;
+use App\Service\GameManagerLineService;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -374,6 +375,13 @@ class MultiPrivateGameController extends GameController
             $this->majCurrentPlayer($inGamePlayerStatus, $game);
         }
 
+        $this->gameManagerService->updateLine(
+            $idGame,
+            $game->getNumberOfRoundsPlayed(),
+            $request->request->get('mot'),
+            GameManagerLineService::LAST_TRIED_WORDS_STATUS_INVALID
+        );
+
         // Mercure notification restartRound
         $update = new Update(
             '/restartRound/'.$idGame,
@@ -403,11 +411,21 @@ class MultiPrivateGameController extends GameController
     {
         $idGame = $request->request->get('idGame');
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
-        $numberOfTry = $request->request->get('currentLineNumber') + 1;
+        if($request->request->get('lastTriedWordsStatus') == GameManagerLineService::LAST_TRIED_WORDS_STATUS_VALID)
+        {
+            $numberOfTry = $request->request->get('currentLineNumber') + 1;
+        } else {
+            $numberOfTry = $request->request->get('currentLineNumber');
+            $inGamePlayerStatuses = $game->getinGamePlayerStatuses();
+            foreach ($inGamePlayerStatuses as $inGamePlayerStatus){
+                $this->majCurrentPlayer($inGamePlayerStatus, $game);
+            }
+        }
         $lineUpdated = $this->gameManagerService->updateLine(
             $idGame,
             $numberOfTry,
-            $request->request->get('mot')
+            $request->request->get('mot'),
+            $request->request->get('lastTriedWordsStatus')
         );
         // If you made it to the last round and the word was not found
         if(trim($request->request->get('mot')) === $game->getWordToFind() ){
@@ -418,11 +436,6 @@ class MultiPrivateGameController extends GameController
         )
         {
             $lineUpdated['wordToFind'] = $game->getWordToFind();
-        }
-
-        $inGamePlayerStatuses = $game->getinGamePlayerStatuses();
-        foreach ($inGamePlayerStatuses as $inGamePlayerStatus){
-            $this->majCurrentPlayer($inGamePlayerStatus, $game);
         }
 
         // Mercure notification displayNewLine
