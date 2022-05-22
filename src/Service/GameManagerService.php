@@ -32,6 +32,7 @@ class GameManagerService
      * @param int $idGame
      * @param int $numberOfTry
      * @param string $lastTry
+     * @param $lastTriedWordsStatus
      * @return array
      */
     #[ArrayShape([
@@ -42,7 +43,7 @@ class GameManagerService
         "numberOfLines" => "int",
         "victory" => "bool"
     ])]
-    public function updateLine(int $idGame, int $numberOfTry, string $lastTry): array
+    public function updateLine(int $idGame, int $numberOfTry, string $lastTry, $lastTriedWordsStatus ): array
     {
         //-- Parameters
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
@@ -50,7 +51,44 @@ class GameManagerService
         $wordSearchArray = str_split($wordToFind);
         $countsOccurrencesPlaced = $this->gameManagerLineService->countOccurrencesPlaced($wordSearchArray, $wordToFind);
         //-- Update of the current line
-        $tableOfTheLastTry = str_split(trim($lastTry));
+        if($lastTriedWordsStatus == GameManagerLineService::LAST_TRIED_WORDS_STATUS_INVALID){
+            $currentLine = $this->entityManager->getRepository(Line::class)->findOneBy([
+                "game"     => $game,
+                "position" => $numberOfTry
+            ]);
+            $tableOfTheLastTry = $this->entityManager->getRepository(Cell::class)->findBy([
+                "ligne" => $currentLine
+            ]);
+            $bonusLetterAlreadyAdded = false;
+            $bonusLetters = [];
+            foreach ($tableOfTheLastTry as $positionCell => $cell){
+                if($positionCell === 0){
+                    $tableOfTheLastTry[$positionCell] = $game->getWordToFind()[0];
+                } elseif(
+                    $cell->getValeur() === "." &&
+                    $bonusLetterAlreadyAdded == false
+                ){
+                    $cell->setValeur($wordSearchArray[$positionCell]);
+                    $cell->setFlagTestee(Cell::FLAG_TEST_TRUE);
+                    $cell->setFlagPresente(Cell::FLAG_PRESENCE_FALSE);
+                    $this->entityManager->persist($cell);
+                    $tableOfTheLastTry[$positionCell] = $wordSearchArray[$positionCell];
+                    $this->entityManager->flush();
+                    $bonusLetters[] = $wordSearchArray[$positionCell];
+                    $bonusLetterAlreadyAdded = true;
+                } else {
+                    $tableOfTheLastTry[$positionCell] = $cell->getValeur();
+                }
+                if(!$bonusLetterAlreadyAdded){
+                    $bonusLetters[] = $wordSearchArray[$positionCell];
+                }
+            }
+            if($bonusLetterAlreadyAdded){
+                $this->updateBonusLetters($game, $bonusLetters);
+            }
+        } else {
+            $tableOfTheLastTry = str_split(trim($lastTry));
+        }
         $actualLine = $this->gameManagerLineService->updateNewLineState(
             $wordSearchArray,
             $countsOccurrencesPlaced,
@@ -112,5 +150,22 @@ class GameManagerService
         $this->entityManager->flush();
 
         return $game;
+    }
+
+    private function updateBonusLetters($game, $bonusLetters)
+    {
+        $gameLines = $this->entityManager->getRepository(Line::class)->findBy([
+            "game" => $game
+        ]);
+        foreach($gameLines as $indexLine => $line ){
+            $lineCells = $this->entityManager->getRepository(Cell::class)->findBy([
+                "ligne" => $line
+            ]);
+            foreach ($bonusLetters as $indexBonusLetter => $bonusLetter){
+                $lineCells[$indexBonusLetter]->setValeur($bonusLetter);
+                $this->entityManager->persist($lineCells[$indexBonusLetter]);
+            }
+        }
+        $this->entityManager->flush();
     }
 }
