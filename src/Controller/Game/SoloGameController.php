@@ -111,24 +111,4 @@ class SoloGameController extends GameController
         }
         return new JsonResponse($lineUpdated);
     }
-
-    /**
-     * Check for the existence of a word
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-    #[Route('/checkWordExistence', name: 'checkWordExistence')]
-    function checkWordExistence(Request $request): JsonResponse
-    {
-
-
-        return new JsonResponse(
-            $this->utils->checkWordExistence(
-                trim(
-                    $request->request->get('mot')
-                )
-            )
-        );
-    }
 }
