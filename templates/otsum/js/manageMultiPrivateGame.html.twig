@@ -111,6 +111,26 @@
     });
 
     {# //---*   FUNCTIONS DECLARATIONS   *---// #}
+    // Check word existence
+    function checkWordExistence(mot) {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                method: "POST",
+                url: "{{ path('checkWordExistence') }}",
+                data: {
+                    mot: mot
+                },
+                success: function(data) {
+                    resolve(data) // Resolve promise and go to then()
+                },
+                error: function(err) {
+                    reject(err) // Reject the promise and go to catch()
+                }
+            });
+        });
+    }
+
+
     const displayActualGrid = function () {
         $.ajax({
             method: "POST",
@@ -120,8 +140,10 @@
             }
         })
         .done(function (data) {
+            console.log(data);
             let box = $('.table').first();
             let box_line;
+            let cursorPlaced = false;
             box.empty();
             $.each(data.arrayGrid, function(indexLine, valueLine) {
                 box.append('<tr></tr>')
@@ -129,30 +151,43 @@
                 $.each(valueLine,function (indexCell, objectCell) {
                     // Grid construction
                     if (indexLine === data.numberOfRoundPlayed && indexCell === 0) {
+                        // First Cell
                         box_line.append('<td data-current_line="' + indexLine + '" class="td line_' + indexLine + ' first_cell valide_cell cell cell_' + indexCell + '"><div>' + data.arrayGrid[0][0].value + '</div></td>')
                     } else {
-                        if (indexLine === data.numberOfRoundPlayed && indexCell === 1) {
-                            box_line.append('<td class="td line_' + indexLine + ' current_cell cell cell_' + indexCell + '"><div>_</div></td>')
-                        } else if (
+                        if(
+                            indexLine === data.numberOfRoundPlayed &&
+                            objectCell.value === "." &&
+                            !cursorPlaced
+                        ){
+                            // Current Line, Cursor Not Placed
+                            box_line.append('<td class="td line_' + indexLine + ' current_cell cell cell_' + indexCell + '"><div>_</div></td>');
+                            cursorPlaced = true;
+                        }
+                        else if(
                             (indexLine === data.numberOfRoundPlayed) && indexCell === (valueLine.length - 1)
                         ){
+                            // Current Line, Last Cell
                             box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + ' last_cell" ><div>' + objectCell.value + '</div></td>')
-                        } else if (
+                        }
+                        else if (
+
                             indexCell <= valueLine.length && (indexLine <= data.numberOfRoundPlayed)
                         ) {
+                            // Line Played
                             box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div>' + objectCell.value + '</div></td>')
-                        } else {
+                        }
+                        else {
+                            // Line Not Played
                             box_line.append('<td class="td line_' + indexLine + ' cell cell_' + indexCell + '"><div></div></td>')
                         }
                     }
-                    // Cell status
                     let cellule = $('.line_' + indexLine + ".cell_" + indexCell).first();
                     if (objectCell.placement === 1 && objectCell.presence === 1) {
                         if (!cellule.hasClass("valide_cell")) {
                             cellule.addClass("valide_cell");
                         }
-                    } else if (objectCell.presence === 1) {
-                        if (!cellule.hasClass("is_in_cell")) {
+                    } else if (objectCell.presence === 1 && !cellule.hasClass('current_cell')) {
+                        if (!cellule.hasClass("is_in_cell") && !cursorPlaced) {
                             cellule.html("<div><p>" + objectCell.value + "</p></div>");
                             cellule.addClass("is_in_cell")
                         }
@@ -217,13 +252,26 @@
             zeroPad: false,
             countUp: false, // enable count up if set to true
             onEnd: function () {
-
+                let mot = "";
+                let currentLineNumber = $('[data-current_line]').data('current_line');
+                let grille = $('#grille');
+                grille.find(".line_" + currentLineNumber).each(function (index) {
+                    mot += $(this).text();
+                    if (
+                        $(this).text() === "." ||
+                        $(this).text() === "_" ||
+                        index === $(".line_" + currentLineNumber).length - 1
+                    ){
+                        return false;
+                    }
+                });
                 if(currentPlayer === {{ app.user.id }}){
                     $.ajax({
                         method: "POST",
                         url: "{{ path('endOfCountDown') }}",
                         data: {
-                            idGame: {{ idGame }}
+                            idGame: {{ idGame }},
+                            mot   : mot
                         }
                     });
                 }
@@ -264,7 +312,8 @@
         let mot = "";
         let currentLineNumber = $('[data-current_line]').data('current_line');
         console.log("currentLineNumber -> " + currentLineNumber);
-        $(".line_" + currentLineNumber).each(function (index) {
+        let grille = $('#grille');
+        grille.find(".line_" + currentLineNumber).each(function (index) {
             mot += $(this).text();
             if ($(this).text() === "." || $(this).text() === "_") {
                 mot_valide = false;
@@ -274,20 +323,62 @@
                 return false;
             }
         });
-        if (!mot_valide) {
-            alert('mot trop court !');
-        } else {
-            $('.last_cell').toggleClass('last_cell');
-            $.ajax({
-                method: "POST",
-                url: "{{ path('updateLineMultiplayer') }}",
-                data: {
-                    currentLineNumber : currentLineNumber,
-                    currentUser       : {{ app.user.id }},
-                    mot: mot,
-                    idGame: {{ idGame }}
+        if(mot_valide){
+            checkWordExistence(mot).then(function(data) {
+                mot_valide = true;
+                // Run this when your request was successful
+                if (data === false) {
+                    mot_valide = false;
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('updateLineMultiplayer') }}",
+                        data: {
+                            currentLineNumber    : currentLineNumber,
+                            currentUser          : {{ app.user.id }},
+                            mot                  : mot,
+                            idGame               : {{ idGame }},
+                            lastTriedWordsStatus : {{ constant('App\\Service\\GameManagerLineService::LAST_TRIED_WORDS_STATUS_INVALID') }}
+                        }
+                    });
+                    $('.line_' + currentLineNumber).each(function (index) {
+                        let numero = (index + 1) + (difficulty * currentLineNumber);
+                        if (index === 0) {
+                            // Affichage de la première lettre
+                            $('.line_' + currentLineNumber + ".cell_" + numero)
+                                .addClass('valide_cell first_cell')
+                                .html("<div>" + mot.split("")[0] + "</div>");
+                        } else if (index === 1) {
+                            // Placement du curseur
+                            $('.line_' + currentLineNumber + ".cell_" + numero)
+                                .addClass('current_cell')
+                                .html("<div>_</div>");
+                        } else {
+                            $('.line_' + currentLineNumber + ".cell_" + numero).html("<div>.</div>");
+                        }
+                    })
                 }
+                if (!mot_valide) {
+                    console.log("Mot non valide");
+                } else {
+                    $('.last_cell').toggleClass('last_cell');
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('updateLineMultiplayer') }}",
+                        data: {
+                            currentLineNumber    : currentLineNumber,
+                            currentUser          : {{ app.user.id }},
+                            mot                  : mot,
+                            idGame               : {{ idGame }},
+                            lastTriedWordsStatus : {{ constant('App\\Service\\GameManagerLineService::LAST_TRIED_WORDS_STATUS_VALID') }}
+                        }
+                    });
+                }
+            }).catch(function(err) {
+                // Run this when promise was rejected via reject()
+                console.log(err)
             });
+        } else {
+            console.log("Mot trop court");
         }
     }
 </script>
