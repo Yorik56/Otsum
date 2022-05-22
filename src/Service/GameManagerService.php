@@ -162,8 +162,10 @@ class GameManagerService
                 "ligne" => $line
             ]);
             foreach ($bonusLetters as $indexBonusLetter => $bonusLetter){
-                $lineCells[$indexBonusLetter]->setValeur($bonusLetter);
-                $this->entityManager->persist($lineCells[$indexBonusLetter]);
+                if($lineCells[$indexBonusLetter]->getValeur() === "."){
+                    $lineCells[$indexBonusLetter]->setValeur($bonusLetter);
+                    $this->entityManager->persist($lineCells[$indexBonusLetter]);
+                }
             }
         }
         $this->entityManager->flush();
