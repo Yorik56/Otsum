@@ -93,7 +93,7 @@
                         })
                     }
                     if (JSON.parse(e.data).lineUpdated.victory === true) {
-                        alert('perdu !!');
+                        console.log('GAGNE !!');
                         $('#div_keyboard').empty();
                         $('#div_keyboard').append("<div id='keyboard'></div");
                         $('.currentTeam').addClass('end');
@@ -109,7 +109,7 @@
                     $('#div_keyboard').empty();
                     $('#div_keyboard').append("<div id='keyboard'></div");
                     if (JSON.parse(e.data).lineUpdated.victory === true) {
-                        alert('gagné !!');
+                        console.log('PERDU ..');
                         $('.currentTeam').addClass('end');
                     }
                 }
