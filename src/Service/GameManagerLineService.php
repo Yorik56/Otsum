@@ -10,6 +10,8 @@ use JetBrains\PhpStorm\ArrayShape;
 
 class GameManagerLineService
 {
+    const LAST_TRIED_WORDS_STATUS_VALID   = 1;
+    const LAST_TRIED_WORDS_STATUS_INVALID = 2;
     private EntityManagerInterface $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager)
@@ -49,12 +51,14 @@ class GameManagerLineService
     public function cleanPresenceFlag(array $actualLine, array $countsOccurrencesPlaced):array
     {
         foreach($actualLine as $index => $letter){
-            if(
-                ($letter['placement'] == false && $letter['presence'] == true) &&
-                $countsOccurrencesPlaced[$letter['valeur']] < 1
-            )
-            {
-                $actualLine[$index]['presence']  = false;
+            if(isset($countsOccurrencesPlaced[$letter['valeur']])){
+                if(
+                    ($letter['placement'] == false && $letter['presence'] == true) &&
+                    $countsOccurrencesPlaced[$letter['valeur']] < 1
+                )
+                {
+                    $actualLine[$index]['presence']  = false;
+                }
             }
         }
         return $actualLine;
@@ -82,6 +86,7 @@ class GameManagerLineService
     {
         $validLetters = 0;
         $actualLine = [];
+
         // For each letter of the word to find
         foreach ($wordSearchArray as $indexWordToFind => $letter){
             $actualLine[$indexWordToFind]['valeur'] = $tableOfTheLastTry[$indexWordToFind];
@@ -99,10 +104,12 @@ class GameManagerLineService
                     $actualLine[$indexWordToFind]['placement'] = false;
                     // If the total number of this occurrence have been played in the last attempt
                     // then this occurrence is not considered to be present in the line
-                    if($testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]] < 1){
-                        $actualLine[$indexWordToFind]['presence']  = false;
+                    if(isset($testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]])){
+                        if($testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]] < 1){
+                            $actualLine[$indexWordToFind]['presence']  = false;
+                        }
+                        $testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]]--;
                     }
-                    $testOccurrenceCounter[$tableOfTheLastTry[$indexWordToFind]]--;
                 }
             } else {
                 $actualLine[$indexWordToFind]['presence']  = false;
