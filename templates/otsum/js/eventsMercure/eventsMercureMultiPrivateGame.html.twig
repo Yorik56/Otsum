@@ -10,7 +10,6 @@
         url.searchParams.append('topic', '/checkPresenceOfAllPlayers/' + {{ idGame }})
         url.searchParams.append('topic', '/startChrono/' + {{ idGame }})
         url.searchParams.append('topic', '/retrieveChrono/' + {{ idGame }} + '/' + {{ app.user.id }})
-        url.searchParams.append('topic', '/restartRound/' + {{ idGame }})
         url.searchParams.append('topic', '/displayNewLine/' + {{ idGame }})
         url.searchParams.append('topic', '/currentKey/' + {{ idGame }})
 
@@ -43,37 +42,6 @@
                     JSON.parse(e.data).arrayChrono,
                     JSON.parse(e.data).currentPlayer
                 );
-            }
-            // restart round
-            if (JSON.parse(e.data).topic === '/restartRound/' + {{ idGame }}) {
-                displayActualGrid();
-                if(JSON.parse(e.data).actualTeam){
-                    $('.currentTeam').removeClass('currentTeam');
-                    $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
-                }
-                if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
-                    console.log("startChrono");
-                    // Start chrono
-                    $.ajax({
-                        method: "POST",
-                        url: "{{ path('startChrono') }}",
-                        data: {
-                            idGame: {{ idGame }},
-                            restart: true
-                        }
-                    })
-                    .done(function () {
-                        // Création du clavier
-                        $('#div_keyboard #keyboard').jkeyboard({
-                            input: $('#search_field'),
-                            layout: 'azerty',
-                        });
-                        console.log("newKeyboard 2nd");
-                    });
-                } else {
-                    $('#div_keyboard').empty();
-                    $('#div_keyboard').append("<div id='keyboard'></div");
-                }
             }
 
             // display new line
@@ -125,7 +93,6 @@
                     let current_cell = $('.current_cell').first();
                     let last_cell = $('.last_cell').first();
                     if(JSON.parse(e.data).currentKey === "backspace"){
-                        // console.log(current_cell.closest(".table"));
                         if(current_cell.closest(".table").length > 0){
                             if(!current_cell.prev().hasClass('first_cell')){
                                 current_cell.prev().addClass('current_cell').html("<div>_</div>");
