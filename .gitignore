@@ -22,3 +22,4 @@ yarn-error.log
 ###< liip/imagine-bundle ###
 /public/images/avatars/
 /.yarn/cache/*
+/public/log/multi_private_game/*
