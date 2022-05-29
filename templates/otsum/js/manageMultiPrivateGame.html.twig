@@ -38,6 +38,7 @@
                 layout: 'azerty',
             });
         }
+        console.log("CHECKPRESENCEOFALLPLAYERS: <data-status> " +  data.status);
         if(data.status === "gameJustStarted"){
             // Retrieve chrono
             {% if chronoType == true  %}
@@ -140,7 +141,6 @@
             }
         })
         .done(function (data) {
-            console.log(data);
             let box = $('.table').first();
             let box_line;
             let cursorPlaced = false;
@@ -270,8 +270,12 @@
                         method: "POST",
                         url: "{{ path('endOfCountDown') }}",
                         data: {
-                            idGame: {{ idGame }},
-                            mot   : mot
+                            idGame              : {{ idGame }},
+                            mot                 : mot,
+                            currentLineNumber   : currentLineNumber
+                        },
+                        success: function () {
+                            console.log("Success EndOfCountdown");
                         }
                     });
                 }
@@ -311,7 +315,6 @@
         let mot_valide = true;
         let mot = "";
         let currentLineNumber = $('[data-current_line]').data('current_line');
-        console.log("currentLineNumber -> " + currentLineNumber);
         let grille = $('#grille');
         grille.find(".line_" + currentLineNumber).each(function (index) {
             mot += $(this).text();
