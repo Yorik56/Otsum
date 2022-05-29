@@ -21,7 +21,7 @@ class NotificationController extends AbstractController
     public function index(): Response
     {
         //-- Invitations to play received
-        $invitationToPlay = $this->entityManager->getRepository(entityName: InvitationToPlay::class)
+        $invitationToPlay = $this->entityManager->getRepository(InvitationToPlay::class)
             ->findBy([
                 'invitedUser' => $this->getUser()->getId(),
                 'flag_state' => InvitationToPlay::REQUEST_GAME_PENDING
