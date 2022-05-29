@@ -5,6 +5,9 @@ namespace App\Service;
 use App\Entity\ContactRequest;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Monolog\Handler\FirePHPHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class Utils
@@ -13,7 +16,13 @@ class Utils
     private KernelInterface $appKernel;
     private EntityManagerInterface $entityManager;
 
-    private const FILENAMES =  [
+    public const LOG_LEVEL_INFO    = 1;
+    public const LOG_LEVEL_WARNING = 2;
+    public const LOG_LEVEL_ERROR   = 3;
+
+    public $logger = null;
+
+    public const FILENAMES =  [
         7  => 'sept_lettres.txt',
         8  => 'huit_lettres.txt',
         9  => 'neuf_lettres.txt',
@@ -27,6 +36,42 @@ class Utils
     {
         $this->appKernel     = $appKernel;
         $this->entityManager = $entityManager;
+    }
+
+    /**
+     * @param $loggerName
+     */
+    public function addLogHandlers($loggerName)
+    {
+        if(is_null($this->logger)){
+            // Create the logger
+            $this->logger = new Logger($loggerName);
+            // Now add some handlers
+            $this->logger->pushHandler(
+                new StreamHandler(
+                    $this->appKernel->getProjectDir() .'\\public\\log\\multi_private_game\\' . $loggerName.'.log'
+                )
+            );
+            $this->logger->pushHandler(new FirePHPHandler());
+        }
+    }
+
+    public function addLog($logLevel, $message, array $data){
+        switch($logLevel) {
+            case Utils::LOG_LEVEL_INFO:
+                // You can now use your logger
+                $this->logger->info($message, $data);
+                return;
+            case Utils::LOG_LEVEL_WARNING:
+                // add records to the log
+                $this->logger->warning('Foo');
+                return;
+            case Utils::LOG_LEVEL_ERROR:
+                $this->logger->error('Bar');
+                return;
+            default:
+                $this->logger->error('Unrecognized log level');
+        }
     }
 
     /**

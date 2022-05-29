@@ -7,6 +7,7 @@ use App\Entity\InGamePlayerStatus;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Service\GameManagerLineService;
+use App\Service\Utils;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,6 +39,15 @@ class MultiPrivateGameController extends GameController
                 ])
             );
             $this->hub->publish($update);
+            // LOGS
+            $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+            $this->utils->addLog(
+                Utils::LOG_LEVEL_INFO,
+                "[REQUEST] otsum(" . $idGame . ") | game created ",
+                [
+                    "userId" => $this->getUser()->getId()
+                ]
+            );
         }
 
         //--- Recovery of the teams
@@ -82,6 +92,15 @@ class MultiPrivateGameController extends GameController
         $idGame   = $request->request->get('idGame');
         $idPlayer = $request->request->get('idPlayer');
 
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[REQUEST] joiningPrivateGame()",
+            [
+                "userId"=> $idPlayer
+            ]
+        );
+
         // Mercure notification joiningPrivateGame
         $update = new Update(
             '/joiningPrivateGame/'.$idGame,
@@ -92,6 +111,15 @@ class MultiPrivateGameController extends GameController
             ])
         );
         $this->hub->publish($update);
+
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[EVENT  ] joiningPrivateGame",
+            [
+                "userId"=> $idPlayer
+            ]
+        );
+
         return new JsonResponse([
             'idGame' => $idGame,
             'idPlayer' => $idPlayer
@@ -117,6 +145,14 @@ class MultiPrivateGameController extends GameController
         $response = 404;
         if($gameReady){
             if(!$game->getStartDate()){
+                $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+                $this->utils->addLog(
+                    Utils::LOG_LEVEL_INFO,
+                    "[REQUEST] checkPresenceOfAllPlayers()",
+                    [
+                        "userId" => $this->getUser()->getId()
+                    ]
+                );
                 // Setting actual player
                 $this->setFirstPlayer($inGamePlayerStatuses);
                 $currentPlayer = $this->getActualPlayer($inGamePlayerStatuses);
@@ -137,11 +173,26 @@ class MultiPrivateGameController extends GameController
                         'idGame' => $idGame
                     ])
                 );
-
-
                 $this->hub->publish($update);
+
+                $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+                $this->utils->addLog(
+                    Utils::LOG_LEVEL_INFO,
+                    "[EVENT  ] checkPresenceOfAllPlayers | game just started",
+                    [
+                        "userId" => $this->getUser()->getId()
+                    ]
+                );
                 $response = "gameJustStarted";
             } else {
+                $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+                $this->utils->addLog(
+                    Utils::LOG_LEVEL_INFO,
+                    "[EVENT  ] checkPresenceOfAllPlayers | game already started",
+                    [
+                        "userId" => $this->getUser()->getId()
+                    ]
+                );
                 $response = "gameAlreadyStarted";
             }
         }
@@ -176,6 +227,20 @@ class MultiPrivateGameController extends GameController
                 ];
             }
         }
+
+        //LOG
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $game->getId());
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[REQUEST] displayActualGrid()",
+            [
+                "userId" => $this->getUser()->getId(),
+                'numberOfRoundPlayed' => $game->getNumberOfRoundsPlayed(),
+                'difficulty'          => $game->getLineLength(),
+                'wordToFind'          => trim($game->getWordToFind())
+            ]
+        );
+
         return new JsonResponse([
             'arrayGrid' => $arrayGrid,
             'numberOfRoundPlayed' => $game->getNumberOfRoundsPlayed(),
@@ -199,6 +264,16 @@ class MultiPrivateGameController extends GameController
                 $inGamePlayerStatus->setFlagActualPlayer(InGamePlayerStatus::FLAG_ACTUAL_PLAYER_TRUE);
                 $this->entityManager->persist($inGamePlayerStatus);
                 $this->entityManager->flush();
+                //LOG
+                $this->utils->addLogHandlers("MultiPrivateGame_" . $inGamePlayerStatus->getRelatedGame()->getId());
+                $this->utils->addLog(
+                    Utils::LOG_LEVEL_INFO,
+                    "[REQUEST] setFirstPlayer()",
+                    [
+                        "userId" => $this->getUser()->getId(),
+                        'actualPlayerId' => $inGamePlayerStatus->getUser()->getId()
+                    ]
+                );
             }
         }
     }
@@ -230,6 +305,17 @@ class MultiPrivateGameController extends GameController
             $response = false;
         }
         $this->entityManager->flush();
+
+        //LOG
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $game->getId());
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[REQUEST] majCurrentPlayer()",
+            [
+                "userId" => $this->getUser()->getId(),
+                'flagActualPlayer' => $inGamePlayerStatus->getFlagActualPlayer()
+            ]
+        );
 
         return [
             'color' => $inGamePlayerStatus->getUser()->getId(),
@@ -286,11 +372,19 @@ class MultiPrivateGameController extends GameController
     public function startChrono(Request $request): JsonResponse
     {
         $idGame   = $request->request->get('idGame');
+
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[REQUEST] startChrono()",
+            []
+        );
+
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
         $lastLine = $game->getLines()->get($game->getNumberOfRoundsPlayed());
         if(!$lastLine->getEndDate() || $request->request->get('restart')){
             $dateNow = new \DateTime();
-            $endDate = $dateNow->modify("+11 seconds");
+            $endDate = $dateNow->modify("+31 seconds");
             $lastLine->setEndDate($endDate);
             $this->entityManager->persist($lastLine);
             $this->entityManager->flush();
@@ -298,7 +392,7 @@ class MultiPrivateGameController extends GameController
             $endDate = $lastLine->getEndDate();
         }
 
-        // Mercure notification joiningPrivateGame
+        // Mercure notification startChrono
         $update = new Update(
             '/startChrono/'.$idGame,
             json_encode([
@@ -316,6 +410,16 @@ class MultiPrivateGameController extends GameController
         );
         $this->hub->publish($update);
 
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[EVENT  ] startChrono",
+            [
+                "userId" => $this->getUser()->getId(),
+                "endDate" => $lastLine->getEndDate()
+            ]
+        );
+
         return new JsonResponse(200);
     }
 
@@ -328,6 +432,12 @@ class MultiPrivateGameController extends GameController
     {
         $idGame   = $request->request->get('idGame');
         $idUser   = $request->request->get('idUser');
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[REQUEST] retrieveChrono()",
+            []
+        );
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
         $lastLine = $game->getLines()->get($game->getNumberOfRoundsPlayed());
         $arrayChrono = null;
@@ -344,7 +454,7 @@ class MultiPrivateGameController extends GameController
         }
 
 
-        // Mercure notification joiningPrivateGame
+        // Mercure notification retrieveChrono
         $update = new Update(
             '/retrieveChrono/'.$idGame.'/'.$idUser,
             json_encode([
@@ -355,6 +465,16 @@ class MultiPrivateGameController extends GameController
             ])
         );
         $this->hub->publish($update);
+
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[EVENT  ] retrieveChrono",
+            [
+                "userId" => $this->getUser()->getId(),
+                "endDate" => $lastLine?->getEndDate()
+            ]
+        );
 
         return new JsonResponse(200);
     }
@@ -370,29 +490,65 @@ class MultiPrivateGameController extends GameController
         $idGame   = $request->request->get('idGame');
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
         $inGamePlayerStatuses = $game->getinGamePlayerStatuses();
+        $numberOfTry = $request->request->get('currentLineNumber');
+        //LOG
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[REQUEST] endOfCountDown()",
+            [
+                "userId" => $this->getUser()->getId(),
+                "numberOfTry" => $numberOfTry
+            ]
+        );
 
         foreach ($inGamePlayerStatuses as $inGamePlayerStatus){
             $this->majCurrentPlayer($inGamePlayerStatus, $game);
         }
 
-        $this->gameManagerService->updateLine(
+        $lineUpdated = $this->gameManagerService->updateLine(
             $idGame,
-            $game->getNumberOfRoundsPlayed(),
+            $numberOfTry,
             $request->request->get('mot'),
             GameManagerLineService::LAST_TRIED_WORDS_STATUS_INVALID
         );
 
-        // Mercure notification restartRound
+        // Word Founded
+        if(trim($request->request->get('mot')) === $game->getWordToFind()){
+            $lineUpdated['victory'] = true;
+        } else if(
+            // If you made it to the last round and the word was not found
+            $game->getNumberOfRounds() == $game->getNumberOfRoundsPlayed() &&
+            $lineUpdated['victory'] == false
+        )
+        {
+            $lineUpdated['wordToFind'] = $game->getWordToFind();
+        }
+
+        // Mercure notification displayNewLine
         $update = new Update(
-            '/restartRound/'.$idGame,
+            '/displayNewLine/'.$idGame,
             json_encode([
-                'topic'        =>'/restartRound/'.$idGame,
+                'topic'        => '/displayNewLine/'.$idGame,
+                'lineUpdated'  => $lineUpdated,
                 'actualPlayer' => $game->getCurrentPlayer()->getId(),
-                'actualTeam'   => $this->getPlayerTeam($game)->getColor()
+                'chronoType'   => $game->getChronoType(),
+                'actualTeam'   => $this->getPlayerTeam($game)->getColor(),
+                'difficulty'   => $game->getLineLength()
             ])
         );
-
         $this->hub->publish($update);
+
+        //LOG
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[EVENT  ] displayNewLine ",
+            [
+                "userId" => $this->getUser()->getId(),
+                "numberOfTry" => $numberOfTry
+            ]
+        );
 
         return new JsonResponse([
             200
@@ -409,8 +565,19 @@ class MultiPrivateGameController extends GameController
     #[Route('/updateLineMultiplayer', name: 'updateLineMultiplayer')]
     function updateLineMultiplayer(Request $request): JsonResponse
     {
+
+
         $idGame = $request->request->get('idGame');
         $game = $this->entityManager->getRepository(Game::class)->find($idGame);
+
+        //LOG
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[REQUEST] updateLineMultiplayer()",
+            []
+        );
+
         if($request->request->get('lastTriedWordsStatus') == GameManagerLineService::LAST_TRIED_WORDS_STATUS_VALID)
         {
             $numberOfTry = $request->request->get('currentLineNumber') + 1;
@@ -451,6 +618,22 @@ class MultiPrivateGameController extends GameController
             ])
         );
         $this->hub->publish($update);
+
+        //LOG
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[EVENT  ] displayNewLine",
+            [
+                "userId" => $this->getUser()->getId(),
+                "numberOfTry" => $numberOfTry,
+                'actualPlayer' => $game->getCurrentPlayer()->getId(),
+                'chronoType'   => $game->getChronoType(),
+                'actualTeam'   => $this->getPlayerTeam($game)->getColor(),
+                'difficulty'   => $game->getLineLength()
+            ]
+        );
+
         return new JsonResponse([
             200
         ]);
@@ -472,6 +655,17 @@ class MultiPrivateGameController extends GameController
             ])
         );
         $this->hub->publish($update);
+
+        //LOG
+        $this->utils->addLogHandlers("MultiPrivateGame_" . $idGame);
+        $this->utils->addLog(
+            Utils::LOG_LEVEL_INFO,
+            "[EVENT  ] sendCurrentKey",
+            [
+                "userId" => $this->getUser()->getId(),
+                "currentKey" => $currentKey
+            ]
+        );
 
         return new JsonResponse([
             200
