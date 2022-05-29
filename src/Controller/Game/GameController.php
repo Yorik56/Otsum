@@ -11,12 +11,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+
 class GameController extends AbstractController
 {
     protected EntityManagerInterface $entityManager;
     protected HubInterface $hub;
     public GameManagerService $gameManagerService;
     public Utils $utils;
+
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -30,6 +32,8 @@ class GameController extends AbstractController
         $this->gameManagerService = $gameManagerService;
         $this->utils = $utils;
     }
+
+
 
     /**
      * Check for the existence of a word
