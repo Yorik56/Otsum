@@ -15,9 +15,10 @@
 
         //--- LISTENING FOR MERCURE EVENTS ---//
         const eventSource = new EventSource(url)
-        eventSource.onmessage = (e) => {
+        eventSource.onmessage = (e) =>{
             // joining private game
             if (JSON.parse(e.data).topic === '/joiningPrivateGame/' + {{ idGame }}) {
+                console.log('[EVENT] joiningPrivateGame}');
                 let idPlayer = JSON.parse(e.data).idPlayer;
                 let userAvatarBox = $(`[data-idUser='${idPlayer}']`).find('.avatarBox');
                 if (userAvatarBox.hasClass('absent')) {
@@ -27,10 +28,12 @@
             }
             // checking the presence of all the players
             if (JSON.parse(e.data).topic === '/checkPresenceOfAllPlayers/' + {{ idGame }}) {
+                console.log('[EVENT] checkPresenceOfAllPlayers}');
                 creationDeLaGrille("{{ firstLetter }}", {{ difficulty }});
             }
             // start chrono
             if (JSON.parse(e.data).topic === '/startChrono/' + {{ idGame }}) {
+                console.log('[EVENT] startChrono}');
                 simplyCountDownStart(
                     JSON.parse(e.data).arrayChrono,
                     JSON.parse(e.data).currentPlayer
@@ -38,6 +41,7 @@
             }
             // retrieve chrono
             if (JSON.parse(e.data).topic === '/retrieveChrono/'+ {{ idGame }} + '/' + {{ app.user.id }}) {
+                console.log('[EVENT] retrieveChrono}');
                 simplyCountDownStart(
                     JSON.parse(e.data).arrayChrono,
                     JSON.parse(e.data).currentPlayer
@@ -46,6 +50,7 @@
 
             // display new line
             if (JSON.parse(e.data).topic === '/displayNewLine/' + {{ idGame }}) {
+                console.log('[EVENT] displayNewLine}');
                 $('.currentTeam').removeClass('currentTeam');
                 $('.multiPrivateGame .' + JSON.parse(e.data).actualTeam).addClass('currentTeam');
                 if(JSON.parse(e.data).actualPlayer === {{ app.user.id }}){
@@ -85,6 +90,7 @@
             }
             // display currentKey
             if (JSON.parse(e.data).topic === '/currentKey/' + {{ idGame }}) {
+                console.log('[EVENT] currentKey}');
                 if(
                     JSON.parse(e.data).actualPlayer !== {{ app.user.id }} &&
                     JSON.parse(e.data).currentKey &&
@@ -111,7 +117,6 @@
                     }
                 }
             }
-
         }
 
         //-- Before unload:  Unsubscribe mercure topics

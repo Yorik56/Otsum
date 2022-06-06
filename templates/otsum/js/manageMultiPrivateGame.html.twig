@@ -38,9 +38,9 @@
                 layout: 'azerty',
             });
         }
-        console.log("CHECKPRESENCEOFALLPLAYERS: <data-status> " +  data.status);
+        displayActualGrid();
         if(data.status === "gameJustStarted"){
-            // Retrieve chrono
+            // Start chrono
             {% if chronoType == true  %}
                 $.ajax({
                     method: "POST",
@@ -51,8 +51,7 @@
                 })
             {% endif %}
         } else if(data.status === "gameAlreadyStarted"){
-            // Start chrono
-            displayActualGrid()
+            // Retrieve chrono
             {% if chronoType == true  %}
                 $.ajax({
                     method: "POST",
@@ -68,6 +67,7 @@
 
     {# //---*   EVENTS   *---// #}
     let numberOfKeysPressed = 0;
+    let lineSent = false;
     // User keyboard events
     $('body').on("keydown", function(e){
         numberOfKeysPressed++;
@@ -79,7 +79,10 @@
                 sendKeyValue = e.key.toLowerCase();
                 $(".backspace").trigger("click");
             } else if (e.key.toLowerCase() === "enter"){
-                sendActualLine();
+                if(!lineSent){
+                    sendActualLine();
+                    lineSent = true;
+                }
             } else {
                 sendKey = true;
                 $('#keyboard .jkey').each(function (index, element) {
@@ -108,12 +111,14 @@
 
     // Validation de l'essai / MAJ de la ligne
     $('.return').on("click", function () {
+        console.log('[FUNCTION CALL] sendActualLine(); LIGNE 114');
         sendActualLine();
     });
 
     {# //---*   FUNCTIONS DECLARATIONS   *---// #}
     // Check word existence
     function checkWordExistence(mot) {
+        console.log('[FUNCTION] checkWordExistence');
         return new Promise(function(resolve, reject) {
             $.ajax({
                 method: "POST",
@@ -133,6 +138,7 @@
 
 
     const displayActualGrid = function () {
+        console.log('[FUNCTION] displayActualGrid');
         $.ajax({
             method: "POST",
             url: "{{ path('displayActualGrid') }}",
@@ -228,6 +234,7 @@
 
     // Affichage de la partie
     const simplyCountDownStart = function (data, currentPlayer) {
+        console.log('[FUNCTION] simplyCountDownStart');
         $('#countdownExample').empty();
         simplyCountdown('#countdownExample', {
             year: data.year, // required
@@ -266,6 +273,7 @@
                     }
                 });
                 if(currentPlayer === {{ app.user.id }}){
+                    console.log('[REQUEST] endOfCountDown');
                     $.ajax({
                         method: "POST",
                         url: "{{ path('endOfCountDown') }}",
@@ -285,6 +293,7 @@
 
     // Affichage de la partie
     const creationDeLaGrille = function (mot, difficulty) {
+        console.log('[FUNCTION] creationDeLaGrille');
         let box = $('.table');
         let box_line;
         $('.wordToFind').append(mot);
@@ -312,6 +321,7 @@
 
     // Affichage de la partie
     const sendActualLine = function () {
+        console.log('[FUNCTION] sendActualLine');
         let mot_valide = true;
         let mot = "";
         let currentLineNumber = $('[data-current_line]').data('current_line');
@@ -375,6 +385,7 @@
         currentLineNumber, currentUser,
         mot, idGame, lastTriedWordsStatus,
     ){
+        console.log('[FUNCTION] updateLineMultiplayer');
         $.ajax({
             method: "POST",
             url: "{{ path('updateLineMultiplayer') }}",
